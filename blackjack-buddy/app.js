@@ -380,7 +380,7 @@ const G = {
   gens: {}, boosts: {}, tipLevel: 0, tips: 0, frac: 0, lastSeen: 0, tab: 'table', earned: 0,
   stars: 0, franchises: 0, runEarned: 0, owned: {}, equip: { ...DEFAULT_EQUIP }, shopCat: 'perks', autoFrac: 0,
   st: null, statCat: 'vip', muted: false, cashback: 0, starsSpent: 0, su: {},
-  roundStake: 0, roundTC: 0, hist: [],
+  roundStake: 0, roundTC: 0, hist: [], lastTopup: 0,
 };
 // lifetime stats: never reset, not even by a franchise
 const NEW_STATS = () => ({
@@ -412,13 +412,15 @@ const runningCount = () => G.seen.reduce((a, c) => a + hiLo(c), 0);
 const decksLeft = () => G.shoe.length / 52;
 const trueCount = () => decksLeft() > 0 ? runningCount() / decksLeft() : 0;
 function revealHole() {
-  G.holeHidden = false;
+  G.holeHidden = false; mustCommit = true;
   if (!G.holeCounted && G.dealer.length > 1) { G.seen.push(G.dealer[1]); G.holeCounted = true; }
 }
 
 function load() {
   try {
-    const d = JSON.parse(localStorage.getItem('blackjack-buddy') || '{}');
+    const parse = t => { try { return t ? JSON.parse(t) : null; } catch (e) { return null; } };
+    const file = window.buddy && window.buddy.loadSync ? parse(window.buddy.loadSync()) : null, ls = parse(localStorage.getItem('blackjack-buddy'));
+    const d = (file && ls ? ((file.lastSeen || 0) >= (ls.lastSeen || 0) ? file : ls) : file || ls) || {};   // newest of the two
     if (Number.isFinite(d.chips)) G.chips = Math.max(0, Math.floor(d.chips));
     if (Number.isFinite(d.bet)) G.bet = Math.floor(d.bet);
     if (Number.isFinite(d.pp)) G.pp = Math.floor(d.pp);
@@ -454,19 +456,25 @@ function load() {
     if (Array.isArray(d.hist)) G.hist = d.hist.filter(r => r && typeof r === 'object' && Array.isArray(r.h)).slice(-HIST_MAX);
     loadShoe(d.shoe); loadRound(d.round);
     if (typeof d.muted === 'boolean') G.muted = d.muted;
+    if (Number.isFinite(d.lastTopup)) G.lastTopup = Math.min(d.lastTopup, Date.now());   // clock set back: no longer than one cooldown
     if (Number.isFinite(d.starsSpent)) G.starsSpent = Math.max(0, Math.min(G.stars, Math.floor(d.starsSpent)));
     if (d.su && typeof d.su === 'object') for (const u of STAR_UPS) G.su[u.id] = Math.max(0, Math.min(u.costs.length, Math.floor(d.su[u.id] || 0)));
   } catch (e) { /* fresh start */ }
   if (G.state === 'BET') fitBets();
 }
+let mustCommit = false;                                  // a card or the hole card was revealed: save before it is painted
 function save() {
-  try { localStorage.setItem('blackjack-buddy', JSON.stringify({ chips: G.chips, bet: G.bet, pp: G.pp, tp: G.tp, countVisible: G.countVisible,
+  mustCommit = false;
+  let json;
+  try { json = JSON.stringify({ chips: G.chips, bet: G.bet, pp: G.pp, tp: G.tp, countVisible: G.countVisible,
       betWant: G.betWant, ppWant: G.ppWant, tpWant: G.tpWant, hist: G.hist,
       shoe: { cards: G.shoe, cutAt: G.cutAt, dealt: G.dealt, pending: G.shufflePending, seen: G.seen },
       round: G.state === 'BET' ? null : { state: G.state, hands: G.hands, cur: G.cur, dealer: G.dealer, holeHidden: G.holeHidden, holeCounted: G.holeCounted,
         handBet: G.handBet, ins: G.ins, stake: G.roundStake, tc: G.roundTC, sides: G.sideResults, insResult: G.insResult, pp: G.pp, tp: G.tp },
       gens: G.gens, boosts: G.boosts, tipLevel: G.tipLevel, tips: G.tips, frac: G.frac, lastSeen: Date.now(), earned: G.earned,
-      stars: G.stars, franchises: G.franchises, runEarned: G.runEarned, owned: G.owned, equip: G.equip, st: G.st, muted: G.muted, starsSpent: G.starsSpent, su: G.su })); } catch (e) { /* */ }
+      stars: G.stars, franchises: G.franchises, runEarned: G.runEarned, owned: G.owned, equip: G.equip, st: G.st, muted: G.muted, starsSpent: G.starsSpent, su: G.su, lastTopup: G.lastTopup }); } catch (e) { return; }
+  if (window.buddy && window.buddy.saveSync) { try { window.buddy.saveSync(json); } catch (e) { /* */ } }
+  try { localStorage.setItem('blackjack-buddy', json); } catch (e) { /* */ }
 }
 
 // ---------------------------------------------------------------- saving an unfinished round
@@ -528,7 +536,7 @@ function drawCard(faceDown) {
     for (const c of G.dealer.concat(...G.hands.map(h => h.cards))) { const i = G.shoe.findIndex(x => x[0] === c[0] && x[1] === c[1]); if (i >= 0) G.shoe.splice(i, 1); }
   }
   const card = G.shoe.pop();
-  G.dealt++;
+  G.dealt++; mustCommit = true;
   if (!faceDown) G.seen.push(card);
   if (!G.shufflePending && G.dealt >= G.cutAt) {
     G.shufflePending = true;
@@ -873,10 +881,14 @@ function vipTierUp(from, to) {                         // pay every tier crossed
 }
 
 // top-up is for an empty casino: with attractions or the auto-tipper, the floor refills you (no spend-down-and-top-up loop)
-const canTopup = () => G.state === 'BET' && G.chips < MIN_BET && incomePerMin() === 0 && !G.owned.autotip;
+// and at most one every 10 minutes, so a free top-up can't be bet all-in over and over (a loss costs nothing)
+const TOPUP_COOLDOWN = 10 * 60000;
+const topupWait = () => Math.max(0, G.lastTopup + TOPUP_COOLDOWN - Date.now());
+const canTopup = () => G.state === 'BET' && G.chips < MIN_BET && incomePerMin() === 0 && !G.owned.autotip && topupWait() === 0;
+const mmss = ms => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
 function topup() {
   if (!canTopup()) return;
-  G.chips = topupAmount(); fitBets(); G.st.topups++;
+  G.chips = topupAmount(); fitBets(); G.st.topups++; G.lastTopup = Date.now();
   G.result = null; G.net = 0; G.sideResults = []; G.insResult = null; G.cashback = 0;
   save(); setMood('happy', 3000); say(pick(LINES.topup), 4000); sfx('coins'); render();
 }
@@ -1563,6 +1575,7 @@ function setValue(id, v) {
 }
 
 function render() {
+  if (mustCommit) save();                              // every card draw is followed by a render in the same task: commit first
   const inHand = G.state !== 'BET', betOk = G.state === 'BET';
   if (betOk) fitBets();                                // chips spent in the casino or shop: trim the bet so Deal still works
   const broke = G.chips < MIN_BET && !inHand, topOk = canTopup();
@@ -1643,7 +1656,8 @@ function render() {
   // action bar: one context at a time
   document.body.dataset.phase = G.state === 'BET' ? 'bet' : G.state === 'INSURANCE' ? 'ins' : 'play';
   const deal = $('btn-deal');
-  deal.textContent = broke ? (topOk ? 'Top up ' + fmtBig(topupAmount()) + ' chips' : 'Out of chips \u00b7 tip jar \u2192') : 'Deal  \u00b7  ' + fmtBig(totalStake());
+  const wait = broke && !topOk && incomePerMin() === 0 && !G.owned.autotip ? topupWait() : 0;
+  deal.textContent = broke ? (topOk ? 'Top up ' + fmtBig(topupAmount()) + ' chips' : wait ? 'Top-up in ' + mmss(wait) + ' \u00b7 tip jar \u2192' : 'Out of chips \u00b7 tip jar \u2192') : 'Deal  \u00b7  ' + fmtBig(totalStake());
   deal.title = broke && !topOk ? 'Your casino refills you: ' + (incomePerMin() > 0 ? '+' + fmtBig(Math.round(incomePerMin())) + '/min, ' : '') + 'or click the tip jar' : 'Deal (Space)';
   document.querySelectorAll('[data-q]').forEach(b => { b.disabled = !betOk || broke; });
   deal.disabled = !(broke || canDeal());
@@ -1764,7 +1778,7 @@ document.addEventListener('contextmenu', e => { e.preventDefault(); if (window.b
 if (window.buddy) window.buddy.onMenu(cmd => {
   if (cmd === 'toggle') toggle();
   else if (cmd === 'rules') { $('rules').classList.toggle('show'); sfx('click'); }
-  else if (cmd === 'reset') { if (canTopup()) topup(); else say(G.chips < MIN_BET && G.state === 'BET' ? 'Your casino pays you, hun~ try the tip jar' : 'Top-ups are for when you\'re broke~', 3000); }
+  else if (cmd === 'reset') { if (canTopup()) topup(); else say(G.chips < MIN_BET && G.state === 'BET' ? (topupWait() && incomePerMin() === 0 && !G.owned.autotip ? 'Next top-up in ' + mmss(topupWait()) + ' \u2014 tip jar meanwhile~' : 'Your casino pays you, hun~ try the tip jar') : 'Top-ups are for when you\'re broke~', 3000); }
   else if (cmd === 'mute') { G.muted = !G.muted; save(); render(); }
   else if (cmd === 'stats') { if (!document.body.classList.contains('open')) toggle(); setTab('stats'); }
 });
@@ -1813,6 +1827,7 @@ setInterval(() => {
   G.st.playMs += Math.min(5000, now - lastTick);
   const today = new Date().toDateString();
   if (G.st.lastDay !== today) { G.st.lastDay = today; G.st.days++; }
+  if (G.tab === 'table' && G.state === 'BET' && G.chips < MIN_BET && now - lastStats > 1000 && !pressing()) { render(); lastStats = now; }   // top-up countdown
   if (G.tab === 'stats' && now - lastStats > 1000 && !pressing()) { renderStats(true); lastStats = now; }
   lastTick = now;
   if (now - lastSave > 5000) { save(); lastSave = now; }
@@ -1824,7 +1839,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(G.state === 'BET' ? pick(LINES.hello) : 'Where were we? Your hand~ \u2665'), 1200);
 
 // exposed for automated tests only
-window.__bb = { gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { topupWait, gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,

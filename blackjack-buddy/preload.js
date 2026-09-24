@@ -7,4 +7,6 @@ contextBridge.exposeInMainWorld('buddy', {
   contextMenu: () => ipcRenderer.send('context-menu'),
   quit: () => ipcRenderer.send('quit'),
   onMenu: cb => ipcRenderer.on('menu', (e, cmd) => cb(cmd)),
+  saveSync: json => ipcRenderer.sendSync('save-sync', json),   // written to disk before the call returns
+  loadSync: () => ipcRenderer.sendSync('load-sync'),
 });

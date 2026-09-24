@@ -43,6 +43,33 @@ module.exports = (win, app) => {
         await shot('e2-history');
         log('errors', JSON.stringify(await run('__errs')));
         await run(`window.buddy.quit()`);
+      } else if (phase === 'killdeal') {
+        // deal, look at the cards, hit once, then hard-kill the whole app (Task Manager style) before any periodic save
+        await run(`__bb.G.muted = true; __bb.toggle(); __bb.G.betWant = 100; __bb.fitBets();`); await wait(6000);
+        const before = await run(`({ chips: __bb.G.chips, rounds: __bb.G.st.rounds })`);
+        for (let t = 0; t < 10; t++) { await run(`if (__bb.G.state === 'BET') __bb.startHand()`); await wait(1600);
+          const st = await run('__bb.G.state'); if (st === 'INSURANCE') await run('__bb.insurance(false)'); if (st === 'PLAYER') break; await wait(2500); }
+        await run(`__bb.hit()`); await wait(150);
+        const seen = await run(`({ state: __bb.G.state, hand: __bb.G.hands[0].cards.join(' '), dealer0: __bb.G.dealer[0].join(''), chips: __bb.G.chips })`);
+        fs.writeFileSync(path.join(out, 'kill.json'), JSON.stringify({ before, seen }));
+        log('saw', JSON.stringify(seen), '-> SIGKILL');
+        process.kill(process.pid, 'SIGKILL');
+      } else if (phase === 'afterkill') {
+        const k = JSON.parse(fs.readFileSync(path.join(out, 'kill.json'), 'utf8'));
+        const now = await run(`({ state: __bb.G.state, hand: __bb.G.hands[0] ? __bb.G.hands[0].cards.join(' ') : '', chips: __bb.G.chips })`);
+        log('before deal', JSON.stringify(k.before), '| seen before kill', JSON.stringify(k.seen), '| after relaunch', JSON.stringify(now));
+        log(now.hand === k.seen.hand ? 'HAND KEPT (no exploit)' : 'HAND UNDONE (exploit: bet refunded / hand replayable)');
+        app.quit();
+      } else if (phase === 'oldsave') {
+        // simulate a pre-2.1.6 install: save only in localStorage, no save.json
+        await run(`localStorage.setItem('blackjack-buddy', JSON.stringify({ chips: 12345, lastSeen: Date.now(), st: { wagered: 20000, rounds: 7 } }))`);
+        try { fs.unlinkSync(path.join(app.getPath('userData'), 'save.json')); } catch (e) {}
+        await run(`window.save = () => {}; 1`);   // don't overwrite it on the way out
+        await wait(8000); log('wrote a localStorage-only save'); process.kill(process.pid, 'SIGKILL');
+      } else if (phase === 'afterold') {
+        log('migrated', JSON.stringify(await run(`({ chips: __bb.G.chips, wagered: __bb.G.st.wagered, rounds: __bb.G.st.rounds, tier: __bb.VIP[__bb.vipIdx()].name })`)),
+          'save.json now exists:', fs.existsSync(path.join(app.getPath('userData'), 'save.json')));
+        app.quit();
       } else if (phase === 'hold') {
         // hold the bet + button, drift off the panel onto empty space, release there
         await run(`__bb.G.muted = true; __bb.G.chips = 1e9; __bb.fitBets(); __bb.toggle(); __bb.setBet(10);`); await wait(900);

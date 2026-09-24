@@ -9,7 +9,7 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder. Version **2.1.5**.
+lifetime VIP ladder. Version **2.1.6**.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).
@@ -63,6 +63,15 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
   first 2.1 ladder via `st.vipV`). Tier-up pays chips and unlocks VIP cosmetics.
   Badges (`gemSVG`/`GEM_SHAPES`): wood token, 4 metal medals with 1–4 pips, pearl, jade, sapphire,
   heart ruby, emerald cut, diamond, obsidian shard, celestial star.
+- **Durable saves**: `save()` writes `userData/save.json` synchronously via `buddy.saveSync` (main-process
+  `fs.writeFileSync` + rename) and mirrors to localStorage. `drawCard()` / `revealHole()` set `mustCommit`;
+  `render()` saves first when it is set, so the state is on disk before a card is painted. Load takes the newer of
+  file and localStorage (by `lastSeen`). Reason: Chromium commits localStorage seconds late, so killing the app from
+  Task Manager used to undo a hand already on screen (verified in Electron, now fixed: `BB_PHASE=killdeal/afterkill`).
+- **Exploits closed**: spend-down top-up loop (top-up only with no casino income/auto-tipper), all-in free-roll on
+  top-ups (10-min cooldown, `G.lastTopup`), kill-to-undo (durable saves), quit-to-refund (hand resumes instead),
+  sleep income (capped away earnings), insurance after spending chips. Not preventable offline: moving the system
+  clock forward (away earnings, top-up cooldown) and editing save.json; acceptable for a single-player game.
 - **Economy tick** (`setInterval` 250 ms): passive income; gaps > 10 min (PC sleep) are treated as
   away time with the offline cap; auto-tips credited in batches; periodic re-renders skipped while
   the mouse is pressed (rebuilding a button mid-press swallows the click — verified in Chromium).

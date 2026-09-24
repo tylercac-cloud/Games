@@ -128,6 +128,15 @@ ipcMain.on('context-menu', () => {
   ]).popup({ window: win });
 });
 
+// the game save: written synchronously, so a hard kill (Task Manager) can't undo a hand that was already on screen
+const saveFile = () => path.join(app.getPath('userData'), 'save.json');
+ipcMain.on('save-sync', (e, json) => {
+  const f = saveFile();
+  try { fs.writeFileSync(f + '.tmp', json); fs.renameSync(f + '.tmp', f); e.returnValue = true; }
+  catch (err) { try { fs.writeFileSync(f, json); e.returnValue = true; } catch (err2) { e.returnValue = false; } }
+});
+ipcMain.on('load-sync', e => { try { e.returnValue = fs.readFileSync(saveFile(), 'utf8'); } catch (err) { e.returnValue = null; } });
+
 ipcMain.on('quit', () => { savePos(); app.quit(); });
 
 if (!app.requestSingleInstanceLock()) {

@@ -52,7 +52,8 @@ HOUSE RULES
   shows its total, then its result.
 - You start with 500 chips. If you go broke with an empty casino (no attractions, no auto-tipper), the Deal
   button becomes "Top up" (500, more at higher VIP tiers). Once your casino earns, it refills you instead:
-  Deal points you to the tip jar. (This closes a loop of spending down to 0 and topping up for free chips.)
+  Deal points you to the tip jar. Top-ups are at most one per 10 minutes (the button counts down).
+  (This closes two loops: spending down to 0 and topping up, and betting a free top-up all-in again and again.)
 - Totals: soft hands show both values, e.g. 7/17.
 - Quit mid-hand and the same hand is waiting next launch: the shoe and the round are saved, so the cards
   (and the count) are exactly where you left them.
@@ -183,7 +184,9 @@ SIDE BETS (settled right after the deal)
   House edge 0.95% (was 11.2% with trips at 30 and straight flush at 40).
 
 WHERE YOUR DATA LIVES
-Chips, bets, stats, VIP progress and the window position are stored in %APPDATA%\blackjack-buddy.
+Chips, bets, stats, VIP progress and the window position are stored in %APPDATA%\blackjack-buddy
+(save.json). The save is written the moment a card is dealt, so closing or force-quitting the game can't
+undo a hand you have already seen - it is waiting for you next launch.
 Your existing save carries over; lifetime stats and VIP start counting from this version.
 
 START WITH WINDOWS (optional)
