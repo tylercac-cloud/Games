@@ -23,6 +23,12 @@ jobs:
           cache: npm
           cache-dependency-path: blackjack-buddy/package-lock.json
       - run: npm ci
+      - name: Tag this version (GitHub releases need an existing tag)
+        shell: bash
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then echo "$tag exists"; else
+            git tag "$tag" && git push origin "refs/tags/$tag"; fi
       - name: Build installer and publish the release
         run: npx electron-builder --win nsis --publish always
         env:
