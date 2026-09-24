@@ -43,6 +43,18 @@ module.exports = (win, app) => {
         await shot('e2-history');
         log('errors', JSON.stringify(await run('__errs')));
         await run(`window.buddy.quit()`);
+      } else if (phase === 'hold') {
+        // hold the bet + button, drift off the panel onto empty space, release there
+        await run(`__bb.G.muted = true; __bb.G.chips = 1e9; __bb.fitBets(); __bb.toggle(); __bb.setBet(10);`); await wait(900);
+        const r = JSON.parse(await run(`JSON.stringify(document.querySelector('[data-step="betup"]').getBoundingClientRect())`));
+        const x = Math.round(r.left + r.width / 2), y = Math.round(r.top + r.height / 2);
+        const m = (type, x, y) => win.webContents.sendInputEvent({ type, x, y, button: 'left', clickCount: 1 });
+        m('mouseMove', x, y); await wait(100); m('mouseDown', x, y); await wait(600);
+        for (let i = 1; i <= 6; i++) { m('mouseMove', x - 20 * i, y - 60 * i); await wait(40); }   // up past the panel edge into transparent space
+        m('mouseUp', x - 120, y - 360); await wait(300);
+        const b1 = await run('__bb.G.bet'); await wait(1500); const b2 = await run('__bb.G.bet');
+        log('bet at release', b1, 'bet 1.5 s later', b2, b2 === b1 ? 'STOPPED (ok)' : 'STILL CLIMBING (bug)');
+        app.quit();
       } else {
         const st = await run(`({ state: __bb.G.state, hand: __bb.G.hands[0] ? __bb.G.hands[0].cards.join(' ') : '', dealer: __bb.G.dealer.join(' '), chips: __bb.G.chips, wagered: __bb.G.st.wagered, tier: __bb.VIP[__bb.vipIdx()].name, rounds: __bb.G.st.rounds })`);
         log('after relaunch', JSON.stringify(st));

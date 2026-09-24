@@ -9,7 +9,7 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder. Version **2.1.1**.
+lifetime VIP ladder. Version **2.1.2**.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).
@@ -109,7 +109,8 @@ f31e2b3 Blackjack Buddy 2.1: fair side bets, VIP by wagered, stats overhaul
 `BB_TEST=1 BB_PHASE=1 xvfb-run -a node_modules/electron/dist/electron . --no-sandbox` and again with `BB_PHASE=2`.
 `test-hook.js` (loaded by `main.js` when `BB_TEST` is set; excluded from `npm run package`) plays 5
 rounds by keyboard, quits mid-hand via the app's quit path, exports CSV, then on phase 2 checks the
-hand resumes identically and finishes it. Screenshots/CSV go to `shots/` (or `BB_OUT`). Last run: all
+hand resumes identically and finishes it. `BB_PHASE=hold` holds the bet + button and releases off-panel
+(synthetic input bypasses Windows click-through, so this cannot prove the Windows case). Screenshots/CSV go to `shots/` (or `BB_OUT`). Last run: all
 checks passed, zero renderer errors.
 
 ## How to test without Windows
@@ -121,6 +122,7 @@ replace `setTimeout` with a manual queue and stub `render`, `say`, `sfx`, `drawG
 (hundreds of thousands of localStorage writes exhaust headless Chromium's memory). A random-action
 fuzzer (9 seeds, ~46,000 random actions incl. mid-hand relaunches) checks: chips integer and never negative,
 wagered never decreasing, bets fit chips, no card more than twice, tier never below its floor.
+A second fuzzer clicks random visible buttons / presses keys on the real DOM with a fake clock.
 The Windows build itself (tray, click-through) still needs a manual check.
 
 ## Known limitations / ideas not built

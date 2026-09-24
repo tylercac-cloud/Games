@@ -1677,8 +1677,9 @@ document.querySelectorAll('[data-step]').forEach(b => {
       repeatTimer = setTimeout(loop, 70);
     };
     repeatTimer = setTimeout(loop, 380);
-    const stop = () => { clearTimeout(repeatTimer); window.removeEventListener('pointerup', stop); };
-    window.addEventListener('pointerup', stop);
+    const ends = ['pointerup', 'pointercancel', 'blur'];
+    const stop = () => { clearTimeout(repeatTimer); ends.forEach(t => window.removeEventListener(t, stop)); b.removeEventListener('pointerleave', stop); };
+    ends.forEach(t => window.addEventListener(t, stop)); b.addEventListener('pointerleave', stop);   // sliding off the button stops it too
   });
 });
 
@@ -1707,7 +1708,9 @@ $('btn-quit').onclick = () => window.buddy && window.buddy.quit();
 $('rules-close').onclick = () => { $('rules').classList.remove('show'); sfx('click'); };
 
 // drag anywhere on her or the table; a plain click on her opens / closes the table
-let drag = null, ignoring = true;
+let drag = null, ignoring = true, held = false;
+window.addEventListener('pointerdown', () => { held = true; }, true);
+['pointerup', 'pointercancel', 'blur'].forEach(t => window.addEventListener(t, () => { held = false; }, true));
 document.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   if (e.target.closest('button, .rules')) return;
@@ -1723,6 +1726,7 @@ document.addEventListener('mousemove', e => {
     if (drag.moved && window.buddy) window.buddy.dragMove(dx, dy);
     return;
   }
+  if (held) return;                                     // a button is held: stay clickable so the release is ours
   // click-through: let the mouse fall through wherever there is nothing under it
   const el = document.elementFromPoint(e.clientX, e.clientY);
   const hit = !!(el && el !== document.body && el !== document.documentElement &&
@@ -1735,7 +1739,7 @@ document.addEventListener('mouseup', () => {
   drag = null;
 });
 document.addEventListener('mouseleave', () => {
-  if (!drag && !ignoring) { ignoring = true; if (window.buddy) window.buddy.ignoreMouse(true); }
+  if (!drag && !held && !ignoring) { ignoring = true; if (window.buddy) window.buddy.ignoreMouse(true); }
 });
 // keyboard: H hit, S stand, D double, P split, R surrender, I / N insurance, Space or Enter deal
 const KEYS = { h: () => hit(), s: () => stand(), d: () => doubleDown(), p: () => split(), r: () => surrender() };
