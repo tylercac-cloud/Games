@@ -7,7 +7,7 @@ const SUITS = ['\u2660', '\u2665', '\u2666', '\u2663'];          // ♠ ♥ ♦ 
 const RED = new Set(['\u2665', '\u2666']);
 const RANK_ORDER = Object.fromEntries(RANKS.map((r, i) => [r, i + 1]));   // A=1 … K=13
 const DECKS = 2, CUT_RANGE = [0.55, 0.75];
-const START_CHIPS = 500, MIN_BET = 10, STEP = 10, BIG_STEP = 100, SIDE_STEP = 5, SIDE_BIG_STEP = 50;
+const START_CHIPS = 500, MIN_BET = 10, STEP = 10, SIDE_STEP = 5;
 
 const LINES = {
   hello: ['Hi! Click me to play \u2665', 'Table\'s open whenever you are~'],
@@ -247,6 +247,9 @@ const RESULT_NAMES = {
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const fmt = (n, signed) => (signed && n > 0 ? '+' : '') + n.toLocaleString('en-US');
 // drop trailing zeros after a decimal point only: '3.50' -> '3.5', '2.00' -> '2', '250' stays '250'
+// tight spots (hand tags, split total): 12,500 -> 12.5K; millions and up as fmtBig
+const fmtShort = (n, signed) => Math.abs(n) < 1e4 ? fmt(Math.round(n), signed) : Math.abs(n) < 1e6 ? (n < 0 ? '-' : signed ? '+' : '') + trimZeros((Math.abs(n) / 1e3).toFixed(Math.abs(n) < 1e5 ? 1 : 0)) + 'K' : fmtBig(n, signed);
+const fmtMult = m => m < 100 ? trimZeros(m.toFixed(2)) : fmtBig(Math.round(m));   // x1.25, x53,846, x1.2M
 const trimZeros = t => t.includes('.') ? t.replace(/0+$/, '').replace(/\.$/, '') : t;
 // compact form for big numbers: 1,234,567 -> 1.23M
 const fmtBig = (n, signed) => {
@@ -866,7 +869,7 @@ function vipTierUp(from, to) {                         // pay every tier crossed
   for (let t = from + 1; t <= to; t++) { reward += tierReward(t); G.st.tierUps++; }
   G.chips += reward;
   save();
-  setTimeout(() => { render(); celebrateVip(to, reward); }, 1100);
+  setTimeout(() => { render(); celebrateVip(to, reward, from); }, 1100);
 }
 
 // top-up is for an empty casino: with attractions or the auto-tipper, the floor refills you (no spend-down-and-top-up loop)
@@ -914,7 +917,7 @@ function tipClick(x, y, auto, n = 1) {                  // n > 1: a batch of aut
   if (!auto && G.tips % 25 === 0) { say(pick(LINES.tip), 2500); setMood('happy', 1800); }
   if (!auto) sfx('tip');
   if (x !== undefined) {
-    const f = document.createElement('div'); f.className = 'float'; f.textContent = '+' + fmt(v);
+    const f = document.createElement('div'); f.className = 'float'; f.textContent = '+' + fmtBig(v);
     f.style.left = (x - 10) + 'px'; f.style.top = (y - 24) + 'px';
     document.body.appendChild(f); setTimeout(() => f.remove(), 900);
     const j = $('tipjar'); j.classList.remove('bump'); void j.offsetWidth; j.classList.add('bump');
@@ -978,7 +981,7 @@ function celebrateFranchise(gain, before) {
   const rankChanged = rankOf(before) !== rankOf(G.stars);
   ov.innerHTML = '<div class="rays"></div><div class="big">' + starSVG('bigstar') + '</div>' +
     '<div class="gain">+<span class="cnt">0</span></div>' +
-    '<div class="sub">Location #' + (G.franchises + 1) + ' \u00b7 income \u00d7' + trimZeros(starMult().toFixed(2)) + ' forever</div>' +
+    '<div class="sub">Location #' + (G.franchises + 1) + ' \u00b7 income \u00d7' + fmtMult(starMult()) + ' forever</div>' +
     (rankChanged ? '<div class="rank">New rank: ' + rankOf(G.stars) + '</div>' : '') +
     '<div class="tap">click to continue</div>';
   $('table').appendChild(ov);
@@ -1061,15 +1064,18 @@ function renderVipBadges() {
   $('vipchip').classList.toggle('active', G.tab === 'stats');
   style($('xpbar')); $('xpbar').title = tip;
 }
-function celebrateVip(to, reward) {
-  const t = VIP[to], items = vipRewards(to);
+function celebrateVip(to, reward, from) {
+  const t = VIP[to], items = [];
+  for (let k = (from === undefined ? to - 1 : from) + 1; k <= to; k++) items.push(...vipRewards(k));
+  const shown = items.slice(0, 4), more = items.length - shown.length;
   const ov = document.createElement('div'); ov.className = 'celebrate vipcel';
   ov.style.setProperty('--v1', t.c[0]); ov.style.setProperty('--v2', t.c[1]); ov.style.setProperty('--v3', t.c[2]);
   ov.innerHTML = '<div class="rays"></div><div class="big">' + gemSVG(to, 'biggem') + '</div>' +
     '<div class="kicker">VIP tier reached</div><div class="gain">' + t.name + '</div>' +
     '<div class="sub">' + vipPerksText(to) + '</div>' +
     '<div class="rewards"><span class="rchip">+' + fmtBig(reward) + ' chips</span>' +
-    items.map(it => '<span class="rchip"><i style="--a:' + it.sw[0] + ';--b:' + it.sw[1] + '"></i>' + it.name + ' ' + it.group.toLowerCase() + '</span>').join('') + '</div>' +
+    shown.map(it => '<span class="rchip"><i style="--a:' + it.sw[0] + ';--b:' + it.sw[1] + '"></i>' + it.name + ' ' + it.group.toLowerCase() + '</span>').join('') +
+    (more > 0 ? '<span class="rchip">+' + more + ' more unlocks</span>' : '') + '</div>' +
     '<div class="tap">click to continue</div>';
   if (!document.body.classList.contains('open')) toggle();
   $('table').appendChild(ov);
@@ -1132,7 +1138,7 @@ function renderStats(periodic) {
         ['Total wagered', fmtBig(st.wagered)],
         ['Lifetime net', fmtBig(st.net, true), signCls(st.net), 'All rounds incl. side bets, insurance and cashback'],
         ['Win rate', pct(st.wins, decided), '', 'Wins ÷ (wins + losses), pushes excluded'],
-        ['VIP perks', '×' + trimZeros(vipMult().toFixed(2)) + ' · ' + cashbackPct() + '%', '', vipPerksText(i)]]);
+        ['VIP perks', '\u00d7' + trimZeros(vipMult().toFixed(2)) + ' \u00b7 ' + cashbackPct() + '%', '', vipPerksText(i)]]);
   } else if (G.statCat === 'hist') {
     let cum = 0; const curve = [0].concat(st.curve.map(u => (cum += u)));
     box.innerHTML = sect('Last ' + st.curve.length + ' rounds \u00b7 running units') + sparkline(curve, v => fmtU(v, 1), 'Round') +
@@ -1185,7 +1191,7 @@ function franchise(confirmed) {
   BOOSTS.slice(0, su('keepboosts')).forEach(b => { G.boosts[b.id] = true; });
   G.result = null; G.sideResults = []; G.insResult = null; G.betWant = 50; G.ppWant = 0; G.tpWant = 0; fitBets();
   save(); setMood('happy', 4000); hop(); celebrateFranchise(gain, starsBefore); sfx('tierup');
-  say('New location! +' + gain + ' \u2605 \u2014 income \u00d7' + trimZeros(starMult().toFixed(2)), 6000);
+  say('New location! +' + gain + ' \u2605 \u2014 income \u00d7' + fmtMult(starMult()), 6000);
   renderCasino(); render();
   return gain;
 }
@@ -1290,7 +1296,7 @@ function renderShop() {
       t.innerHTML = '<span class="sw sw-' + grp.slot + '-' + it.id + '" style="--a:' + it.sw[0] + ';--b:' + it.sw[1] + '"></span>' +
         '<span class="tname">' + it.name + '</span><span class="tstate">' + (on ? 'Equipped' : owned ? 'Equip' :
           vip ? gemSVG(it.vip, 'tgem') + VIP[it.vip].name : fmtBig(it.cost)) + '</span>';
-      if (vip && !owned) t.title = 'VIP exclusive: unlocks at ' + VIP[it.vip].name + ' (' + fmt(VIP[it.vip].at) + ' comp points)';
+      if (vip && !owned) t.title = 'VIP exclusive: unlocks at ' + VIP[it.vip].name + ' (' + fmtBig(VIP[it.vip].at) + ' wagered)';
       t.disabled = !owned && (vip ? G.shopCat !== 'dealer' : G.chips < it.cost);
       t.onclick = () => buyOrEquip(grp.slot, it.id);
       if (G.shopCat === 'dealer') {
@@ -1317,7 +1323,7 @@ function renderCasino() {
   $('tipcost').textContent = fmtBig(tipCost());
   $('tipup').disabled = G.chips < tipCost();
   $('tipstat').textContent = fmt(G.tips) + (G.tips === 1 ? ' tip' : ' tips');
-  $('incomestat').textContent = '+' + fmt(incomePerMin()) + ' / min';
+  $('incomestat').textContent = '+' + fmtBig(Math.round(incomePerMin())) + ' / min';
 
   // boosts: only the next unowned one is offered, so the list stays short
   const bbox = $('boosts');
@@ -1545,7 +1551,7 @@ function renderPlayer() {                            // one group per hand; spli
     g.dataset.n = h.cards.length;
     const tag = g.querySelector('.htag');
     if (!multi) { tag.textContent = ''; tag.className = 'htag'; return; }
-    if (h.res) { tag.textContent = h.res === 'bust' ? 'Bust' : fmtBig(h.net, true); tag.className = 'htag ' + (h.net > 0 ? 'win' : h.net < 0 ? 'lose' : 'push'); }
+    if (h.res) { tag.textContent = h.res === 'bust' ? 'Bust' : fmtShort(h.net, true); tag.className = 'htag ' + (h.net > 0 ? 'win' : h.net < 0 ? 'lose' : 'push'); }
     else { tag.textContent = h.cards.length ? totalText(h.cards) + (h.doubled ? ' \u00d72' : '') : ''; tag.className = 'htag' + (h.bust ? ' lose' : ''); }
   });
 }
@@ -1563,7 +1569,7 @@ function render() {
   $('chips').textContent = fmtBig(G.chips);
   if (G.chips > G.st.highChips) G.st.highChips = G.chips;
   $('rate').textContent = incomePerMin() > 0 ? '+' + fmtBig(Math.round(incomePerMin())) + '/min' : '';
-  $('rate').title = 'Boosts \u00d7' + fmtBig(boostMult()) + ' \u00b7 Stars \u00d7' + trimZeros(starMult().toFixed(2)) + ' \u00b7 VIP \u00d7' + trimZeros(vipMult().toFixed(2));
+  $('rate').title = 'Boosts \u00d7' + fmtBig(boostMult()) + ' \u00b7 Stars \u00d7' + fmtMult(starMult()) + ' \u00b7 VIP \u00d7' + trimZeros(vipMult().toFixed(2));
   const sb = $('stars');
   if (G.stars) {
     if (sb.dataset.n !== String(G.stars) + '/' + banked()) {
@@ -1590,14 +1596,14 @@ function render() {
   document.querySelectorAll('[data-step]').forEach(b => { b.disabled = !en[b.dataset.step]; });
 
   // side-bet and insurance outcomes sit next to the bet they belong to
-  const delta = (id, v) => { const el = $(id); el.textContent = v === null ? '' : fmt(v, true); el.className = 'delta ' + (v > 0 ? 'pos' : 'neg'); };
+  const delta = (id, v) => { const el = $(id), t = v === null ? '' : fmtBig(v, true); el.textContent = t; el.title = t; el.className = 'delta ' + (v > 0 ? 'pos' : 'neg') + (t.length > 5 ? ' long' : ''); };
   const side = name => { const r = G.sideResults.find(x => x[0] === name); return r ? r[1] : null; };
   delta('d-pp', side('Pairs')); delta('d-tp', side('21+3'));
   delta('d-bet', G.result ? G.net : null);
   const hitNames = G.sideResults.filter(r => r[1] > 0).map(r => r[2]);
   $('sideres').textContent = hitNames.length ? hitNames.join(' \u00b7 ') + '!' : '';
   const ir = $('insrow');
-  ir.textContent = G.insResult !== null ? 'Insurance ' + fmt(G.insResult, true) : '';
+  ir.textContent = G.insResult !== null ? 'Insurance ' + fmtBig(G.insResult, true) : '';
   ir.classList.toggle('won', (G.insResult || 0) > 0);
 
   // count pill
@@ -1618,7 +1624,7 @@ function render() {
   document.querySelector('.cards').classList.toggle('multi', multi);
   $('pwho').textContent = multi ? (settled ? 'Total' : 'Hand ' + (G.cur + 1) + '/' + G.hands.length) : 'You';
   const pv = $('pval');
-  if (multi && settled) { pv.textContent = fmtBig(G.net, true); pv.className = 'sm ' + signCls(G.net); }
+  if (multi && settled) { pv.textContent = fmtShort(G.net, true); pv.className = 'sm ' + signCls(G.net); }
   else { pv.textContent = G.hands.length && hand() && hand().cards.length ? totalText(hand().cards) : ''; pv.className = ''; }
   const shoe = $('shoe');
   shoe.textContent = G.shufflePending ? 'Cut card out' : decksLeft().toFixed(1) + ' decks left';
@@ -1648,7 +1654,7 @@ function render() {
   $('btn-surrender').disabled = !canSurrender();
   renderVipBadges();
   $('mute').classList.toggle('off', G.muted);
-  $('ins-cost').textContent = fmt(Math.floor(G.handBet / 2));
+  $('ins-cost').textContent = fmtBig(Math.floor(G.handBet / 2));
   $('ins-yes').disabled = G.chips < Math.floor(G.handBet / 2);
 }
 

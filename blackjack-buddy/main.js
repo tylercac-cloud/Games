@@ -10,7 +10,6 @@ const fs = require('fs');
 // app.disableHardwareAcceleration();
 
 const W = 560, H = 412;
-const IS_WIN = process.platform === 'win32';
 
 let win = null;
 let tray = null;
