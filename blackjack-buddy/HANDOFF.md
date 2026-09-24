@@ -119,7 +119,7 @@ taints the sprite canvas, so use HTTP. `window.__bb` exposes internals (G, start
 split, insurance, fitBets, setTab, renderStats, franchise, VIP, vipIdx, ...). For fast simulations
 replace `setTimeout` with a manual queue and stub `render`, `say`, `sfx`, `drawGirl`, **and `save`**
 (hundreds of thousands of localStorage writes exhaust headless Chromium's memory). A random-action
-fuzzer (24 seeds x 6,000 actions incl. mid-hand relaunches) checks: chips integer and never negative,
+fuzzer (9 seeds, ~46,000 random actions incl. mid-hand relaunches) checks: chips integer and never negative,
 wagered never decreasing, bets fit chips, no card more than twice, tier never below its floor.
 The Windows build itself (tray, click-through) still needs a manual check.
 
