@@ -37,9 +37,9 @@
   </header>
 
   <section class="controls">
-    <div class="stepper"><span class="lbl">Bet<i class="delta" id="d-bet"></i></span><div class="pill"><button data-step="betdown">−</button><b id="v-bet">50</b><button data-step="betup">+</button></div></div>
-    <div class="stepper"><span class="lbl">Pairs<i class="delta" id="d-pp"></i></span><div class="pill"><button data-step="ppdown">−</button><b id="v-pp">0</b><button data-step="ppup">+</button></div></div>
-    <div class="stepper"><span class="lbl">21+3<i class="delta" id="d-tp"></i></span><div class="pill"><button data-step="tpdown">−</button><b id="v-tp">0</b><button data-step="tpup">+</button></div></div>
+    <div class="stepper"><span class="lbl">Bet<i class="delta" id="d-bet"></i></span><div class="pill"><button data-step="betdown">−</button><b id="v-bet" title="Click to type an amount">50</b><button data-step="betup">+</button></div></div>
+    <div class="stepper"><span class="lbl">Pairs<i class="delta" id="d-pp"></i></span><div class="pill"><button data-step="ppdown">−</button><b id="v-pp" title="Click to type an amount">0</b><button data-step="ppup">+</button></div></div>
+    <div class="stepper"><span class="lbl">21+3<i class="delta" id="d-tp"></i></span><div class="pill"><button data-step="tpdown">−</button><b id="v-tp" title="Click to type an amount">0</b><button data-step="tpup">+</button></div></div>
     <div class="sidehit" id="sideres"></div>
   </section>
 
@@ -100,9 +100,9 @@
 
   <footer class="actions">
     <div class="bar bar-bet">
-      <button class="qb" data-q="min" title="Minimum bet">Min</button>
-      <button class="qb" data-q="half" title="Halve the bet">½</button>
-      <button class="qb" data-q="dbl" title="Double the bet">×2</button>
+      <button class="qb" data-q="min" title="1% of your chips; press again for the table minimum (10)">Min</button>
+      <button class="qb" data-q="half" title="Halve the bet (↓)">½</button>
+      <button class="qb" data-q="dbl" title="Double the bet (↑)">×2</button>
       <button class="qb" data-q="max" title="Bet everything (after side bets)">Max</button>
       <button id="btn-deal" class="primary" title="Deal (Space)">Deal</button>
     </div>
@@ -132,9 +132,9 @@
   <p>Two decks. One card is burned after every shuffle and a cut card is placed at a random depth (55–75% of the shoe). When it comes out, the current hand finishes and the shoe is shuffled before the next deal.</p>
   <p>Dealer stands on all 17s. Blackjack pays 3:2. Dealer peeks for blackjack. Double on any first two cards. Late surrender on the first two cards (half the bet back). Insurance on a dealer ace: half the bet, pays 2:1.</p>
   <p><b>Splitting:</b> split any pair of the same rank for another bet of the same size, up to 4 hands. Double after split is allowed. Split aces get one card each and can't be re-split or doubled. A 21 on a split hand pays 1:1, not 3:2.</p>
-  <p>No bet limits beyond your chips. − / + step by 10 (side bets by 5). Hold a button and it speeds up: ×10 after a second, ×100 after three. Shift-click steps ×10. Min / ½ / ×2 / Max next to Deal set the bet in one click. Bets are sticky: after a loss the bet shrinks to what you can afford and comes back once you can afford it again.</p>
+  <p>No bet limits beyond your chips. − / + step by 10 (side bets by 5). Hold a button and it speeds up: ×10 after a second, ×100 after three. Shift-click steps ×10. Click an amount to type one (2500, 2.5k, 1.2M, 3Qa). Min (1% of your chips, again for 10) / ½ / ×2 / Max next to Deal set the bet in one click. Bets are sticky: after a loss the bet shrinks to what you can afford and comes back once you can afford it again.</p>
   <p>Out of chips with an empty casino? Deal turns into a top-up (at most one every 10 minutes). Once you own attractions or the auto-tipper, your casino refills you instead (tip jar).</p>
-  <p>Keys: H hit · S stand · D double · P split · R surrender · I / N insurance · Space or Enter deal.</p>
+  <p>Keys: H hit · S stand · D double · P split · R surrender · I / N insurance · Space or Enter deal · ↑ / ↓ double / halve the bet, Shift+↑ / ↓ step it.</p>
   <p>Quit mid-hand and the same hand (same shoe, same cards) is waiting for you next time.</p>
   <h3>Casino <small>(passive income)</small></h3>
   <p>Spend chips on floor attractions; each pays out every second while she is running, and for up to 4 hours while she is closed (longer with shop perks). Prices rise 15% per copy, and every attraction doubles its own output at 10, 25, 50, 100, 150, 200 and 300 copies. Boosts multiply the whole floor. The tip jar pays per click; "Bigger tips" doubles it.</p>

@@ -643,8 +643,39 @@ function setBet(v) {
 function quickBet(q) {                                   // Min / half / double / Max
   if (G.state !== 'BET' || G.chips < MIN_BET) return;
   const max = floorTo(G.chips - G.pp - G.tp, STEP);
-  setBet(q === 'min' ? MIN_BET : q === 'half' ? G.bet / 2 : q === 'dbl' ? G.bet * 2 : max);
+  const low = Math.max(MIN_BET, floorTo(G.chips * 0.01, STEP));   // Min: 1% of your chips; pressed again, the table minimum
+  setBet(q === 'min' ? (G.bet > low ? low : MIN_BET) : q === 'half' ? G.bet / 2 : q === 'dbl' ? G.bet * 2 : max);
   sfx('tick');
+}
+// typed amounts: 2500, 2,500, 2.5k, 1.2M, 3Qa, 1e21 (suffixes as fmtBig prints them)
+const AMT_SUF = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, qa: 1e15, qi: 1e18, sx: 1e21, sp: 1e24, oc: 1e27 };
+function parseAmount(txt) {
+  const m = String(txt).trim().toLowerCase().replace(/[,_\s]/g, '').match(/^(\d+(?:\.\d*)?|\.\d+)(e\d{1,2})?(k|m|b|t|qa|qi|sx|sp|oc)?$/);
+  if (!m) return NaN;
+  const v = parseFloat(m[1] + (m[2] || '')) * (m[3] ? AMT_SUF[m[3]] : 1);
+  return Number.isFinite(v) ? v : NaN;
+}
+let editing = null;                                        // 'bet' | 'pp' | 'tp' while an amount is being typed
+function editAmount(which) {
+  if (G.state !== 'BET' || G.chips < MIN_BET || editing) return;
+  const b = $('v-' + which), inp = document.createElement('input');
+  editing = which; inp.className = 'amtin'; inp.spellcheck = false; inp.maxLength = 16;
+  inp.value = String(which === 'bet' ? G.bet : G[which]); inp.title = 'Type an amount: 2500, 2.5k, 1.2M, 3Qa \u00b7 Enter to set, Esc to cancel';
+  b.parentNode.insertBefore(inp, b.nextSibling); b.classList.add('hid'); inp.focus(); inp.select();
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true;
+    const v = parseAmount(inp.value);
+    inp.remove(); b.classList.remove('hid'); editing = null;
+    if (ok && G.state === 'BET' && !Number.isNaN(v)) {
+      if (which === 'bet') setBet(Math.max(v, MIN_BET)); else adjustSide(which, floorTo(v, SIDE_STEP) - G[which]);
+      const got = which === 'bet' ? G.bet : G[which];
+      if (v >= got + (which === 'bet' ? STEP : SIDE_STEP)) say('That\'s all you can cover \u2014 ' + fmtBig(got) + '~', 2500);   // typed more than the chips allow
+      sfx('tick');
+    } else { if (ok && inp.value.trim()) sfx('deny'); render(); }
+  };
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  inp.addEventListener('blur', () => finish(true));
 }
 function adjustSide(which, delta) {
   if (G.state !== 'BET') return;
@@ -1869,6 +1900,7 @@ document.querySelectorAll('[data-step]').forEach(b => {
   });
 });
 
+['bet', 'pp', 'tp'].forEach(w => { $('v-' + w).onclick = () => editAmount(w); });
 $('btn-deal').onclick = () => { if (G.chips < MIN_BET && G.state === 'BET') { if (canTopup()) topup(); else { sfx('tab'); setTab('casino'); } } else startHand(); };
 document.querySelectorAll('[data-q]').forEach(b => { b.onclick = () => quickBet(b.dataset.q); });
 $('btn-hit').onclick = hit;
@@ -1944,8 +1976,17 @@ document.addEventListener('mouseleave', () => {
 const KEYS = { h: () => hit(), s: () => stand(), d: () => doubleDown(), p: () => split(), r: () => surrender() };
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $('rules').classList.contains('show')) { $('rules').classList.remove('show'); sfx('click'); return; }
-  if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || !document.body.classList.contains('open') || G.tab !== 'table') return;
+  if (e.target && e.target.tagName === 'INPUT') return;          // typing a bet or dragging the volume slider
+  const arrow = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+  if ((e.repeat && !arrow) || e.ctrlKey || e.altKey || e.metaKey || !document.body.classList.contains('open') || G.tab !== 'table') return;
   const k = e.key.toLowerCase();
+  if (arrow) {                                             // betting: up/down double/halve, with Shift step by 10 (100 while held)
+    if (G.state !== 'BET') return;
+    const up = e.key === 'ArrowUp';
+    if (e.shiftKey) stepAction(up ? 'betup' : 'betdown', e.repeat ? 10 : 1); else if (!e.repeat) quickBet(up ? 'dbl' : 'half');
+    if (e.shiftKey) sfx('tick');
+    e.preventDefault(); return;
+  }
   if (G.state === 'INSURANCE' && (k === 'i' || k === 'y' || k === 'n')) insurance(k !== 'n');
   else if (G.state === 'PLAYER' && KEYS[k]) KEYS[k]();
   else if (G.state === 'BET' && (k === ' ' || k === 'enter')) $('btn-deal').click();
@@ -2024,7 +2065,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(G.state === 'BET' ? pick(LINES.hello) : 'Where were we? Your hand~ \u2665'), 1200);
 
 // exposed for automated tests only
-window.__bb = { ACH, checkAch, achReward, renderSettings, topupWait, gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { parseAmount, ACH, checkAch, achReward, renderSettings, topupWait, gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,

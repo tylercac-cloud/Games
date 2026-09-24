@@ -40,8 +40,12 @@ CONTROLS
 - Bet / Pairs / 21+3 ... - and + step the main bet by 10 and the side bets by 5.
                          Hold a button and it speeds up (x10 after a second, x100 after three).
                          Shift-click steps x10. No caps: the only limit is your chips.
-- Min / ½ / x2 / Max ... quick-bet buttons next to Deal.
+- Min / ½ / x2 / Max ... quick-bet buttons next to Deal. Min = 1% of your chips; press it again for the
+                         table minimum (10).
+- Type a bet ........... click any amount (Bet, Pairs, 21+3) and type it: 2500, 2.5k, 1.2M, 3Qa, 1e21.
+                         Enter sets it, Esc cancels. More than your chips? You get everything you can cover.
 - Keyboard ............ H hit, S stand, D double, P split, R surrender, I / N insurance, Space or Enter deal,
+                         Up / Down double / halve the bet, Shift+Up / Down step it by 10 (100 while held),
                          Esc closes the rules
                          (table open, Table tab, window focused: click her or the table first).
 - Sticky bets .......... after a loss your bets shrink to what you can afford, then grow back to the

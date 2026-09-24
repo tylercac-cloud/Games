@@ -9,7 +9,7 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder, 15 milestones, and a Settings page. Version **2.2.0**. Shipped as an NSIS installer with
+lifetime VIP ladder, 15 milestones, and a Settings page. Version **2.2.1**. Shipped as an NSIS installer with
 auto-update from GitHub Releases.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
@@ -96,7 +96,9 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
   can't orphan saves. electron-updater (GitHub provider) checks 8 s after launch then every 6 h, auto-downloads,
   installs on quit or via "Restart to update". Not packaged → updater off (`state: 'dev'`). Installer is unsigned
   (SmartScreen warning). To ship an update: bump `version`, push, run the release workflow.
-- **Keyboard**: H/S/D/P/R, I/Y/N insurance, Space/Enter deal (table open, Table tab, window focused).
+- **Betting input** (2.2.1): click any amount to type it (`parseAmount`: 2500, 2.5k, 1.2M, 3Qa, 1e21; capped to chips
+  with a line from her); Min = 1% of chips, again = 10; ↑/↓ ×2/½, Shift+↑/↓ ±10 (±100 while held).
+- **Keyboard**: H/S/D/P/R, I/Y/N insurance, Space/Enter deal, arrows for the bet (table open, Table tab, window focused).
   Clicked buttons are blurred so Space never re-presses them.
 
 ## Verified numbers (headless Chromium, real game code, fake timers)
