@@ -80,6 +80,28 @@ module.exports = (win, app) => {
         app.bb.setOnTop(true); await wait(300);
         log('after turning on:', win.isAlwaysOnTop(), 'visible:', win.isVisible());
         app.quit();
+      } else if (phase === 'settings') {
+        // Settings page: open from the menu command, toggle on-top, back up, restore, hide
+        const { dialog } = require('electron'), bak = path.join(out, 'backup.json');
+        dialog.showSaveDialog = async () => ({ canceled: false, filePath: bak });
+        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [bak] });
+        for (let g = 0; g < 12 && await run('__bb.G.state') !== 'BET'; g++) { await run(`__bb.G.state === 'INSURANCE' ? __bb.insurance(false) : __bb.canAct() && __bb.stand(); 1`); await wait(2500); }   // finish any saved hand
+        await run(`__bb.G.muted = true; __bb.G.chips = 777777; save(); 1`);
+        win.webContents.send('menu', 'settings'); await wait(900); await shot('s1-settings');
+        const click = async sel => { await run(`document.querySelector('${sel}').click()`); await wait(500); };
+        await click('[data-set="ontop"]'); log('on top after switch:', win.isAlwaysOnTop(), 'switch on:', await run(`document.querySelector('[data-set="ontop"]').classList.contains('on')`));
+        await click('[data-set="ontop"]'); log('on top after 2nd switch:', win.isAlwaysOnTop());
+        await click('[data-set="export"]'); log('backup written:', fs.existsSync(bak), 'chips in it:', JSON.parse(fs.readFileSync(bak, 'utf8')).chips, '| msg:', await run(`document.querySelector('#setBody').textContent.includes('Saved to')`));
+        await run(`__bb.G.chips = 5; save(); 1`);
+        await click('[data-set="import"]'); await shot('s2-confirm');
+        log('settings text:', await run(`document.querySelector('#setBody').textContent.slice(-160)`), 'state', await run('__bb.G.state'));
+        log('confirm row shown:', await run(`!!document.querySelector('[data-set="restore-yes"]')`));
+        await run(`document.querySelector('[data-set="restore-yes"]').click()`); await wait(3500);
+        log('chips after restore + reload:', await run('__bb.G.chips'), '| file:', JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'save.json'), 'utf8')).chips);
+        win.webContents.send('menu', 'settings'); await wait(700);
+        await click('[data-set="hide"]'); log('visible after Hide:', win.isVisible());
+        log('errors after reload', JSON.stringify(await run('window.__errs || "none recorded (hook installs on first load only)"')));
+        app.quit();
       } else if (phase === 'hold') {
         // hold the bet + button, drift off the panel onto empty space, release there
         await run(`__bb.G.muted = true; __bb.G.chips = 1e9; __bb.fitBets(); __bb.toggle(); __bb.setBet(10);`); await wait(900);

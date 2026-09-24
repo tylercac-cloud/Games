@@ -2,9 +2,12 @@
 // Creates a frameless, transparent, always-on-top window parked above the taskbar.
 // Transparent areas are click-through; the renderer tells us when the cursor is over her or the table.
 
-const { app, BrowserWindow, ipcMain, screen, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Menu, Tray, nativeImage, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+// One save folder for every way of running her (the .bat, the installer, the portable .exe), whatever the app is called
+app.setPath('userData', path.join(app.getPath('appData'), 'blackjack-buddy'));
 
 // If the widget ever shows up as a black box on your PC, uncomment the next line.
 // app.disableHardwareAcceleration();
@@ -29,6 +32,26 @@ function setOnTop(v) {
   settings.onTop = !!v; saveSettings(); applyOnTop(); buildTrayMenu();
   if (win) { if (settings.onTop) bringToFront(); win.webContents.send('menu', settings.onTop ? 'ontop-on' : 'ontop-off'); }
 }
+function toRenderer(channel, data) { if (win && !win.isDestroyed()) win.webContents.send(channel, data); }
+
+// ---- updates: the installed app checks GitHub Releases (tylercac-cloud/Games), downloads in the background,
+// and installs when she quits or when you press "Restart to update" in Settings. The .bat / dev copy never updates itself.
+let updater = null, update = { state: 'idle' };
+function setUpdate(u) { update = u; toRenderer('update-status', update); }
+function setupUpdates() {
+  if (!app.isPackaged) { update = { state: 'dev' }; return; }
+  try { updater = require('electron-updater').autoUpdater; } catch (e) { update = { state: 'dev' }; return; }
+  updater.autoDownload = true; updater.autoInstallOnAppQuit = true;
+  updater.on('checking-for-update', () => setUpdate({ state: 'checking' }));
+  updater.on('update-available', i => setUpdate({ state: 'downloading', version: i.version, percent: 0 }));
+  updater.on('update-not-available', () => setUpdate({ state: 'none', checked: Date.now() }));
+  updater.on('download-progress', p => setUpdate({ state: 'downloading', version: update.version, percent: Math.round(p.percent) }));
+  updater.on('update-downloaded', i => setUpdate({ state: 'ready', version: i.version }));
+  updater.on('error', e => setUpdate({ state: 'error', message: String(e && e.message || e).slice(0, 140) }));
+  const check = () => { updater.checkForUpdates().catch(() => { /* reported through 'error' */ }); };
+  setTimeout(check, 8000); setInterval(check, 6 * 3600 * 1000);
+}
+
 function bringToFront() { if (!win) return; if (!win.isVisible()) { win.show(); win.setIgnoreMouseEvents(true, { forward: true }); } win.moveTop(); win.focus(); }
 
 function loadPos() {
@@ -85,6 +108,7 @@ function create() {
   win.on('move', () => { clearTimeout(saveTimer); saveTimer = setTimeout(savePos, 400); });
   win.on('closed', () => { win = null; });
   createTray();
+  setupUpdates();
 
   if (process.env.BB_TEST) app.bb = { setOnTop, settings };
   if (process.env.BB_TEST) { try { require('./test-hook')(win, app); } catch (e) { /* not shipped in the packaged app */ } }
@@ -116,6 +140,7 @@ function buildTrayMenu() {                              // rebuilt when "Always 
     { label: 'Open / close table', click: send('toggle') },
     { label: 'House rules & paytables', click: send('rules') },
     { label: 'Stats & VIP', click: send('stats') },
+    { label: 'Settings', click: send('settings') },
     { label: 'Sound on / off', click: send('mute') },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
@@ -141,6 +166,7 @@ ipcMain.on('context-menu', () => {
     { label: 'Open / close table', click: send('toggle') },
     { label: 'House rules & paytables', click: send('rules') },
     { label: 'Stats & VIP', click: send('stats') },
+    { label: 'Settings', click: send('settings') },
     { label: 'Sound on / off', click: send('mute') },
     { label: 'Top up chips (when broke)', click: send('reset') },
     { label: 'Always on top', type: 'checkbox', checked: settings.onTop, click: mi => setOnTop(mi.checked) },
@@ -160,6 +186,32 @@ ipcMain.on('save-sync', (e, json) => {
 ipcMain.on('load-sync', e => { try { e.returnValue = fs.readFileSync(saveFile(), 'utf8'); } catch (err) { e.returnValue = null; } });
 
 ipcMain.on('quit', () => { savePos(); app.quit(); });
+
+// ---- Settings page
+const canStartup = () => app.isPackaged && process.platform === 'win32';
+ipcMain.on('settings-get', e => {
+  e.returnValue = { onTop: settings.onTop, version: app.getVersion(), packaged: app.isPackaged, update,
+    startup: canStartup() ? app.getLoginItemSettings().openAtLogin : null };
+});
+ipcMain.on('settings-ontop', (e, v) => setOnTop(v));
+ipcMain.on('settings-startup', (e, v) => { if (canStartup()) app.setLoginItemSettings({ openAtLogin: !!v }); });
+ipcMain.on('hide-her', () => { if (win && win.isVisible()) win.hide(); });
+ipcMain.on('update-check', () => { if (updater) updater.checkForUpdates().catch(() => {}); else toRenderer('update-status', update); });
+ipcMain.on('update-install', () => { if (updater && update.state === 'ready') { savePos(); updater.quitAndInstall(true, true); } });
+// save backups: plain JSON copies of the save, wherever you like
+ipcMain.handle('backup-export', async (e, json) => {
+  const d = new Date(), stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const r = await dialog.showSaveDialog(win, { title: 'Save a backup', defaultPath: path.join(app.getPath('documents'), 'Blackjack Buddy backup ' + stamp + '.json'),
+    filters: [{ name: 'Blackjack Buddy backup', extensions: ['json'] }] });
+  if (r.canceled || !r.filePath) return null;
+  fs.writeFileSync(r.filePath, json); return r.filePath;
+});
+ipcMain.handle('backup-import', async () => {
+  const r = await dialog.showOpenDialog(win, { title: 'Restore a backup', defaultPath: app.getPath('documents'), properties: ['openFile'],
+    filters: [{ name: 'Blackjack Buddy backup', extensions: ['json'] }] });
+  if (r.canceled || !r.filePaths[0]) return null;
+  return fs.readFileSync(r.filePaths[0], 'utf8');
+});
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();

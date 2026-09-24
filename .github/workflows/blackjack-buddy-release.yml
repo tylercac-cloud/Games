@@ -1,0 +1,29 @@
+# Builds the Blackjack Buddy Windows installer and publishes it as a GitHub Release.
+# The installed game checks these releases and updates itself.
+# Run it from the Actions tab ("Run workflow") after bumping "version" in blackjack-buddy/package.json.
+name: Blackjack Buddy release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: blackjack-buddy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: blackjack-buddy/package-lock.json
+      - run: npm ci
+      - name: Build installer and publish the release
+        run: npx electron-builder --win nsis --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,7 +9,8 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder. Version **2.1.8**.
+lifetime VIP ladder, 15 milestones, and a Settings page. Version **2.2.0**. Shipped as an NSIS installer with
+auto-update from GitHub Releases.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).
@@ -18,8 +19,10 @@ Keep replies terse. Ask before adding features; the owner has already trimmed st
 
 | File | Role |
 |---|---|
-| `main.js` | Electron main: frameless transparent always-on-top window, click-through, tray, context menu, drag, window position, CSV download dialog. |
-| `preload.js` | `window.buddy` bridge (ignoreMouse, drag, contextMenu, quit, onMenu). |
+| `main.js` | Electron main: frameless transparent always-on-top window, click-through, tray, context menu, drag, window position, CSV download dialog, settings IPC, backup dialogs, electron-updater. |
+| `package.json` `build` | electron-builder: NSIS one-click per-user installer, publish to GitHub `tylercac-cloud/Games` releases. |
+| `../.github/workflows/blackjack-buddy-release.yml` | Manual (workflow_dispatch) Windows build that runs `electron-builder --win nsis --publish always` and publishes the release + `latest.yml`. |
+| `preload.js` | `window.buddy` bridge (ignoreMouse, drag, contextMenu, quit, onMenu, saveSync/loadSync, settings, setOnTop, setStartup, hideHer, checkUpdate, installUpdate, onUpdate, exportBackup, importBackup). |
 | `index.html` | Markup + rules panel text (keep in sync with README). |
 | `app.js` | Everything else: rules, state, save/load, economy, VIP, shop, sprite, rendering, input. ~1,770 lines, one classic script (not a module). Top-level function declarations are globals — tests stub them via `window.fn = ...`. |
 | `style.css` | All styles. Window is 560×412; colour tokens in `:root`. |
@@ -79,7 +82,20 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
   away time with the offline cap; auto-tips credited in batches; periodic re-renders skipped while
   the mouse is pressed (rebuilding a button mid-press swallows the click — verified in Chromium).
 - **Stats tab** (after the owner's trim): Overview (VIP card + ladder + 9 tiles), History (running
-  units chart of last 200 rounds, last 50 of 250 stored hands, Export CSV), Casino.
+  units chart of last 200 rounds, last 50 of 250 stored hands, Export CSV), Casino, Milestones.
+- **Milestones** (`ACH`, not to be confused with the casino attraction `MILESTONES` tiers): 15 goals, each
+  unlocking one shop item marked `ms: '<id>'` (treated like VIP items: not buyable, previewable).
+  `checkAch(silent, delay)` stamps `st.ach[id] = time` immediately and announces later (toast + her line), so
+  the round line or tier-up card isn't overwritten. Runs silently at startup to credit old saves.
+  New counters: `fourWay, comebacks, perfectPairs, straightFlushes, charlies, maxTC`.
+- **Settings** (gear button, tray, right-click): on top, hide, chatter (normal/quiet/off), start with Windows
+  (packaged win32 only), deal speed (`T(ms)` scales game-flow delays by 0.45), count, sound, volume, updates,
+  backup/restore. Restore validates the JSON, is blocked mid-hand, sets `restoring` so nothing overwrites it,
+  writes save.json + localStorage, then reloads.
+- **Installer / updates**: `userData` is pinned to `%APPDATA%\blackjack-buddy` so the productName change
+  can't orphan saves. electron-updater (GitHub provider) checks 8 s after launch then every 6 h, auto-downloads,
+  installs on quit or via "Restart to update". Not packaged → updater off (`state: 'dev'`). Installer is unsigned
+  (SmartScreen warning). To ship an update: bump `version`, push, run the release workflow.
 - **Keyboard**: H/S/D/P/R, I/Y/N insurance, Space/Enter deal (table open, Table tab, window focused).
   Clicked buttons are blurred so Space never re-presses them.
 
@@ -105,7 +121,7 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
   commit `5099f26` if ever wanted back.
 - Not requested: an in-game strategy coach.
 
-## Git history (branch `claude/happy-lovelace-mv77s0`, repo tylercac-cloud/games)
+## Git history (newest first; 2.1.x/2.2 commits omitted, see `git log`) (branch `claude/happy-lovelace-mv77s0`, repo tylercac-cloud/games)
 
 ```
 92c7899 Respace the VIP ladder and give each tier family its own badge
@@ -123,7 +139,8 @@ f31e2b3 Blackjack Buddy 2.1: fair side bets, VIP by wagered, stats overhaul
 `BB_TEST=1 BB_PHASE=1 xvfb-run -a node_modules/electron/dist/electron . --no-sandbox` and again with `BB_PHASE=2`.
 `test-hook.js` (loaded by `main.js` when `BB_TEST` is set; excluded from `npm run package`) plays 5
 rounds by keyboard, quits mid-hand via the app's quit path, exports CSV, then on phase 2 checks the
-hand resumes identically and finishes it. `BB_PHASE=hold` holds the bet + button and releases off-panel
+hand resumes identically and finishes it. `BB_PHASE=settings` opens Settings, toggles on-top, backs up, restores
+(dialogs stubbed) and hides her. `BB_PHASE=hold` holds the bet + button and releases off-panel
 (synthetic input bypasses Windows click-through, so this cannot prove the Windows case). Screenshots/CSV go to `shots/` (or `BB_OUT`). Last run: all
 checks passed, zero renderer errors.
 

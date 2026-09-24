@@ -1,14 +1,75 @@
 {
   "name": "blackjack-buddy",
-  "version": "2.1.8",
+  "productName": "Blackjack Buddy",
+  "version": "2.2.0",
   "description": "A tiny always-on-top desktop blackjack table with a redhead dealer.",
+  "author": "tylercac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tylercac-cloud/Games.git"
+  },
   "main": "main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
+    "dist": "electron-builder --win nsis --publish never",
+    "release": "electron-builder --win nsis --publish always",
     "package": "npx @electron/packager . BlackjackBuddy --platform=win32 --arch=x64 --out=dist --overwrite --icon=icon.ico --ignore=\"^/(dist|shots|test-hook\\.js|HANDOFF\\.md|Create Desktop Shortcut\\.bat|Run Blackjack Buddy\\.bat)\""
   },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
   "devDependencies": {
-    "electron": "^44.4.5"
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.tylercac.blackjackbuddy",
+    "productName": "Blackjack Buddy",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "app.js",
+      "style.css",
+      "icon.png",
+      "icon.ico",
+      "sprites/**",
+      "fonts/**",
+      "README.txt",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico",
+      "artifactName": "Blackjack-Buddy-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Blackjack Buddy",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tylercac-cloud",
+        "repo": "Games",
+        "releaseType": "release"
+      }
+    ]
   }
 }

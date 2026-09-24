@@ -9,4 +9,13 @@ contextBridge.exposeInMainWorld('buddy', {
   onMenu: cb => ipcRenderer.on('menu', (e, cmd) => cb(cmd)),
   saveSync: json => ipcRenderer.sendSync('save-sync', json),   // written to disk before the call returns
   loadSync: () => ipcRenderer.sendSync('load-sync'),
+  settings: () => ipcRenderer.sendSync('settings-get'),
+  setOnTop: v => ipcRenderer.send('settings-ontop', !!v),
+  setStartup: v => ipcRenderer.send('settings-startup', !!v),
+  hideHer: () => ipcRenderer.send('hide-her'),
+  checkUpdate: () => ipcRenderer.send('update-check'),
+  installUpdate: () => ipcRenderer.send('update-install'),
+  onUpdate: cb => ipcRenderer.on('update-status', (e, u) => cb(u)),
+  exportBackup: json => ipcRenderer.invoke('backup-export', json),
+  importBackup: () => ipcRenderer.invoke('backup-import'),
 });

@@ -1,7 +1,17 @@
 BLACKJACK BUDDY  -  taskbar widget (Windows, Electron)
 =====================================================
 
-SETUP (once)
+INSTALL (recommended)
+1. Go to https://github.com/tylercac-cloud/Games/releases and download the newest
+   "Blackjack-Buddy-Setup-x.y.z.exe".
+2. Run it. Windows SmartScreen may say "Windows protected your PC" because the installer isn't code-signed:
+   click "More info", then "Run anyway". It installs for your user only (no admin prompt), adds a desktop and
+   Start menu shortcut, and starts her.
+3. Updates install themselves: she checks GitHub a few seconds after launch and every 6 hours, downloads in
+   the background, and installs when you quit (or click "Restart to update" in Settings).
+Uninstall from Windows Settings > Apps. Your save is kept (see WHERE YOUR DATA LIVES).
+
+SETUP FROM THIS FOLDER (for developers; the installer above is easier)
 1. Install Node.js (LTS) from https://nodejs.org - run the installer, defaults are fine.
 2. Unzip this folder somewhere you'll keep it, e.g. Documents\BlackjackBuddy.
 3. Double-click "Run Blackjack Buddy.bat".
@@ -23,6 +33,7 @@ CONTROLS
 - VIP chip ............. the gem next to the tabs: your VIP tier. Click it for the Stats screen.
                          The thin line along the top of the table is your progress to the next tier.
                          When the table is closed, a small VIP pill sits beside her.
+- Gear button .......... Settings (see below). Also in the tray and right-click menus.
 - Speaker button ....... sound on / off (also in the right-click menu)
 - Drag her or the table  move the widget (position is remembered)
 - Right-click .......... menu: open/close, rules, stats & VIP, sound, top-up (only when broke), quit
@@ -38,6 +49,36 @@ CONTROLS
 - Action bar .......... shows only what you can do right now: Deal while betting; Hit / Stand /
                          Double / Split / Surrender during a hand; Take / No thanks when insurance is offered
 - "-" button ........... hide the table      "x" button ........... quit
+
+SETTINGS (gear button)
+- Her: Always on top, Hide to tray (the tray icon brings her back), Chatter (normal / quiet / off),
+  Start with Windows (installed version only).
+- Table: Deal speed (Fast is about twice as quick), show or hide the Hi-Lo count.
+- Sound: on / off and volume.
+- Updates: your version, update status, Check now, Restart to update.
+- Backup: "Save..." writes your whole save to a .json file (Documents by default). "Restore..." loads one
+  after asking you to confirm; it replaces your current progress and can't be used mid-hand.
+
+MILESTONES (Stats -> Milestones)
+15 one-time goals, each unlocking a cosmetic that can't be bought. Unlocks are for life.
+    Natural ............ get a blackjack ......................... Natural card back
+    Regular ............ play 100 rounds ......................... Mahogany felt
+    Double trouble ..... win 25 doubled hands .................... Teal felt
+    Covered ............ win an insurance bet .................... Silk ribbon
+    On fire ............ win 7 rounds in a row ................... Flame ribbon
+    Comeback ........... win right after losing 5 in a row ....... Charcoal outfit
+    Five-card Charlie .. win a hand holding 5+ cards ............. Clover outfit
+    Perfect pair ....... hit a Perfect Pair side bet ............. Twin card back
+    Card counter ....... bet into a true count of +5 or more ..... Neon ribbon
+    Four-way split ..... split into four hands ................... Split card back
+    Grinder ............ play 1,000 rounds ....................... Grinder card back
+    Straight flush ..... hit a 21+3 straight flush ............... Royal blue felt
+    Whale .............. win 1B or more in one round ............. Vegas night felt
+    Mogul .............. open 5 franchises ....................... Gilded outfit
+    Lifer .............. play 10,000 rounds ...................... Midnight suit outfit
+Existing saves get credit for what they have already done (rounds, blackjacks, doubles won, streak,
+insurance, big win, franchises); the new counters (Charlie, comeback, perfect pair, straight flush,
+four-way split, counter) start at 2.2.0.
 
 HOUSE RULES
 - Two decks. One card is burned after every shuffle.
@@ -114,7 +155,7 @@ SHOP (spend your chips)
 - Table: felt colours for the card area.
 - Buying an item equips it; click anything you own to switch back. Shop items survive a franchise.
 - Items marked with a gem are VIP exclusives: they can't be bought, they unlock at that VIP tier.
-  Dealer items can still be hovered to try on.
+  Items marked with a trophy are milestone rewards (see MILESTONES). Dealer items can still be hovered to try on.
 
 VIP (lifetime, never resets - not even by a franchise)
 - Your tier follows total chips wagered: main bet, doubles, splits, side bets and insurance.
@@ -155,6 +196,7 @@ the same.
   lifetime net, win rate, VIP perks.
 - History: running units over the last 200 rounds and the last 50 hands (hover a row for bets,
   count, side bets, insurance and cashback). Export CSV saves the last 250 hands as a spreadsheet.
+- Milestones: all 15 goals with progress bars and their rewards.
 - Casino: lifetime earnings, income, highest balance, tips, attractions, franchises, stars, rank,
   time with her, time at the table, days played, sessions.
 
@@ -164,8 +206,8 @@ SOUND
   tabs, opening and closing the table, her speech bubbles, tips, purchases, equipping cosmetics,
   locked items, milestones, franchise arm and confirm, star upgrades, top-ups, away earnings and
   VIP tier-ups. The auto-tipper and her idle chatter are silent on purpose (she chats every 30-55 s while
-  the table is open, every 2-4 min while it is closed).
-  All sounds are generated by the app itself (no audio files). Mute with the speaker button.
+  the table is open, every 2-4 min while it is closed; Settings > Chatter quiets or stops her).
+  All sounds are generated by the app itself (no audio files). Mute with the speaker button; volume in Settings.
 
 CARD COUNTING (Hi-Lo)
 - 2-6 count +1, 7-9 count 0, 10-A count -1.
@@ -192,15 +234,18 @@ WHERE YOUR DATA LIVES
 Chips, bets, stats, VIP progress and the window position are stored in %APPDATA%\blackjack-buddy
 (save.json). The save is written the moment a card is dealt, so closing or force-quitting the game can't
 undo a hand you have already seen - it is waiting for you next launch.
-Your existing save carries over; lifetime stats and VIP start counting from this version.
+The installer, the .bat version and older versions all share this save; uninstalling keeps it.
+Settings > Backup copies it anywhere you like.
 
 START WITH WINDOWS (optional)
-Win+R, type  shell:startup , Enter. Copy the "Blackjack Buddy" desktop shortcut into that folder.
+Installed version: Settings > Start with Windows. Folder version: Win+R, type  shell:startup , Enter, and copy
+the "Blackjack Buddy" desktop shortcut into that folder.
 
-STANDALONE .EXE (optional)
-Open a command prompt in this folder and run:  npm run package
-You get dist\BlackjackBuddy-win32-x64\BlackjackBuddy.exe (with her icon) - that folder runs on any Windows
-PC without Node. It shares the same save as the .bat version.
+BUILDING THE INSTALLER (developers)
+npm run dist builds dist\Blackjack-Buddy-Setup-x.y.z.exe (needs Windows). Releases are built by the GitHub
+Actions workflow "Blackjack Buddy release" (Actions tab -> Run workflow), which publishes the installer and
+the update feed (latest.yml) to GitHub Releases. Bump "version" in package.json first; updates only reach
+players when the version number goes up.
 
 TROUBLESHOOTING
 - Black box instead of a transparent widget: open main.js in Notepad and remove the two slashes

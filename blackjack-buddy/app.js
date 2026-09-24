@@ -152,7 +152,10 @@ const SHOP = {
       { id: 'gold', name: 'Gold', cost: 25000, sw: ['#f5c451', '#fff5c8'] },
       { id: 'midnight', name: 'Midnight', cost: 100000, sw: ['#343860', '#a0aaff'] },
       { id: 'platinum', name: 'Platinum', vip: 4, sw: ['#d4e3ee', '#ffffff'] },
-      { id: 'emerald', name: 'Emerald', vip: 9, sw: ['#1fd18a', '#9ff7cf'] } ] },
+      { id: 'emerald', name: 'Emerald', vip: 9, sw: ['#1fd18a', '#9ff7cf'] },
+      { id: 'flame', name: 'Flame', ms: 'streak', sw: ['#ff7828', '#ffde60'] },
+      { id: 'silk', name: 'Silk', ms: 'insured', sw: ['#ece6f8', '#ffd678'] },
+      { id: 'neon', name: 'Neon', ms: 'counter', sw: ['#28f0c8', '#ff5adc'] } ] },
     { slot: 'outfit', group: 'Outfit', items: [
       { id: 'navy', name: 'Navy', cost: 0, sw: ['#2e3046', '#f8f5ef'] },
       { id: 'burgundy', name: 'Burgundy', cost: 10000, sw: ['#6e2230', '#f8f5ef'] },
@@ -169,7 +172,11 @@ const SHOP = {
       { id: 'pearl', name: 'Pearl', vip: 5, sw: ['#f7eef4', '#d98fb4'] },
       { id: 'sapphire', name: 'Sapphire', vip: 7, sw: ['#2a5cc8', '#b3cfff'] },
       { id: 'obsidian', name: 'Obsidian', vip: 11, sw: ['#15121f', '#9b7cff'] },
-      { id: 'celestial', name: 'Celestial', vip: 12, sw: ['#fff6d0', '#ff8fc8'] } ] },
+      { id: 'celestial', name: 'Celestial', vip: 12, sw: ['#fff6d0', '#ff8fc8'] },
+      { id: 'charcoal', name: 'Charcoal', ms: 'comeback', sw: ['#404248', '#f5c451'] },
+      { id: 'clover', name: 'Clover', ms: 'charlie', sw: ['#287846', '#ffd666'] },
+      { id: 'midsuit', name: 'Midnight suit', ms: 'r10000', sw: ['#1a244e', '#d2283c'] },
+      { id: 'gilded', name: 'Gilded', ms: 'mogul', sw: ['#c89a32', '#18181e'] } ] },
     { slot: 'acc', group: 'Accessory', items: [
       { id: 'none', name: 'None', cost: 0, sw: ['#2a2c34', '#2a2c34'] },
       { id: 'flower', name: 'Flower clip', cost: 15000, sw: ['#ff96be', '#ffd666'] },
@@ -195,7 +202,11 @@ const SHOP = {
       { id: 'holo', name: 'Holographic', cost: 2500000, sw: ['#7ee8fa', '#eec0ff'] },
       { id: 'silver', name: 'Silver', vip: 2, sw: ['#c8d3e4', '#7d8aa0'] },
       { id: 'ruby', name: 'Ruby', vip: 8, sw: ['#c8173a', '#ffb0bf'] },
-      { id: 'obsidian', name: 'Obsidian', vip: 11, sw: ['#15121f', '#9b7cff'] } ] },
+      { id: 'obsidian', name: 'Obsidian', vip: 11, sw: ['#15121f', '#9b7cff'] },
+      { id: 'natural', name: 'Natural', ms: 'natural', sw: ['#c8283c', '#ffffff'] },
+      { id: 'split', name: 'Split', ms: 'fourway', sw: ['#3f4fb0', '#c8283c'] },
+      { id: 'twin', name: 'Twin', ms: 'perfect', sw: ['#7b3fb0', '#d070b0'] },
+      { id: 'grinder', name: 'Grinder', ms: 'r1000', sw: ['#222228', '#f5c451'] } ] },
   ],
   table: [
     { slot: 'felt', group: 'Table felt', items: [
@@ -206,7 +217,11 @@ const SHOP = {
       { id: 'gold', name: 'Gold rush', cost: 500000, sw: ['#e6b446', '#3a2c10'] },
       { id: 'walnut', name: 'Walnut', vip: 1, sw: ['#b07a45', '#3a2412'] },
       { id: 'jade', name: 'Jade', vip: 6, sw: ['#5fbf8f', '#123a28'] },
-      { id: 'starfield', name: 'Starfield', vip: 12, sw: ['#6a5cff', '#0c0a24'] } ] },
+      { id: 'starfield', name: 'Starfield', vip: 12, sw: ['#6a5cff', '#0c0a24'] },
+      { id: 'teal', name: 'Teal', ms: 'doubles', sw: ['#14aaaa', '#0c3434'] },
+      { id: 'royal', name: 'Royal blue', ms: 'sflush', sw: ['#2850d2', '#101c44'] },
+      { id: 'mahogany', name: 'Mahogany', ms: 'r100', sw: ['#963c2d', '#34120c'] },
+      { id: 'vegas', name: 'Vegas night', ms: 'bigwin', sw: ['#dc328c', '#2c0a1e'] } ] },
   ],
 };
 const DEFAULT_EQUIP = { ribbon: 'mint', outfit: 'navy', acc: 'none', back: 'classic', felt: 'green' };
@@ -215,6 +230,8 @@ const RIBBON_SRC = [[80, 176, 132], [48, 122, 92], [255, 214, 102]];
 const RIBBONS = { mint: null, cherry: [[226, 64, 76], [170, 40, 52], [255, 214, 102]], sakura: [[255, 150, 190], [220, 100, 150], [255, 255, 255]],
   gold: [[245, 196, 81], [196, 146, 40], [255, 245, 200]], midnight: [[52, 56, 96], [30, 32, 60], [160, 170, 255]],
   platinum: [[212, 227, 238], [140, 162, 180], [255, 255, 255]], emerald: [[31, 209, 138], [10, 122, 76], [159, 247, 207]],
+  flame: [[255, 120, 40], [200, 64, 24], [255, 222, 96]], silk: [[236, 230, 248], [176, 166, 200], [255, 214, 120]],
+  neon: [[40, 240, 200], [16, 150, 130], [255, 90, 220]],
   hidden: [[-1], [-1], [-1]] };                                  // -1 = make transparent
 // outfits recolour three palette groups on the base sprite: vest, shirt (also her cuffs), bow tie
 const VEST_SRC = [[46, 48, 70], [18, 19, 30], [78, 81, 112]];
@@ -236,6 +253,10 @@ const OUTFITS = {
   pearl: { vest: [[247, 238, 244], [176, 140, 164], [255, 255, 255]], shirt: [[255, 250, 252], [232, 214, 226], [170, 140, 158]], tie: [[217, 143, 180], [170, 90, 132]] },
   sapphire: { vest: [[42, 92, 200], [14, 34, 96], [110, 160, 255]], tie: [[230, 240, 255], [160, 184, 220]] },
   obsidian: { vest: [[21, 18, 31], [4, 3, 8], [155, 124, 255]], shirt: [[40, 36, 54], [28, 24, 40], [16, 14, 24]], tie: [[155, 124, 255], [96, 70, 200]] },
+  charcoal: { vest: [[64, 66, 72], [28, 29, 33], [100, 103, 112]], tie: [[245, 196, 81], [184, 132, 30]] },
+  clover: { vest: [[40, 120, 70], [16, 60, 32], [80, 170, 110]], tie: [[255, 214, 102], [206, 160, 50]] },
+  midsuit: { vest: [[26, 36, 78], [10, 14, 36], [64, 86, 150]], shirt: [[240, 244, 255], [206, 214, 236], [140, 150, 180]], tie: [[210, 40, 60], [150, 20, 40]] },
+  gilded: { vest: [[200, 154, 50], [112, 82, 20], [244, 210, 120]], shirt: [[255, 250, 240], [232, 222, 204], [170, 150, 122]], tie: [[24, 24, 30], [8, 8, 12]] },
   celestial: { vest: [[255, 246, 208], [214, 170, 90], [255, 214, 120]], shirt: [[255, 255, 255], [236, 226, 246], [180, 166, 200]], tie: [[255, 111, 181], [214, 70, 140]] },
 };
 const HIDES_RIBBON = new Set(['catears', 'headphones', 'beret', 'bow', 'santa', 'crown']);
@@ -267,7 +288,7 @@ function audio() {
   if (AC) { if (AC.state === 'suspended') AC.resume(); return AC; }
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
-    master = AC.createGain(); master.gain.value = 0.32;
+    master = AC.createGain(); master.gain.value = 0.32 * G.volume;
     const comp = AC.createDynamicsCompressor(); master.connect(comp); comp.connect(AC.destination);
     noiseBuf = AC.createBuffer(1, AC.sampleRate * 0.5, AC.sampleRate);
     const ch = noiseBuf.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
@@ -381,6 +402,7 @@ const G = {
   stars: 0, franchises: 0, runEarned: 0, owned: {}, equip: { ...DEFAULT_EQUIP }, shopCat: 'perks', autoFrac: 0,
   st: null, statCat: 'vip', muted: false, cashback: 0, starsSpent: 0, su: {},
   roundStake: 0, roundTC: 0, hist: [], lastTopup: 0,
+  volume: 1, chatter: 'normal', fast: false,                // Settings: sound volume, her idle chatter, deal speed
 };
 // lifetime stats: never reset, not even by a franchise
 const NEW_STATS = () => ({
@@ -393,7 +415,51 @@ const NEW_STATS = () => ({
   vipV: 3, vipFloor: 0,                                 // VIP from wagered (2.1+); vipFloor keeps a tier earned under the old comp ladder
   units: 0, tableMs: 0, sessions: 0,
   curve: [],                                           // units of the last 200 rounds
+  fourWay: 0, comebacks: 0, perfectPairs: 0, straightFlushes: 0, charlies: 0, maxTC: 0,   // milestone counters
+  ach: {},                                             // milestone id -> time unlocked
 });
+// ---------------------------------------------------------------- milestones (each unlocks one cosmetic)
+const TROPHY = '<svg class="troph" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M3 1h6v1h2v2a2.5 2.5 0 0 1-2.2 2.5A3 3 0 0 1 6.5 8v1.5H8V11H4V9.5h1.5V8a3 3 0 0 1-2.3-1.5A2.5 2.5 0 0 1 1 4V2h2zm0 2H2v1a1.5 1.5 0 0 0 1 1.4zm6 0v2.4A1.5 1.5 0 0 0 10 4V3z"/></svg>';
+const ACH = [
+  { id: 'natural', name: 'Natural', desc: 'Get a blackjack', v: () => G.st.blackjacks, goal: 1 },
+  { id: 'r100', name: 'Regular', desc: 'Play 100 rounds', v: () => G.st.rounds, goal: 100 },
+  { id: 'doubles', name: 'Double trouble', desc: 'Win 25 doubled hands', v: () => G.st.doubleWins, goal: 25 },
+  { id: 'insured', name: 'Covered', desc: 'Win an insurance bet', v: () => G.st.insWon, goal: 1 },
+  { id: 'streak', name: 'On fire', desc: 'Win 7 rounds in a row', v: () => G.st.bestStreak, goal: 7 },
+  { id: 'comeback', name: 'Comeback', desc: 'Win right after losing 5 in a row', v: () => G.st.comebacks, goal: 1 },
+  { id: 'charlie', name: 'Five-card Charlie', desc: 'Win a hand holding 5+ cards', v: () => G.st.charlies, goal: 1 },
+  { id: 'perfect', name: 'Perfect pair', desc: 'Hit a Perfect Pair (same rank and suit)', v: () => G.st.perfectPairs, goal: 1 },
+  { id: 'counter', name: 'Card counter', desc: 'Bet into a true count of +5 or more', v: () => G.st.maxTC, goal: 5 },
+  { id: 'fourway', name: 'Four-way split', desc: 'Split into four hands', v: () => G.st.fourWay, goal: 1 },
+  { id: 'r1000', name: 'Grinder', desc: 'Play 1,000 rounds', v: () => G.st.rounds, goal: 1000 },
+  { id: 'sflush', name: 'Straight flush', desc: 'Hit a 21+3 straight flush', v: () => G.st.straightFlushes, goal: 1 },
+  { id: 'bigwin', name: 'Whale', desc: 'Win 1B or more in one round', v: () => G.st.biggestWin, goal: 1e9 },
+  { id: 'mogul', name: 'Mogul', desc: 'Open 5 franchises', v: () => G.franchises, goal: 5 },
+  { id: 'r10000', name: 'Lifer', desc: 'Play 10,000 rounds', v: () => G.st.rounds, goal: 10000 },
+];
+const achReward = id => { for (const cat of ['dealer', 'cards', 'table']) for (const grp of SHOP[cat]) for (const it of grp.items) if (it.ms === id) return { slot: grp.slot, group: grp.group, ...it }; return null; };
+function checkAch(silent, delay = 0) {                   // stamp newly reached milestones now; announce them (after `delay`) unless silent
+  const got = ACH.filter(a => !G.st.ach[a.id] && a.v() >= a.goal);
+  for (const a of got) G.st.ach[a.id] = Date.now();
+  if (got.length && !silent) setTimeout(() => announceAch(got), delay);
+  return got.length;
+}
+function announceAch(got) {
+  const a = got[0], r = achReward(a.id);
+  toastAch(a, r, got.length - 1);
+  setMood('surprised', 1800); setTimeout(() => setMood('happy', 2500), 900);
+  say('Milestone: ' + a.name + '! ' + (r ? r.name + ' ' + r.group.toLowerCase() + ' unlocked \u2665' : ''), 4500);
+  sfx('milestone');
+  renderShop(); if (G.tab === 'stats') renderStats();
+}
+function toastAch(a, r, more) {
+  const old = document.querySelector('.achtoast'); if (old) old.remove();
+  const el = document.createElement('div'); el.className = 'achtoast';
+  el.innerHTML = TROPHY + '<div><b>' + a.name + '</b><small>' + (r ? 'Unlocked: ' + r.name + ' ' + r.group.toLowerCase() : a.desc) + (more > 0 ? ' \u00b7 +' + more + ' more' : '') + '</small></div>';
+  $('table').appendChild(el);
+  el.onclick = () => el.remove();
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 4200);
+}
 
 G.st = NEW_STATS();
 // this launch only: the Session stats page
@@ -443,6 +509,8 @@ function load() {
     if (d.equip && typeof d.equip === 'object') for (const k in DEFAULT_EQUIP) if (typeof d.equip[k] === 'string') G.equip[k] = d.equip[k];
     if (d.st && typeof d.st === 'object') {
       for (const k in G.st) if (typeof d.st[k] === typeof G.st[k] && d.st[k] !== null) G.st[k] = d.st[k];
+      if (Array.isArray(G.st.ach)) G.st.ach = {};
+      for (const k in G.st.ach) if (!Number.isFinite(G.st.ach[k])) delete G.st.ach[k];
       if (!Array.isArray(G.st.curve) || !G.st.curve.every(Number.isFinite)) G.st.curve = [];
       if (d.st.vipV === undefined) {                      // older save: keep the tier it earned under the comp ladder
         let i = 0; while (i + 1 < OLD_COMP_AT.length && G.st.comp >= OLD_COMP_AT[i + 1]) i++;
@@ -456,6 +524,9 @@ function load() {
     if (Array.isArray(d.hist)) G.hist = d.hist.filter(r => r && typeof r === 'object' && Array.isArray(r.h)).slice(-HIST_MAX);
     loadShoe(d.shoe); loadRound(d.round);
     if (typeof d.muted === 'boolean') G.muted = d.muted;
+    if (Number.isFinite(d.volume)) G.volume = Math.max(0, Math.min(1, d.volume));
+    if (['normal', 'quiet', 'off'].includes(d.chatter)) G.chatter = d.chatter;
+    if (typeof d.fast === 'boolean') G.fast = d.fast;
     if (Number.isFinite(d.lastTopup)) G.lastTopup = Math.min(d.lastTopup, Date.now());   // clock set back: no longer than one cooldown
     if (Number.isFinite(d.starsSpent)) G.starsSpent = Math.max(0, Math.min(G.stars, Math.floor(d.starsSpent)));
     if (d.su && typeof d.su === 'object') for (const u of STAR_UPS) G.su[u.id] = Math.max(0, Math.min(u.costs.length, Math.floor(d.su[u.id] || 0)));
@@ -463,8 +534,10 @@ function load() {
   if (G.state === 'BET') fitBets();
 }
 let mustCommit = false;                                  // a card or the hole card was revealed: save before it is painted
+let restoring = false;                                   // a backup is being loaded: nothing may overwrite it on the way out
 function save() {
   mustCommit = false;
+  if (restoring) return;
   let json;
   try { json = JSON.stringify({ chips: G.chips, bet: G.bet, pp: G.pp, tp: G.tp, countVisible: G.countVisible,
       betWant: G.betWant, ppWant: G.ppWant, tpWant: G.tpWant, hist: G.hist,
@@ -472,7 +545,7 @@ function save() {
       round: G.state === 'BET' ? null : { state: G.state, hands: G.hands, cur: G.cur, dealer: G.dealer, holeHidden: G.holeHidden, holeCounted: G.holeCounted,
         handBet: G.handBet, ins: G.ins, stake: G.roundStake, tc: G.roundTC, sides: G.sideResults, insResult: G.insResult, pp: G.pp, tp: G.tp },
       gens: G.gens, boosts: G.boosts, tipLevel: G.tipLevel, tips: G.tips, frac: G.frac, lastSeen: Date.now(), earned: G.earned,
-      stars: G.stars, franchises: G.franchises, runEarned: G.runEarned, owned: G.owned, equip: G.equip, st: G.st, muted: G.muted, starsSpent: G.starsSpent, su: G.su, lastTopup: G.lastTopup }); } catch (e) { return; }
+      stars: G.stars, franchises: G.franchises, runEarned: G.runEarned, owned: G.owned, equip: G.equip, st: G.st, muted: G.muted, starsSpent: G.starsSpent, su: G.su, lastTopup: G.lastTopup, volume: G.volume, chatter: G.chatter, fast: G.fast }); } catch (e) { return; }
   if (window.buddy && window.buddy.saveSync) { try { window.buddy.saveSync(json); } catch (e) { /* */ } }
   try { localStorage.setItem('blackjack-buddy', json); } catch (e) { /* */ }
 }
@@ -506,8 +579,8 @@ function resumeRound() {                                 // pick up where the sa
   if (G.state === 'DEALER') {
     const h0 = G.hands[0], natural = G.hands.length === 1 && !h0.split && h0.cards.length === 2 && handValue(h0.cards) === 21;
     revealHole(); render();
-    if (G.hands.some(h => !h.bust && !h.surrendered) && !natural && handValue(G.dealer) !== 21) return setTimeout(dealerStep, 750);
-    return setTimeout(settle, 700);
+    if (G.hands.some(h => !h.bust && !h.surrendered) && !natural && handValue(G.dealer) !== 21) return setTimeout(dealerStep, T(750));
+    return setTimeout(settle, T(700));
   }
   render();                                              // INSURANCE: the question is still on the table
 }
@@ -586,9 +659,11 @@ function adjustSide(which, delta) {
 // A round holds 1-4 player hands (splits). Each hand: { cards, bet, doubled, done, split, aces, res, net }
 const newHand = (cards, bet, split) => ({ cards, bet, doubled: false, done: false, split: !!split, aces: false, res: null, net: 0, surrendered: false });
 const MAX_HANDS = 4;
+const T = ms => G.fast ? Math.round(ms * 0.45) : ms;   // Settings > Deal speed: Fast plays the table about twice as quickly
 
 function startHand() {
   if (!canDeal()) return;
+  const toast = document.querySelector('.achtoast'); if (toast) toast.remove();   // the deal area is needed again
   if (G.shufflePending) { shuffle(); say(pick(LINES.shuffle)); sfx('shuffle'); }
   else if (G.bet >= Math.max(1000, G.chips * 0.25) && Math.random() < 0.6) say(pick(LINES.bigbet), 2500);
   else if (Math.random() < 0.35) say(pick(LINES.deal), 2500);
@@ -611,7 +686,7 @@ function dealSeq(seq, done) {
   (seq[0] === 'p' ? G.hands[0].cards : G.dealer).push(drawCard(hole));
   sfx('card');
   render();
-  setTimeout(() => dealSeq(seq.slice(1), done), 260);
+  setTimeout(() => dealSeq(seq.slice(1), done), T(260));
 }
 
 function afterDeal() {
@@ -633,14 +708,14 @@ function resolveSideBets() {
     const win = hit ? G.pp * (hit[1] + 1) : 0;
     G.chips += win;
     res.push(['Pairs', win - G.pp, hit ? hit[0] : null]);
-    G.st.ppBets++; if (hit) G.st.ppHits++;
+    G.st.ppBets++; if (hit) G.st.ppHits++; if (hit && hit[1] === 35) G.st.perfectPairs++;
   }
   if (G.tp) {
     const hit = twentyOnePlusThree(p[0], p[1], G.dealer[0]);
     const win = hit ? G.tp * (hit[1] + 1) : 0;
     G.chips += win;
     res.push(['21+3', win - G.tp, hit ? hit[0] : null]);
-    G.st.tpBets++; if (hit) G.st.tpHits++;
+    G.st.tpBets++; if (hit) G.st.tpHits++; if (hit && hit[1] === 60) G.st.straightFlushes++;
   }
   G.sideResults = res;
   for (const r of res) { G.st.sideWagered += r[0] === 'Pairs' ? G.pp : G.tp; G.st.sideNet += r[1]; }
@@ -667,7 +742,7 @@ function peek() {                                     // dealer checks the hole 
   if (d === 21 || p === 21) {
     G.hands[0].done = true;
     revealHole(); sfx('flip'); G.state = 'DEALER'; render();
-    setTimeout(() => settle(), 700);
+    setTimeout(() => settle(), T(700));
   } else {
     G.state = 'PLAYER'; render();
   }
@@ -688,7 +763,7 @@ function hit() {
   const h = hand();
   h.cards.push(drawCard()); sfx('card');
   const v = handValue(h.cards);
-  if (v > 21) { h.done = true; h.bust = true; setMood('sad', 900); sfx('bust'); render(); setTimeout(nextHand, 500); }
+  if (v > 21) { h.done = true; h.bust = true; setMood('sad', 900); sfx('bust'); render(); setTimeout(nextHand, T(500)); }
   else if (v === 21) { render(); stand(); }
   else render();
 }
@@ -707,7 +782,7 @@ function doubleDown() {
   h.cards.push(drawCard()); sfx('card');
   h.done = true; if (handValue(h.cards) > 21) { h.bust = true; setTimeout(() => sfx('bust'), 180); }
   render();
-  setTimeout(nextHand, 450);
+  setTimeout(nextHand, T(450));
 }
 
 function split() {
@@ -719,22 +794,22 @@ function split() {
   h.split = true;
   if (moved[0] === 'A') { h.aces = true; other.aces = true; }  // split aces: one card each, no resplit, no double
   G.hands.splice(G.cur + 1, 0, other);
-  G.st.splits++;
+  G.st.splits++; if (G.hands.length === 4) G.st.fourWay++;
   if (Math.random() < 0.5) say(pick(LINES.split), 2200);
   sfx('chips'); render();
   setTimeout(() => {
     h.cards.push(drawCard()); sfx('card');
     if (h.aces || handValue(h.cards) === 21) h.done = true;
     render();
-    if (h.done) setTimeout(nextHand, 450);
-  }, 320);
+    if (h.done) setTimeout(nextHand, T(450));
+  }, T(320));
 }
 
 function surrender() {
   if (!canSurrender()) return;
   hand().surrendered = true; hand().done = true; sfx('fold');
   G.state = 'DEALER'; revealHole(); setTimeout(() => sfx('flip'), 200); render();
-  setTimeout(() => settle(), 600);
+  setTimeout(() => settle(), T(600));
 }
 
 // move to the next unfinished hand; split hands get their second card when they come up
@@ -750,8 +825,8 @@ function nextHand() {
       h.cards.push(drawCard()); sfx('card');
       if (h.aces || handValue(h.cards) === 21) h.done = true;
       render();
-      if (h.done) setTimeout(nextHand, 450);
-    }, 320);
+      if (h.done) setTimeout(nextHand, T(450));
+    }, T(320));
   } else render();
 }
 
@@ -759,14 +834,14 @@ function finishPlayer() {
   G.state = 'DEALER'; revealHole(); sfx('flip');
   const live = G.hands.some(h => !h.bust && !h.surrendered);
   render();
-  if (!live) return setTimeout(() => settle(), 700);
-  setMood('think'); setTimeout(dealerStep, 750);
+  if (!live) return setTimeout(() => settle(), T(700));
+  setMood('think'); setTimeout(dealerStep, T(750));
 }
 
 function dealerStep() {
   if (handValue(G.dealer) < 17) {
     G.dealer.push(drawCard()); sfx('card'); render();
-    setTimeout(dealerStep, 650);
+    setTimeout(dealerStep, T(650));
   } else settle();
 }
 
@@ -831,6 +906,7 @@ function settle() {
 function recordBetCount() {                           // how your bet tracked the true count (counting practice)
   const tc = trueCount();
   G.roundTC = tc;
+  G.st.maxTC = Math.max(G.st.maxTC, Math.floor(tc));
   if (tc >= 2) { G.st.tcHiBet += G.bet; G.st.tcHiN++; }
   else if (tc <= 0) { G.st.tcLoBet += G.bet; G.st.tcLoN++; }
 }
@@ -850,13 +926,16 @@ function recordRound(d, dbj, roundNet, cash) {
     if (h.res === 'surrender') st.surrenders++;
     if (h.doubled) { st.doubles++; if (h.net > 0) st.doubleWins++; }
     if (h.split && h.net > 0) st.splitWins++;
+    if (h.net > 0 && h.cards.length >= 5 && h.res !== 'blackjack') st.charlies++;
   }
+  if (roundNet > 0 && st.streak <= -5) st.comebacks++;
   if (roundNet > 0) { st.streak = Math.max(0, st.streak) + 1; st.bestStreak = Math.max(st.bestStreak, st.streak); }
   else if (roundNet < 0) { st.streak = Math.min(0, st.streak) - 1; st.worstStreak = Math.max(st.worstStreak, -st.streak); }
   recordAnalysis(roundNet, cash);
   const after = vipIdx();
   st.vipFloor = after;                                  // tiers are for life, even if the ladder is retuned
   if (after > before) vipTierUp(before, after);
+  checkAch(false, after > before ? 6800 : 1600);          // announce after her round line (or the tier-up card)
 }
 // the main game in units (net / starting bet), so results compare across bet sizes
 function recordAnalysis(roundNet, cash) {
@@ -1123,6 +1202,74 @@ function sparkline(vals, fmtV, name) {                   // one series: cumulati
     '<polyline class="' + (last >= 0 ? 'up' : 'down') + '" points="' + pts + '"/><g class="hit">' + hits + '</g></svg>' +
     '<div class="sp-lab"><span>high ' + fmtV(hi) + '</span><span>low ' + fmtV(lo) + '</span><b class="' + signCls(last) + '">now ' + fmtV(last) + '</b></div></div>';
 }
+// ---------------------------------------------------------------- settings
+const desktop = () => !!(window.buddy && window.buddy.settings);
+let updateInfo = null, backupMsg = '', pendingRestore = null;
+function renderSettings() {
+  const info = desktop() ? window.buddy.settings() : { onTop: null, version: '', packaged: false, update: { state: 'dev' }, startup: null };
+  if (!updateInfo) updateInfo = info.update || { state: 'dev' };
+  const u = updateInfo;
+  const sw = (id, on, off) => '<button class="switch' + (on ? ' on' : '') + '" data-set="' + id + '"' + (off ? ' disabled' : '') + ' aria-pressed="' + !!on + '"><i></i></button>';
+  const seg = (id, opts, cur) => '<span class="seg">' + opts.map(([v, l]) => '<button data-set="' + id + '" data-v="' + v + '" class="' + (cur === v ? 'on' : '') + '">' + l + '</button>').join('') + '</span>';
+  const row = (label, sub, ctl) => '<div class="setrow"><div class="sl"><b>' + label + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>' + ctl + '</div>';
+  const upText = { dev: 'Self-updating comes with the installed version', idle: 'Checks GitHub automatically', checking: 'Checking\u2026',
+    none: 'You have the latest version', downloading: 'Downloading ' + (u.version || '') + '\u2026 ' + (u.percent || 0) + '%',
+    ready: 'Version ' + u.version + ' is ready to install', error: 'Couldn\u2019t check for updates' + (u.message ? ' (' + u.message + ')' : '') }[u.state] || '';
+  const upBtn = u.state === 'ready' ? '<button class="sbtn primary" data-set="install">Restart to update</button>'
+    : '<button class="sbtn" data-set="check"' + (!info.packaged || u.state === 'checking' || u.state === 'downloading' ? ' disabled' : '') + '>Check now</button>';
+  const vol = Math.round(G.volume * 100);
+  $('setBody').innerHTML =
+    sect('Her') +
+    row('Always on top', 'Untick for movies and fullscreen games', sw('ontop', info.onTop, !desktop())) +
+    row('Hide her', 'The tray icon brings her back', '<button class="sbtn" data-set="hide"' + (desktop() ? '' : ' disabled') + '>Hide to tray</button>') +
+    row('Chatter', 'How often she chats when you\u2019re idle', seg('chatter', [['normal', 'Normal'], ['quiet', 'Quiet'], ['off', 'Off']], G.chatter)) +
+    (info.startup !== null ? row('Start with Windows', '', sw('startup', info.startup)) : '') +
+    sect('Table') +
+    row('Deal speed', 'Fast plays about twice as quickly', seg('fast', [['0', 'Normal'], ['1', 'Fast']], G.fast ? '1' : '0')) +
+    row('Show the count', 'Hi-Lo running and true count', sw('count', G.countVisible)) +
+    sect('Sound') +
+    row('Sound', '', sw('sound', !G.muted)) +
+    row('Volume', '', '<span class="vol"><input type="range" min="0" max="100" step="5" value="' + vol + '" data-set="volume"' + (G.muted ? ' disabled' : '') + '><em>' + vol + '%</em></span>') +
+    sect('Updates') +
+    row('Version ' + (info.version || '\u2014'), upText, upBtn) +
+    sect('Backup') +
+    (pendingRestore
+      ? '<div class="setrow warn"><div class="sl"><b>Replace your progress?</b><small>Backup from ' + new Date(pendingRestore.lastSeen || 0).toLocaleString() + ' \u00b7 ' + fmtBig(pendingRestore.chips) + ' chips. Your current progress will be replaced.</small></div>' +
+        '<span class="btns"><button class="sbtn" data-set="restore-no">Cancel</button><button class="sbtn danger" data-set="restore-yes">Restore</button></span></div>'
+      : row('Save backup', backupMsg || 'A copy of your whole save, wherever you like', '<span class="btns"><button class="sbtn" data-set="export"' + (desktop() ? '' : ' disabled') + '>Save\u2026</button><button class="sbtn" data-set="import"' + (desktop() ? '' : ' disabled') + '>Restore\u2026</button></span>'));
+}
+async function settingsAction(el) {
+  const k = el.dataset.set, v = el.dataset.v;
+  if (k === 'ontop') window.buddy.setOnTop(!el.classList.contains('on'));
+  else if (k === 'startup') window.buddy.setStartup(!el.classList.contains('on'));
+  else if (k === 'hide') window.buddy.hideHer();
+  else if (k === 'chatter') G.chatter = v;
+  else if (k === 'fast') G.fast = v === '1';
+  else if (k === 'count') G.countVisible = !G.countVisible;
+  else if (k === 'sound') { G.muted = !G.muted; if (!G.muted) sfx('chips'); }
+  else if (k === 'check') { updateInfo = { state: 'checking' }; window.buddy.checkUpdate(); }
+  else if (k === 'install') { save(); window.buddy.installUpdate(); }
+  else if (k === 'export') { save(); try { const path = await window.buddy.exportBackup(localStorage.getItem('blackjack-buddy') || '{}'); backupMsg = path ? 'Saved to ' + path : backupMsg; } catch (e) { backupMsg = 'Couldn\u2019t save there. Try another folder'; sfx('deny'); } }
+  else if (k === 'import') {
+    if (G.state !== 'BET') { backupMsg = 'Finish the hand in play first'; sfx('deny'); }
+    else {
+      let txt = null, d = null; try { txt = await window.buddy.importBackup(); } catch (e) { txt = '-'; }   // unreadable file: reported below
+      if (txt) { try { d = JSON.parse(txt); } catch (e) { d = null; } }
+      if (txt && !(d && Number.isFinite(d.chips) && d.st && typeof d.st === 'object')) { backupMsg = 'That file isn\u2019t a Blackjack Buddy backup'; sfx('deny'); }
+      else if (d) pendingRestore = d;
+    }
+  }
+  else if (k === 'restore-no') pendingRestore = null;
+  else if (k === 'restore-yes' && pendingRestore && G.state !== 'BET') { pendingRestore = null; backupMsg = 'Finish the hand in play first'; sfx('deny'); }
+  else if (k === 'restore-yes' && pendingRestore) {
+    const d = pendingRestore; d.lastSeen = Date.now();              // restoring is not time away: no away earnings for it
+    const json = JSON.stringify(d); restoring = true;
+    try { window.buddy.saveSync(json); } catch (e) { /* */ } try { localStorage.setItem('blackjack-buddy', json); } catch (e) { /* */ }
+    location.reload(); return;
+  }
+  if (k !== 'hide') sfx('click');
+  save(); render(); renderSettings();
+}
 let statsKey = '';
 function renderStats(periodic) {
   document.querySelectorAll('#statCats button').forEach(b => b.classList.toggle('active', b.dataset.cat === G.statCat));
@@ -1165,6 +1312,15 @@ function renderStats(periodic) {
         return '<div class="hrow" title="' + tip + '"><span class="hn">#' + fmt(r.n) + '</span><span class="hh">' + hands + '</span><span class="hd">vs ' + r.d.map(cardTxt).join(' ') +
           '</span><span class="hr">' + res + '</span><b class="' + signCls(r.net) + '">' + fmtBig(r.net, true) + '</b></div>';
       }).join('') + '</div>' : '<div class="sparkline empty">No rounds yet</div>');
+  } else if (G.statCat === 'ach') {
+    const n = ACH.filter(a => G.st.ach[a.id]).length;
+    box.innerHTML = sect(n + ' / ' + ACH.length + ' milestones') + '<div class="achlist">' + ACH.map(a => {
+      const got = G.st.ach[a.id], r = achReward(a.id), v = Math.min(a.v(), a.goal), p = got ? 1 : v / a.goal;
+      return '<div class="ach' + (got ? ' got' : '') + '" title="' + a.desc + (got ? ' \u00b7 unlocked ' + new Date(got).toLocaleDateString() : '') + '">' + TROPHY +
+        '<div class="am"><b>' + a.name + '</b><small>' + a.desc + '</small>' + (got ? '' : '<div class="abar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div>') + '</div>' +
+        '<div class="ar">' + (r ? '<span class="sw sw-' + r.slot + '-' + r.id + '" style="--a:' + r.sw[0] + ';--b:' + r.sw[1] + '"></span><small>' + r.name + '</small>' : '') +
+        '<small class="ap">' + (got ? 'Unlocked' : a.goal > 1 ? fmtBig(Math.floor(v)) + ' / ' + fmtBig(a.goal) : 'Locked') + '</small></div></div>';
+    }).join('') + '</div>';
   } else {
     box.innerHTML = statTiles([
       ['Lifetime earned', fmtBig(G.earned)], ['Income', fmtBig(Math.round(incomePerMin())) + '/min'], ['Highest balance', fmtBig(st.highChips)],
@@ -1207,6 +1363,7 @@ function franchise(confirmed) {
   save(); setMood('happy', 4000); hop(); celebrateFranchise(gain, starsBefore); sfx('tierup');
   say('New location! +' + gain + ' \u2605 \u2014 income \u00d7' + fmtMult(starMult()), 6000);
   renderCasino(); render();
+  checkAch(false, 3000);
   return gain;
 }
 
@@ -1216,7 +1373,7 @@ function shopItem(slot, id) {
   for (const cat of ['dealer', 'cards', 'table']) for (const grp of SHOP[cat]) if (grp.slot === slot) return grp.items.find(i => i.id === id);
   return null;
 }
-const ownsItem = (slot, id) => { const it = shopItem(slot, id); return !!it && (it.vip !== undefined ? vipIdx() >= it.vip : it.cost === 0 || !!G.owned[slot + ':' + id]); };
+const ownsItem = (slot, id) => { const it = shopItem(slot, id); return !!it && (it.vip !== undefined ? vipIdx() >= it.vip : it.ms ? !!G.st.ach[it.ms] : it.cost === 0 || !!G.owned[slot + ':' + id]); };
 const vipRewards = i => { const out = []; for (const cat of ['dealer', 'cards', 'table']) for (const grp of SHOP[cat]) for (const it of grp.items) if (it.vip === i) out.push({ slot: grp.slot, group: grp.group, ...it }); return out; };
 function buyPerk(id) {
   const p = perkById(id);
@@ -1231,7 +1388,7 @@ function buyOrEquip(slot, id) {
   let bought = false;
   if (!ownsItem(slot, id)) {
     bought = true;
-    if (it.vip !== undefined || G.chips < it.cost) { sfx('deny'); return false; }
+    if (it.vip !== undefined || it.ms || G.chips < it.cost) { sfx('deny'); return false; }
     G.chips -= it.cost; G.owned[slot + ':' + id] = true; sfx('buy');
     setMood('happy', 2500); say(slot === 'back' || slot === 'felt' ? 'Ooh, fancy~' : 'Do I look cute? \u2665', 3000);
   }
@@ -1304,14 +1461,15 @@ function renderShop() {
     for (const it of grp.items) {
       const owned = ownsItem(grp.slot, it.id), on = G.equip[grp.slot] === it.id;
       const t = document.createElement('button');
-      const vip = it.vip !== undefined;
-      t.className = 'tile' + (on ? ' on' : '') + (owned ? ' owned' : vip ? ' vip' : G.chips >= it.cost ? ' can' : ' poor') + (vip ? ' vipitem' : '');
-      if (vip) t.style.setProperty('--vip', VIP[it.vip].c[1]);
+      const vip = it.vip !== undefined, ms = it.ms ? ACH.find(a => a.id === it.ms) : null, locked = vip || !!ms;
+      t.className = 'tile' + (on ? ' on' : '') + (owned ? ' owned' : locked ? ' vip' : G.chips >= it.cost ? ' can' : ' poor') + (locked ? ' vipitem' : '');
+      if (locked) t.style.setProperty('--vip', vip ? VIP[it.vip].c[1] : '#ffd76a');
       t.innerHTML = '<span class="sw sw-' + grp.slot + '-' + it.id + '" style="--a:' + it.sw[0] + ';--b:' + it.sw[1] + '"></span>' +
         '<span class="tname">' + it.name + '</span><span class="tstate">' + (on ? 'Equipped' : owned ? 'Equip' :
-          vip ? gemSVG(it.vip, 'tgem') + VIP[it.vip].name : fmtBig(it.cost)) + '</span>';
+          vip ? gemSVG(it.vip, 'tgem') + VIP[it.vip].name : ms ? TROPHY + 'Milestone' : fmtBig(it.cost)) + '</span>';
       if (vip && !owned) t.title = 'VIP exclusive: unlocks at ' + VIP[it.vip].name + ' (' + fmtBig(VIP[it.vip].at) + ' wagered)';
-      t.disabled = !owned && (vip ? G.shopCat !== 'dealer' : G.chips < it.cost);
+      if (ms && !owned) t.title = 'Milestone reward: ' + ms.name + ' \u2014 ' + ms.desc;
+      t.disabled = !owned && (locked ? G.shopCat !== 'dealer' : G.chips < it.cost);
       t.onclick = () => buyOrEquip(grp.slot, it.id);
       if (G.shopCat === 'dealer') {
         t.onmouseenter = () => { preview = { slot: grp.slot, id: it.id }; drawGirl(); };
@@ -1323,6 +1481,7 @@ function renderShop() {
 }
 
 function setTab(tab) {
+  if (tab !== 'settings') pendingRestore = null;
   G.tab = tab;
   document.body.dataset.tab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -1330,6 +1489,8 @@ function setTab(tab) {
   renderCasino();
   if (tab === 'shop') renderShop();
   if (tab === 'stats') renderStats();
+  if (tab === 'settings') { backupMsg = ''; renderSettings(); }
+  $('btn-settings').classList.toggle('active', tab === 'settings');
   renderVipBadges();
 }
 function renderCasino() {
@@ -1524,11 +1685,11 @@ function blinkLoop() {
   setTimeout(blinkLoop, 2500 + Math.random() * 2700);
 }
 function chatterLoop() {
-  if (G.state === 'BET' && !$('bubble').classList.contains('show') && document.body.dataset.mood === 'idle') {
+  if (G.chatter !== 'off' && G.state === 'BET' && !$('bubble').classList.contains('show') && document.body.dataset.mood === 'idle') {
     say(pick(LINES.idle), 4500, true);
   }
-  const open = document.body.classList.contains('open');
-  setTimeout(chatterLoop, open ? 30000 + Math.random() * 25000 : 120000 + Math.random() * 120000);
+  const often = G.chatter === 'normal' && document.body.classList.contains('open');   // Quiet: always the slow pace
+  setTimeout(chatterLoop, often ? 30000 + Math.random() * 25000 : 120000 + Math.random() * 120000);
 }
 
 // ---------------------------------------------------------------- rendering
@@ -1723,6 +1884,19 @@ $('mute').onclick = () => { G.muted = !G.muted; save(); render(); if (!G.muted) 
 document.querySelectorAll('#statCats button').forEach(b => { b.onclick = () => { G.statCat = b.dataset.cat; renderStats(); sfx('click'); }; });
 document.addEventListener('pointerdown', () => audio(), { once: true });
 $('btn-hide').onclick = toggle;
+$('btn-settings').onclick = () => { sfx('tab'); setTab(G.tab === 'settings' ? 'table' : 'settings'); };
+$('setBody').addEventListener('click', e => { const b = e.target.closest('button[data-set]'); if (b && !b.disabled) settingsAction(b); });
+$('setBody').addEventListener('input', e => {
+  if (e.target.dataset.set !== 'volume') return;
+  G.volume = +e.target.value / 100; if (master) master.gain.value = 0.32 * G.volume;
+  e.target.nextElementSibling.textContent = e.target.value + '%';
+});
+$('setBody').addEventListener('change', e => { if (e.target.dataset.set === 'volume') { save(); sfx('chips'); } });
+if (window.buddy && window.buddy.onUpdate) window.buddy.onUpdate(u => {
+  updateInfo = u;
+  if (G.tab === 'settings') renderSettings();
+  if (u.state === 'ready') say('Update ' + u.version + ' is ready~ restart it from Settings \u2665', 5000);
+});
 $('count').onclick = () => { G.countVisible = !G.countVisible; sfx('click'); save(); render(); };
 document.querySelectorAll('.tab').forEach(t => { t.onclick = () => { if (G.tab !== t.dataset.tab) sfx('tab'); setTab(t.dataset.tab); }; });
 $('tipjar').onclick = e => tipClick(e.clientX, e.clientY);
@@ -1738,7 +1912,7 @@ window.addEventListener('pointerdown', () => { held = true; }, true);
 ['pointerup', 'pointercancel', 'blur'].forEach(t => window.addEventListener(t, () => { held = false; }, true));
 document.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
-  if (e.target.closest('button, .rules')) return;
+  if (e.target.closest('button, input, .rules')) return;
   const onGirl = e.target.id === 'girl' && girlOpaque(e.clientX, e.clientY);
   if (!onGirl && !e.target.closest('.panel, .bubble')) return;
   drag = { sx: e.screenX, sy: e.screenY, moved: false, onGirl };
@@ -1786,7 +1960,9 @@ if (window.buddy) window.buddy.onMenu(cmd => {
   else if (cmd === 'rules') { $('rules').classList.toggle('show'); sfx('click'); }
   else if (cmd === 'reset') { if (canTopup()) topup(); else say(G.chips < MIN_BET && G.state === 'BET' ? (topupWait() && incomePerMin() === 0 && !G.owned.autotip ? 'Next top-up in ' + mmss(topupWait()) + ' \u2014 tip jar meanwhile~' : 'Your casino pays you, hun~ try the tip jar') : 'Top-ups are for when you\'re broke~', 3000); }
   else if (cmd === 'mute') { G.muted = !G.muted; save(); render(); }
-  else if (cmd === 'ontop-off') say('Movie time? I\'ll stay behind your windows~ \u2665', 4000);
+  else if (cmd === 'settings') { if (!document.body.classList.contains('open')) toggle(); setTab('settings'); }
+  if (['ontop-off', 'ontop-on', 'mute'].includes(cmd) && G.tab === 'settings') renderSettings();
+  if (cmd === 'ontop-off') say('Movie time? I\'ll stay behind your windows~ \u2665', 4000);
   else if (cmd === 'ontop-on') say('Back on top of everything~', 3000);
   else if (cmd === 'stats') { if (!document.body.classList.contains('open')) toggle(); setTab('stats'); }
 });
@@ -1794,6 +1970,7 @@ if (window.buddy) window.buddy.onMenu(cmd => {
 // ---------------------------------------------------------------- go
 shuffle();
 load();
+checkAch(true);                                          // existing players: credit what they already did, quietly
 const away = offlineEarnings();
 applyCosmetics();
 setTab('table');
@@ -1847,7 +2024,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(G.state === 'BET' ? pick(LINES.hello) : 'Where were we? Your hand~ \u2665'), 1200);
 
 // exposed for automated tests only
-window.__bb = { topupWait, gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { ACH, checkAch, achReward, renderSettings, topupWait, gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,
