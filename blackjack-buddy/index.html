@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Blackjack Buddy</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-mood="idle">
+
+<!-- ================= the dealer (pixel sprite, drawn on a canvas) ================= -->
+<canvas class="girl" id="girl" width="48" height="64"></canvas>
+<!-- her hands, resting on the panel edge (only when the table is open) -->
+<canvas class="hands" id="hands" width="32" height="10"></canvas>
+
+<!-- ================= the panel ================= -->
+<div class="panel" id="table">
+  <div class="xpbar" id="xpbar"><i></i></div>
+  <header class="header">
+    <div class="bank" title="Chips">
+      <svg class="chip-ic" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="currentColor"/><circle cx="10" cy="10" r="5.6" fill="none" stroke="#15161b" stroke-width="1.6"/><path d="M10 1v3M10 16v3M1 10h3M16 10h3M3.6 3.6l2.1 2.1M14.3 14.3l2.1 2.1M3.6 16.4l2.1-2.1M14.3 5.7l2.1-2.1" stroke="#15161b" stroke-width="1.6"/></svg>
+      <span class="bankcol"><b id="chips">500</b><span class="rate" id="rate"></span></span>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="table">Table</button>
+      <button class="tab" data-tab="casino">Casino</button>
+      <button class="tab" data-tab="shop">Shop</button>
+    </nav>
+    <button class="vipchip" id="vipchip"><span class="gemslot"></span><span class="vname">Wood</span></button>
+    <span class="stars" id="stars" title="Franchise stars: each one adds +25% to all income and tips"></span>
+    <div class="spacer"></div>
+    <button class="count" id="count" title="Hi-Lo count — click to hide it and count yourself"></button>
+    <button class="icon-btn" id="mute" title="Sound on / off"><svg viewBox="0 0 16 16"><path class="spk" d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z"/><path class="wave" d="M10.4 5.6a3.4 3.4 0 0 1 0 4.8M12.3 3.8a6 6 0 0 1 0 8.4"/><path class="x" d="M10.5 6l4 4M14.5 6l-4 4"/></svg></button>
+    <button class="icon-btn" id="btn-hide" title="Hide table"><svg viewBox="0 0 16 16"><path d="M4 8h8"/></svg></button>
+    <button class="icon-btn danger" id="btn-quit" title="Quit"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
+  </header>
+
+  <section class="controls">
+    <div class="stepper"><span class="lbl">Bet<i class="delta" id="d-bet"></i></span><div class="pill"><button data-step="betdown">−</button><b id="v-bet">50</b><button data-step="betup">+</button></div></div>
+    <div class="stepper"><span class="lbl">Pairs<i class="delta" id="d-pp"></i></span><div class="pill"><button data-step="ppdown">−</button><b id="v-pp">0</b><button data-step="ppup">+</button></div></div>
+    <div class="stepper"><span class="lbl">21+3<i class="delta" id="d-tp"></i></span><div class="pill"><button data-step="tpdown">−</button><b id="v-tp">0</b><button data-step="tpup">+</button></div></div>
+    <div class="sidehit" id="sideres"></div>
+  </section>
+
+  <section class="cards stage">
+    <div class="row">
+      <div class="who"><span>Dealer</span><b id="dval"></b></div>
+      <div class="hand-cards" id="dhand"></div>
+      <div class="meta col"><span class="shoe" id="shoe">103 in shoe</span><span class="insrow" id="insrow"></span></div>
+    </div>
+    <div class="row">
+      <div class="who"><span id="pwho">You</span><b id="pval"></b></div>
+      <div class="hand-cards" id="phand"></div>
+      <div class="meta col"><span class="result" id="result"></span><span class="cashrow" id="cashrow"></span></div>
+      <div class="hint" id="hint">Place your bet</div>
+    </div>
+  </section>
+
+  <section class="casino" id="casino">
+    <div class="tipbox">
+      <button class="tipjar" id="tipjar" title="Click for a tip">
+        <span class="tip-ic"><svg viewBox="0 0 24 24"><path d="M7 4h10v2l-1.5 1.5V9c2.4 1.4 3.8 3.6 3.8 6.3V17a4 4 0 0 1-4 4H8.7a4 4 0 0 1-4-4v-1.7C4.7 12.6 6.1 10.4 8.5 9V7.5L7 6z"/><circle cx="12" cy="15.5" r="2.6" fill="#15161b"/></svg></span>
+        <span class="tip-txt"><small>Tip jar</small><b id="tipval">+1</b></span>
+        <span class="tip-count" id="tipstat">0 tips</span>
+      </button>
+      <button class="row-btn" id="tipup"><span>Bigger tips</span><b id="tipcost">100</b></button>
+      <div class="boosts" id="boosts"></div>
+      <button class="franchise" id="franchise"></button>
+      <div class="lifetime" id="lifetime"></div>
+      <span id="incomestat" hidden></span>
+    </div>
+    <div class="gens" id="gens"></div>
+  </section>
+
+  <section class="shop" id="shop">
+    <nav class="shop-cats" id="shopCats">
+      <button data-cat="perks" class="active">Perks</button>
+      <button data-cat="dealer">Dealer</button>
+      <button data-cat="cards">Cards</button>
+      <button data-cat="table">Table</button>
+      <button data-cat="stars">Stars</button>
+    </nav>
+    <div class="shop-items" id="shopItems"></div>
+  </section>
+
+  <section class="stats" id="stats">
+    <nav class="shop-cats" id="statCats">
+      <button data-cat="vip" class="active">VIP</button>
+      <button data-cat="bj">Blackjack</button>
+      <button data-cat="casino">Casino</button>
+    </nav>
+    <div class="stat-body" id="statBody"></div>
+  </section>
+
+  <footer class="actions">
+    <div class="bar bar-bet"><button id="btn-deal" class="primary">Deal</button></div>
+    <div class="bar bar-play">
+      <button id="btn-hit" class="primary">Hit</button>
+      <button id="btn-stand">Stand</button>
+      <button id="btn-double">Double</button>
+      <button id="btn-split">Split</button>
+      <button id="btn-surrender">Surrender</button>
+    </div>
+    <div class="bar bar-ins">
+      <span class="ask">Dealer shows an ace. Insurance?</span>
+      <button id="ins-yes" class="primary">Take · <span id="ins-cost">25</span></button>
+      <button id="ins-no">No thanks</button>
+    </div>
+  </footer>
+</div>
+
+<div class="bubble" id="bubble"></div>
+<button class="vippill" id="vippill"><span class="gemslot"></span><span class="vname">Wood</span><span class="pbar"><i></i></span></button>
+
+<!-- ================= rules ================= -->
+<div class="rules" id="rules">
+  <button class="icon-btn rules-close" id="rules-close" title="Close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
+  <h3>House rules</h3>
+  <p>Two decks. One card is burned after every shuffle and a cut card is placed at a random depth (55–75% of the shoe). When it comes out, the current hand finishes and the shoe is shuffled before the next deal.</p>
+  <p>Dealer stands on all 17s. Blackjack pays 3:2. Dealer peeks for blackjack. Double on any first two cards. Late surrender on the first two cards (half the bet back). Insurance on a dealer ace: half the bet, pays 2:1.</p>
+  <p><b>Splitting:</b> split any pair of the same rank for another bet of the same size, up to 4 hands. Double after split is allowed. Split aces get one card each and can't be re-split or doubled. A 21 on a split hand pays 1:1, not 3:2.</p>
+  <p>No bet limits beyond your chips. − / + step by 10 (side bets by 5). Hold a button and it speeds up: ×10 after a second, ×100 after three. Shift-click steps ×10.</p>
+  <h3>Casino <small>(passive income)</small></h3>
+  <p>Spend chips on floor attractions; each pays out every second while she is running, and for up to 4 hours while she is closed (longer with shop perks). Prices rise 15% per copy, and every attraction doubles its own output at 10, 25, 50, 100, 150, 200 and 300 copies. Boosts multiply the whole floor. The tip jar pays per click; "Bigger tips" doubles it.</p>
+  <h3>Franchise <small>(long-term progression)</small></h3>
+  <p>Once this run's floor has earned enough, Franchise sells the casino and opens a new location. You start over at 500 chips with no attractions, boosts or tip upgrades, but keep your shop purchases and gain stars on a logarithmic scale: 1M earned this run = 1 star, 1B = 9, 1T = 22, 1Qa = 39, 1Qi = 60. Every star you keep banked adds +25% to all income and tips.</p>
+  <h3>Star shop <small>(Shop → Stars)</small></h3>
+  <p>Spend stars on permanent upgrades that survive every franchise: bigger starting chips, keeping boosts, cheaper attractions, stronger milestones, stronger stars, more stars per franchise, bigger tips, longer away earnings. Spent stars stop adding income, so it's a trade: income now for a faster engine every run after.</p>
+  <h3>VIP <small>(lifetime, never resets)</small></h3>
+  <p>Every round you play earns comp points: 10 × log10(1 + total chips wagered that round ÷ 10). A 10-chip hand earns 3, a 1,000-chip hand 20, a 1M hand 50. Bigger bets earn more, but hands played matter most. Thirteen tiers from Wood to Celestial. Each tier adds +5% to casino income and tips, raises your cashback on losing rounds (up to 1.25%) and your broke top-up, pays a chip bonus when you reach it, and most unlock exclusive cosmetics. Your VIP pin is on her vest.</p>
+  <h3>Shop</h3>
+  <p>Perks change how the game plays (auto-tipping, longer away earnings). Everything else is cosmetic: her ribbon, outfit and accessories, card backs and table felt. Shop purchases survive a franchise.</p>
+  <h3>Count <small>(Hi-Lo)</small></h3>
+  <p>2–6 count +1, 7–9 count 0, 10–A count −1. The running count includes every card you have seen this shoe: not the burn card, and the hole card only once it is turned. True count = running count ÷ decks left in the shoe. Both reset at the shuffle. Click the count pill to hide it and check yourself.</p>
+  <h3>Perfect Pairs <small>(your first two cards)</small></h3>
+  <p>Mixed pair 6:1 · Coloured pair 12:1 · Perfect pair 25:1</p>
+  <h3>21+3 <small>(your two cards + dealer up card)</small></h3>
+  <p>Flush 5:1 · Straight 10:1 · Three of a kind 30:1 · Straight flush 40:1</p>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
