@@ -135,11 +135,14 @@ the same; hover any tile or bar for detail.
 - Play: win rate, blackjack and dealer-blackjack rates vs the expected 4.78%, bust rates (yours,
   hers, and when hitting hard 12-16), hits/stands, doubles and splits won/lost, surrenders, records,
   streaks, a chart of your result against each dealer up card, and results by starting hand.
-- Edge: luck in standard deviations vs perfect basic strategy (-0.24% for these rules), units won and
+- Edge: luck in standard deviations vs perfect basic strategy (-0.27% for these rules), units won and
   units/100, chip-weighted edge, theo (expected loss) vs actual, worst drawdown, side-bet returns vs
   their expected -0.97% / -0.95%, insurance net, results by true count, bet spread, highest/lowest count.
+  Decisions vs basic strategy: every hit/stand/double/split/surrender/insurance choice is checked
+  silently against the chart for these rules; shows accuracy and your most frequent deviations
+  (e.g. "Hard 16 vs 10: stand, chart: surrender, 7x"). Count-based plays show up as deviations too.
 - History: running units over the last 200 rounds and the last 50 hands (hover a row for bets,
-  count, side bets, insurance and cashback).
+  count, side bets, insurance and cashback). Export CSV saves the last 250 hands as a spreadsheet.
 - Casino: lifetime earnings, income, highest balance, tips, attractions, franchises, stars, rank,
   time with her, time at the table, days played, sessions.
 The new analysis stats start counting from 2.1.

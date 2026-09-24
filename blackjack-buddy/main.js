@@ -60,6 +60,10 @@ function create() {
     },
   });
   win.setMenu(null);
+  // Export CSV: offer the Downloads folder in the save dialog
+  win.webContents.session.on('will-download', (e, item) => {
+    item.setSaveDialogOptions({ defaultPath: path.join(app.getPath('downloads'), item.getFilename()) });
+  });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.loadFile('index.html');
   win.once('ready-to-show', () => {

@@ -398,13 +398,14 @@ const NEW_STATS = () => ({
   tcT: TC_LABELS.map(() => [0, 0, 0]),                  // per true count bucket: rounds, units, main bet total
   stT: START_LABELS.map(() => [0, 0]),                  // per starting hand: rounds, units
   curve: [],                                           // units of the last 200 rounds
+  bsN: 0, bsOk: 0, bsMiss: {},                         // decisions checked against basic strategy; deviations by spot
 });
 
 G.st = NEW_STATS();
 // this launch only: the Session stats page
 const SES = { t0: Date.now(), rounds: 0, hands: 0, wag: 0, net: 0, units: 0, best: 0, worst: 0, peak: 0, trough: 0, bj: 0, won: 0, lost: 0,
   tableMs: 0, lastAct: 0, earned0: 0, tips0: 0, curve: [0] };
-const HIST_MAX = 50, CURVE_MAX = 200;
+const HIST_MAX = 250, HIST_SHOW = 50, CURVE_MAX = 200;
 function tableClock() {                                 // time at the table: gaps over a minute between actions don't count
   const now = Date.now(), gap = now - SES.lastAct;
   if (SES.lastAct && gap < 60000) { SES.tableMs += gap; G.st.tableMs += gap; }
@@ -450,6 +451,7 @@ function load() {
       const tables = NEW_STATS();                         // table stats with the wrong shape start over
       for (const k of ['upT', 'tcT', 'stT']) if (!okTable(G.st[k], tables[k])) G.st[k] = tables[k];
       if (!Array.isArray(G.st.curve) || !G.st.curve.every(Number.isFinite)) G.st.curve = [];
+      if (Array.isArray(G.st.bsMiss) || !Object.values(G.st.bsMiss).every(Number.isFinite)) G.st.bsMiss = {};
       if (d.st.vipV === undefined) {                      // older save: keep the tier it earned under the comp ladder
         let i = 0; while (i + 1 < OLD_COMP_AT.length && G.st.comp >= OLD_COMP_AT[i + 1]) i++;
         G.st.vipFloor = i; G.st.vipV = 2;
@@ -647,6 +649,7 @@ function resolveSideBets() {
 
 function insurance(take) {
   if (G.state !== 'INSURANCE') return;
+  judge(take ? 'I' : 'N', 'Insurance', 'N');
   if (take) { G.ins = Math.floor(G.handBet / 2); G.chips -= G.ins; G.roundStake += G.ins; G.st.insTaken++; sfx('chips'); } else sfx('click');
   peek();
 }
@@ -671,6 +674,45 @@ function peek() {                                     // dealer checks the hole 
 
 // the current hand can take an action: not finished, and not still waiting for its second card after a split
 const canAct = () => G.state === 'PLAYER' && !!hand() && !hand().done && hand().cards.length >= 2;
+// ---------------------------------------------------------------- basic strategy (2 decks, S17, DAS, late surrender)
+// Every decision is checked silently against the chart; the Edge page shows accuracy and the most common deviations.
+const upVal = r => r === 'A' ? 11 : r === 'J' || r === 'Q' || r === 'K' ? 10 : parseInt(r, 10);
+function bsAction() {                                   // -> 'H' hit, 'S' stand, 'D' double, 'P' split, 'R' surrender
+  const h = hand(), c = h.cards, d = upVal(G.dealer[0][0]), t = handValue(c), soft = isSoft(c);
+  const dbl = canDouble(), in_ = (lo, hi) => d >= lo && d <= hi;
+  if (canSplit()) {
+    const v = upVal(c[0][0]);
+    if (v === 11 || v === 8 || (v === 9 && d !== 7 && d !== 10 && d !== 11) || (v === 7 && d <= 8) || ((v === 6 || v === 2 || v === 3) && d <= 7) || (v === 4 && in_(5, 6))) return 'P';
+  }
+  if (canSurrender() && !soft && !(c[0][0] === '8' && c[1][0] === '8') && ((t === 16 && d >= 9) || (t === 15 && d === 10))) return 'R';
+  if (soft) {
+    if (t >= 19) return 'S';
+    if (t === 18) return dbl && in_(3, 6) ? 'D' : d <= 8 ? 'S' : 'H';
+    if (dbl && ((t === 17 && in_(3, 6)) || ((t === 15 || t === 16) && in_(4, 6)) || ((t === 13 || t === 14) && in_(5, 6)))) return 'D';
+    return 'H';
+  }
+  if (t >= 17) return 'S';
+  if (t >= 13) return d <= 6 ? 'S' : 'H';
+  if (t === 12) return in_(4, 6) ? 'S' : 'H';
+  if (dbl && (t === 11 || (t === 10 && d <= 9) || (t === 9 && in_(2, 6)) || (t === 8 && in_(5, 6)))) return 'D';
+  return 'H';
+}
+const ACT_NAME = { H: 'hit', S: 'stand', D: 'double', P: 'split', R: 'surrender', I: 'insure', N: 'decline' };
+function handLabel() {                                  // e.g. "Hard 16 vs 10", "Soft 18 vs 9", "8s vs A"
+  const c = hand().cards, up = G.dealer[0][0], u = up === 'J' || up === 'Q' || up === 'K' ? '10' : up;
+  if (c.length === 2 && c[0][0] === c[1][0]) { const r = upVal(c[0][0]) === 10 ? '10' : c[0][0]; return r + 's vs ' + u; }
+  return (isSoft(c) ? 'Soft ' : 'Hard ') + handValue(c) + ' vs ' + u;
+}
+function judge(act, spot, right) {                     // record one decision against the chart
+  const st = G.st; right = right || bsAction(); spot = spot || handLabel();
+  st.bsN++;
+  if (act === right) { st.bsOk++; return; }
+  const k = spot + '|' + act + '|' + right;
+  st.bsMiss[k] = (st.bsMiss[k] || 0) + 1;
+  const keys = Object.keys(st.bsMiss);                  // keep the 60 most frequent
+  if (keys.length > 80) keys.sort((a, b) => st.bsMiss[b] - st.bsMiss[a]).slice(60).forEach(x => delete st.bsMiss[x]);
+}
+
 const canSplit = () => {
   if (!canAct()) return false;
   const h = hand();
@@ -681,23 +723,26 @@ const canSurrender = () => canAct() && G.hands.length === 1 && hand().cards.leng
 
 function hit() {
   if (!canAct()) return;
+  judge('H');
   const h = hand(), before = handValue(h.cards), stiff = !isSoft(h.cards) && before >= 12 && before <= 16;
   h.cards.push(drawCard()); sfx('card');
   const v = handValue(h.cards);
   G.st.hitsN++; if (stiff) { G.st.stiffHits++; if (v > 21) G.st.stiffBusts++; }
   if (v > 21) { h.done = true; h.bust = true; setMood('sad', 900); sfx('bust'); render(); setTimeout(nextHand, 500); }
-  else if (v === 21) { render(); stand(); }
+  else if (v === 21) { render(); stand(true); }
   else render();
 }
 
-function stand() {
+function stand(auto) {
   if (!canAct()) return;
+  if (!auto) judge('S');
   hand().done = true; sfx('stand'); G.st.standsN++;
   nextHand();
 }
 
 function doubleDown() {
   if (!canDouble()) { if (canAct() && hand().cards.length === 2 && !hand().aces) { say(pick(LINES.nochips), 2500); } return; }
+  judge('D');
   const h = hand();
   G.chips -= h.bet; G.roundStake += h.bet; h.bet *= 2; h.doubled = true;
   sfx('chips');
@@ -709,6 +754,7 @@ function doubleDown() {
 
 function split() {
   if (!canSplit()) return;
+  judge('P');
   const h = hand();
   G.chips -= h.bet; G.roundStake += h.bet;
   const moved = h.cards.pop();
@@ -729,6 +775,7 @@ function split() {
 
 function surrender() {
   if (!canSurrender()) return;
+  judge('R');
   hand().surrendered = true; hand().done = true; sfx('fold');
   G.state = 'DEALER'; revealHole(); setTimeout(() => sfx('flip'), 200); render();
   setTimeout(() => settle(), 600);
@@ -1080,7 +1127,7 @@ function statTiles(rows) {
 }
 const signCls = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
 // benchmarks for the analysis pages
-const BENCH_EDGE = -0.0024;                             // perfect basic strategy, these rules (2M simulated rounds), per starting bet
+const BENCH_EDGE = -0.0027;                             // perfect basic strategy, these rules (6.5M simulated rounds, ±0.05%), per starting bet
 const SIDE_EDGE = { pp: -0.0097, tp: -0.0095 };          // exact, two decks
 const ROUND_SD = 1.15;                                   // standard deviation of one round, in starting bets
 const BJ_RATE = 2 * (8 / 104) * (32 / 103);              // 4.78%: chance of a natural, player or dealer
@@ -1107,6 +1154,15 @@ function divBars(labels, vals, tips, counts) {           // diverging bars aroun
     const v = vals[i], h = counts[i] ? Math.max(4, Math.abs(v) / m * 100) : 0;
     return '<div class="dcol" title="' + tips[i] + '"><div class="dtrack"><i class="' + (v >= 0 ? 'pos' : 'neg') + '" style="height:' + (h / 2).toFixed(1) + '%"></i></div><small class="' + (counts[i] ? '' : 'none') + '">' + l + '</small></div>';
   }).join('') + '</div>';
+}
+function strategyBlock(st) {
+  const miss = Object.entries(st.bsMiss).sort((a, b) => b[1] - a[1]).slice(0, 6), wrong = st.bsN - st.bsOk;
+  return statTiles([
+    ['Accuracy', st.bsN ? (st.bsOk / st.bsN * 100).toFixed(1) + '%' : '\u2014', st.bsN ? (st.bsOk / st.bsN >= 0.95 ? 'pos' : st.bsOk / st.bsN < 0.85 ? 'neg' : '') : '',
+      'Decisions that matched the basic strategy chart for these rules (2 decks, dealer stands on 17, double after split, late surrender, never insure)'],
+    ['Decisions', fmt(st.bsN)], ['Deviations', fmt(wrong), wrong ? 'neg' : '', 'Count-based plays (e.g. standing 16 vs 10 at TC \u2265 0) show up here too']]) +
+    (miss.length ? '<div class="stable">' + miss.map(([k, n]) => { const [spot, did, right] = k.split('|');
+      return '<div class="srow miss"><span>' + spot + '</span><span class="neg">' + ACT_NAME[did] + '</span><span>chart: ' + ACT_NAME[right] + '</span><b>' + fmt(n) + '\u00d7</b></div>'; }).join('') + '</div>' : '');
 }
 let statsKey = '';
 function renderStats(periodic) {
@@ -1174,7 +1230,7 @@ function renderStats(periodic) {
     box.innerHTML =
       '<div class="luck ' + signCls(z) + '"><div><small>Luck vs perfect basic strategy</small><b>' + (n >= 30 ? (z >= 0 ? '+' : '\u2212') + Math.abs(z).toFixed(2) + '\u03c3' : '\u2014') + '</b></div>' +
       '<p>' + (n >= 30 ? (z >= 0 ? 'Luckier than ' + (p * 100).toFixed(0) + '% of players' : 'Unluckier than ' + ((1 - p) * 100).toFixed(0) + '% of players') +
-        ' over ' + fmt(n) + ' rounds. Mistakes count as bad luck here: the benchmark assumes perfect play.' : 'Needs 30 rounds on this version to judge.') + '</p></div>' +
+        ' over ' + fmt(n) + ' rounds. The benchmark assumes perfect play, so strategy deviations (accuracy ' + (st.bsN ? (st.bsOk / st.bsN * 100).toFixed(0) + '%' : '\u2014') + ') show up as bad luck.' : 'Needs 30 rounds on this version to judge.') + '</p></div>' +
       statTiles([
         ['Units won', fmtU(st.units), signCls(st.units), 'Main game result in starting bets: +1u = one starting bet won'],
         ['Units / 100 rounds', n ? fmtU(st.units / n * 100, 2) : '\u2014', signCls(st.units), 'Perfect basic strategy: ' + fmtU(BENCH_EDGE * 100, 2)],
@@ -1189,6 +1245,7 @@ function renderStats(periodic) {
         ['21+3 hits', fmt(st.tpHits) + ' / ' + fmt(st.tpBets) + ' \u00b7 ' + pct(st.tpHits, st.tpBets), '', 'Flush ' + st.tp1 + ' \u00b7 straight ' + st.tp2 + ' \u00b7 trips ' + st.tp3 + ' \u00b7 straight flush ' + st.tp4 + '. Expected hit rate 9.27%'],
         ['21+3 return', st.tpWag ? (st.tpNet / st.tpWag * 100).toFixed(1) + '%' : '\u2014', signCls(st.tpNet), 'Net ' + fmtBig(st.tpNet, true) + ' on ' + fmtBig(st.tpWag) + '. Expected ' + (SIDE_EDGE.tp * 100).toFixed(2) + '%'],
         ['Side bets net', fmtBig(st.sideNet, true), signCls(st.sideNet)], ['Insurance net', fmtBig(st.insNet, true), signCls(st.insNet), 'Won ' + st.insWon + ' of ' + st.insTaken + '. Pays only if the count is high (TC \u2265 +3)']]) +
+      sect('Decisions vs basic strategy') + strategyBlock(st) +
       sect('Result by true count \u00b7 units per 100 rounds') +
       divBars(TC_LABELS, tc.map(r => r[0] ? r[1] / r[0] * 100 : 0),
         tc.map((r, i) => 'True count ' + TC_LABELS[i] + ': ' + fmt(r[0]) + ' rounds (' + pct(r[0], n) + ') \u00b7 ' + (r[0] ? fmtU(r[1] / r[0] * 100, 1) + ' per 100 \u00b7 avg bet ' + fmtBig(Math.round(r[2] / r[0])) : '\u2014')),
@@ -1199,8 +1256,8 @@ function renderStats(periodic) {
   } else if (G.statCat === 'hist') {
     let cum = 0; const curve = [0].concat(st.curve.map(u => (cum += u)));
     box.innerHTML = sect('Last ' + st.curve.length + ' rounds \u00b7 running units') + sparkline(curve, v => fmtU(v, 1), 'Round') +
-      sect('Hand history \u00b7 newest first') +
-      (G.hist.length ? '<div class="hist">' + G.hist.slice().reverse().map(r => {
+      '<div class="histhead">' + sect('Hand history \u00b7 newest first') + (G.hist.length ? '<button class="csv" id="csv" title="Save your last ' + G.hist.length + ' hands as a spreadsheet (CSV)">Export CSV</button>' : '') + '</div>' +
+      (G.hist.length ? '<div class="hist">' + G.hist.slice(-HIST_SHOW).reverse().map(r => {
         const hands = r.h.map(h => h.c.map(cardTxt).join(' ')).join(' <i>|</i> ');
         const res = r.h.length === 1 ? RESULT_NAMES[r.h[0].r] || '' : r.h.map(h => fmtBig(h.n, true)).join(' / ');
         const tip = new Date(r.t).toLocaleString() + ' \u00b7 bet ' + r.h.map(h => fmtBig(h.b)).join(' + ') + ' \u00b7 TC ' + r.tc +
@@ -1218,6 +1275,19 @@ function renderStats(periodic) {
     ]);
   }
   box.scrollTop = samePage ? keep : 0;
+  const csv = $('csv'); if (csv) csv.onclick = exportHistory;
+}
+function exportHistory() {                              // last HIST_MAX hands as CSV (opens a save dialog)
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const rows = [['round', 'time', 'true count', 'your cards', 'dealer cards', 'results', 'bets', 'main net', 'side bets', 'insurance', 'cashback', 'round net']];
+  for (const r of G.hist) {
+    const main = r.h.reduce((a, h) => a + h.n, 0);
+    rows.push([r.n, new Date(r.t).toISOString(), r.tc, r.h.map(h => h.c.join(' ')).join(' | '), r.d.join(' '), r.h.map(h => h.r).join(' | '),
+      r.h.map(h => h.b).join(' | '), main, r.s, r.i, r.cb, r.net]);
+  }
+  const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map(x => x.map(q).join(',')).join('\r\n')], { type: 'text/csv' }));
+  const a = document.createElement('a'); a.href = url; a.download = 'blackjack-buddy-hands-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); sfx('click');
 }
 
 // ---------------------------------------------------------------- franchise (prestige)
@@ -1850,7 +1920,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(pick(LINES.hello)), 1200);
 
 // exposed for automated tests only
-window.__bb = { SES, quickBet, setBet, canTopup, totalText, isSoft, startBucket, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { bsAction, judge, SES, quickBet, setBet, canTopup, totalText, isSoft, startBucket, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,
