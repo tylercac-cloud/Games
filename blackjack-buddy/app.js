@@ -376,11 +376,8 @@ const G = {
   gens: {}, boosts: {}, tipLevel: 0, tips: 0, frac: 0, lastSeen: 0, tab: 'table', earned: 0,
   stars: 0, franchises: 0, runEarned: 0, owned: {}, equip: { ...DEFAULT_EQUIP }, shopCat: 'perks', autoFrac: 0,
   st: null, statCat: 'vip', muted: false, cashback: 0, starsSpent: 0, su: {},
-  roundStake: 0, roundTC: 0, start: [], hist: [],
+  roundStake: 0, roundTC: 0, hist: [],
 };
-const UP_LABELS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'A'];
-const TC_LABELS = ['\u2264 \u22122', '\u22121', '0', '+1', '+2', '+3', '\u2265 +4'];
-const START_LABELS = ['Blackjack', 'Pair', 'Soft', 'Hard 20', 'Hard 17\u201319', 'Hard 12\u201316', 'Hard 9\u201311', 'Hard \u2264 8'];
 // lifetime stats: never reset, not even by a franchise
 const NEW_STATS = () => ({
   rounds: 0, hands: 0, wins: 0, losses: 0, pushes: 0, blackjacks: 0, busts: 0, dealerBusts: 0, dealerBJ: 0,
@@ -390,32 +387,17 @@ const NEW_STATS = () => ({
   tcHiBet: 0, tcHiN: 0, tcLoBet: 0, tcLoN: 0,
   highChips: 0, attractions: 0, playMs: 0, days: 0, lastDay: '', since: 0, topups: 0, tierUps: 0,
   vipV: 2, vipFloor: 0,                                 // VIP from wagered (2.1+); vipFloor keeps a tier earned under the old comp ladder
-  // 2.1 play analysis
-  units: 0, mainWag: 0, mainNet: 0, hitsN: 0, standsN: 0, stiffHits: 0, stiffBusts: 0, doubleLosses: 0, doubleNet: 0,
-  splitHands: 0, splitLosses: 0, insNet: 0, ppNet: 0, tpNet: 0, ppWag: 0, tpWag: 0, pp1: 0, pp2: 0, pp3: 0, tp1: 0, tp2: 0, tp3: 0, tp4: 0,
-  biggestBJ: 0, maxTC: 0, minTC: 0, fourSplits: 0, tableMs: 0, sessions: 0, unitsPeak: 0, maxDD: 0, dealerPlays: 0,
-  upT: UP_LABELS.map(() => [0, 0, 0, 0, 0]),            // per dealer up card 2..A: rounds, won, lost, pushed, units
-  tcT: TC_LABELS.map(() => [0, 0, 0]),                  // per true count bucket: rounds, units, main bet total
-  stT: START_LABELS.map(() => [0, 0]),                  // per starting hand: rounds, units
+  units: 0, tableMs: 0, sessions: 0,
   curve: [],                                           // units of the last 200 rounds
-  bsN: 0, bsOk: 0, bsMiss: {}, bsCost: 0, devN: 0, devOk: 0, devMiss: {},   // decisions vs basic strategy and the count chart
-  daily: {},                                           // 'YYYY-MM-DD': rounds, net, units, table ms, wagered (last 30 days)
 });
 
 G.st = NEW_STATS();
 // this launch only: the Session stats page
-const SES = { t0: Date.now(), rounds: 0, hands: 0, wag: 0, net: 0, units: 0, best: 0, worst: 0, peak: 0, trough: 0, bj: 0, won: 0, lost: 0,
-  tableMs: 0, lastAct: 0, earned0: 0, tips0: 0, curve: [0], bsCost: 0 };
-const dayKey = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-function today() {                                      // this day's row in the 30-day log
-  const k = dayKey(), m = G.st.daily;
-  if (!m[k]) { m[k] = [0, 0, 0, 0, 0]; Object.keys(m).sort().slice(0, -30).forEach(x => delete m[x]); }
-  return m[k];
-}
+const SES = { t0: Date.now(), rounds: 0, wag: 0, net: 0, tableMs: 0, lastAct: 0 };
 const HIST_MAX = 250, HIST_SHOW = 50, CURVE_MAX = 200;
 function tableClock() {                                 // time at the table: gaps over a minute between actions don't count
   const now = Date.now(), gap = now - SES.lastAct;
-  if (SES.lastAct && gap < 60000) { SES.tableMs += gap; G.st.tableMs += gap; today()[3] += gap; }
+  if (SES.lastAct && gap < 60000) { SES.tableMs += gap; G.st.tableMs += gap; }
   SES.lastAct = now;
 }
 const hand = () => G.hands[G.cur];
@@ -455,13 +437,7 @@ function load() {
     if (d.equip && typeof d.equip === 'object') for (const k in DEFAULT_EQUIP) if (typeof d.equip[k] === 'string') G.equip[k] = d.equip[k];
     if (d.st && typeof d.st === 'object') {
       for (const k in G.st) if (typeof d.st[k] === typeof G.st[k] && d.st[k] !== null) G.st[k] = d.st[k];
-      const tables = NEW_STATS();                         // table stats with the wrong shape start over
-      for (const k of ['upT', 'tcT', 'stT']) if (!okTable(G.st[k], tables[k])) G.st[k] = tables[k];
       if (!Array.isArray(G.st.curve) || !G.st.curve.every(Number.isFinite)) G.st.curve = [];
-      const okMap = m => m && !Array.isArray(m) && Object.values(m).every(v => Number.isFinite(v) || (Array.isArray(v) && v.length === 2 && v.every(Number.isFinite)));
-      if (!okMap(G.st.bsMiss)) G.st.bsMiss = {};
-      if (!okMap(G.st.devMiss)) G.st.devMiss = {};
-      if (!G.st.daily || Array.isArray(G.st.daily) || !Object.values(G.st.daily).every(r => Array.isArray(r) && r.length === 5 && r.every(Number.isFinite))) G.st.daily = {};
       if (d.st.vipV === undefined) {                      // older save: keep the tier it earned under the comp ladder
         let i = 0; while (i + 1 < OLD_COMP_AT.length && G.st.comp >= OLD_COMP_AT[i + 1]) i++;
         G.st.vipFloor = i; G.st.vipV = 2;
@@ -480,7 +456,7 @@ function save() {
       betWant: G.betWant, ppWant: G.ppWant, tpWant: G.tpWant, hist: G.hist,
       shoe: { cards: G.shoe, cutAt: G.cutAt, dealt: G.dealt, pending: G.shufflePending, seen: G.seen },
       round: G.state === 'BET' ? null : { state: G.state, hands: G.hands, cur: G.cur, dealer: G.dealer, holeHidden: G.holeHidden, holeCounted: G.holeCounted,
-        handBet: G.handBet, ins: G.ins, stake: G.roundStake, tc: G.roundTC, start: G.start, sides: G.sideResults, insResult: G.insResult, pp: G.pp, tp: G.tp },
+        handBet: G.handBet, ins: G.ins, stake: G.roundStake, tc: G.roundTC, sides: G.sideResults, insResult: G.insResult, pp: G.pp, tp: G.tp },
       gens: G.gens, boosts: G.boosts, tipLevel: G.tipLevel, tips: G.tips, frac: G.frac, lastSeen: Date.now(), earned: G.earned,
       stars: G.stars, franchises: G.franchises, runEarned: G.runEarned, owned: G.owned, equip: G.equip, st: G.st, muted: G.muted, starsSpent: G.starsSpent, su: G.su })); } catch (e) { /* */ }
 }
@@ -489,7 +465,6 @@ function save() {
 // The shoe and any round in progress are saved, so quitting mid-hand resumes the same hand (same cards) next launch.
 const okCard = c => Array.isArray(c) && c.length === 2 && RANKS.includes(c[0]) && SUITS.includes(c[1]);
 const okCards = a => Array.isArray(a) && a.every(okCard);
-const okTable = (t, ref) => Array.isArray(t) && t.length === ref.length && t.every(r => Array.isArray(r) && r.length === ref[0].length && r.every(Number.isFinite));
 function loadShoe(sh) {
   if (!sh || !okCards(sh.cards) || !sh.cards.length || !okCards(sh.seen) || !Number.isFinite(sh.cutAt) || !Number.isFinite(sh.dealt)) return;
   G.shoe = sh.cards; G.seen = sh.seen; G.cutAt = sh.cutAt; G.dealt = sh.dealt; G.shufflePending = !!sh.pending;
@@ -505,7 +480,7 @@ function loadRound(r) {
     return;
   }
   Object.assign(G, { state: r.state, hands, cur: r.cur, dealer: r.dealer, holeHidden: r.holeHidden !== false, holeCounted: !!r.holeCounted,
-    handBet: +r.handBet || hands[0].bet, ins: +r.ins || 0, roundStake: +r.stake || 0, roundTC: +r.tc || 0, start: okCards(r.start) ? r.start : [],
+    handBet: +r.handBet || hands[0].bet, ins: +r.ins || 0, roundStake: +r.stake || 0, roundTC: +r.tc || 0,
     sideResults: Array.isArray(r.sides) ? r.sides : [], insResult: Number.isFinite(r.insResult) ? r.insResult : null,
     pp: +r.pp || 0, tp: +r.tp || 0, result: null });
 }
@@ -621,7 +596,6 @@ function dealSeq(seq, done) {
 }
 
 function afterDeal() {
-  G.start = firstHand().slice(0, 2);
   resolveSideBets();
   const insCost = Math.floor(G.handBet / 2);
   if (G.dealer[0][0] === 'A' && insCost > 0 && G.chips >= insCost) {
@@ -640,16 +614,14 @@ function resolveSideBets() {
     const win = hit ? G.pp * (hit[1] + 1) : 0;
     G.chips += win;
     res.push(['Pairs', win - G.pp, hit ? hit[0] : null]);
-    G.st.ppBets++; G.st.ppNet += win - G.pp; G.st.ppWag += G.pp;
-    if (hit) { G.st.ppHits++; G.st[{ 35: 'pp1', 14: 'pp2', 8: 'pp3' }[hit[1]]]++; }
+    G.st.ppBets++; if (hit) G.st.ppHits++;
   }
   if (G.tp) {
     const hit = twentyOnePlusThree(p[0], p[1], G.dealer[0]);
     const win = hit ? G.tp * (hit[1] + 1) : 0;
     G.chips += win;
     res.push(['21+3', win - G.tp, hit ? hit[0] : null]);
-    G.st.tpBets++; G.st.tpNet += win - G.tp; G.st.tpWag += G.tp;
-    if (hit) { G.st.tpHits++; G.st[{ Flush: 'tp1', Straight: 'tp2', 'Three of a kind': 'tp3', 'Straight flush': 'tp4' }[hit[0]]]++; }
+    G.st.tpBets++; if (hit) G.st.tpHits++;
   }
   G.sideResults = res;
   for (const r of res) { G.st.sideWagered += r[0] === 'Pairs' ? G.pp : G.tp; G.st.sideNet += r[1]; }
@@ -659,7 +631,6 @@ function resolveSideBets() {
 
 function insurance(take) {
   if (G.state !== 'INSURANCE') return;
-  judge(take ? 'I' : 'N', 'Insurance', 'N');
   if (take) { G.ins = Math.floor(G.handBet / 2); G.chips -= G.ins; G.roundStake += G.ins; G.st.insTaken++; sfx('chips'); } else sfx('click');
   peek();
 }
@@ -671,7 +642,6 @@ function peek() {                                     // dealer checks the hole 
   } else {
     if (G.ins) G.insResult = -G.ins;
   }
-  if (G.ins) G.st.insNet += G.insResult;
   sfx('peek');
   if (d === 21 || p === 21) {
     G.hands[0].done = true;
@@ -684,111 +654,6 @@ function peek() {                                     // dealer checks the hole 
 
 // the current hand can take an action: not finished, and not still waiting for its second card after a split
 const canAct = () => G.state === 'PLAYER' && !!hand() && !hand().done && hand().cards.length >= 2;
-// ---------------------------------------------------------------- basic strategy (2 decks, S17, DAS, late surrender)
-// Every decision is checked silently against the chart; the Edge page shows accuracy and the most common deviations.
-const upVal = r => r === 'A' ? 11 : r === 'J' || r === 'Q' || r === 'K' ? 10 : parseInt(r, 10);
-function bsAction() {                                   // -> 'H' hit, 'S' stand, 'D' double, 'P' split, 'R' surrender
-  const h = hand(), c = h.cards, d = upVal(G.dealer[0][0]), t = handValue(c), soft = isSoft(c);
-  const dbl = canDouble(), in_ = (lo, hi) => d >= lo && d <= hi;
-  if (canSplit()) {
-    const v = upVal(c[0][0]);
-    if (v === 11 || v === 8 || (v === 9 && d !== 7 && d !== 10 && d !== 11) || (v === 7 && d <= 8) || ((v === 6 || v === 2 || v === 3) && d <= 7) || (v === 4 && in_(5, 6))) return 'P';
-  }
-  if (canSurrender() && !soft && !(c[0][0] === '8' && c[1][0] === '8') && ((t === 16 && d >= 9) || (t === 15 && d === 10))) return 'R';
-  if (soft) {
-    if (t >= 19) return 'S';
-    if (t === 18) return dbl && in_(3, 6) ? 'D' : d <= 8 ? 'S' : 'H';
-    if (dbl && ((t === 17 && in_(3, 6)) || ((t === 15 || t === 16) && in_(4, 6)) || ((t === 13 || t === 14) && in_(5, 6)))) return 'D';
-    return 'H';
-  }
-  if (t >= 17) return 'S';
-  if (t >= 13) return d <= 6 ? 'S' : 'H';
-  if (t === 12) return in_(4, 6) ? 'S' : 'H';
-  if (dbl && (t === 11 || (t === 10 && d <= 9) || (t === 9 && in_(2, 6)) || (t === 8 && in_(5, 6)))) return 'D';
-  return 'H';
-}
-const ACT_NAME = { H: 'hit', S: 'stand', D: 'double', P: 'split', R: 'surrender', I: 'insure', N: 'decline' };
-function handLabel() {                                  // e.g. "Hard 16 vs 10", "Soft 18 vs 9", "8s vs A"
-  const c = hand().cards, up = G.dealer[0][0], u = up === 'J' || up === 'Q' || up === 'K' ? '10' : up;
-  if (c.length === 2 && c[0][0] === c[1][0]) { const r = upVal(c[0][0]) === 10 ? '10' : c[0][0]; return r + 's vs ' + u; }
-  return (isSoft(c) ? 'Soft ' : 'Hard ') + handValue(c) + ' vs ' + u;
-}
-// count-based plays: the Illustrious 18 (S17 indices; 11 vs A and 9 vs 2 are already basic with two decks) + the Fab 4 surrenders
-const STAND_AT = { '16-10': 0, '15-10': 4, '16-9': 5, '13-2': -1, '13-3': -2, '12-2': 3, '12-3': 2, '12-4': 0, '12-5': -2, '12-6': -1 };
-function expertAction(basic) {
-  const c = hand().cards, d = upVal(G.dealer[0][0]), t = handValue(c), tc = trueCount();
-  if (isSoft(c)) return basic;
-  if (canSplit() && upVal(c[0][0]) === 10 && ((d === 5 && tc >= 5) || (d === 6 && tc >= 4))) return 'P';
-  if (canSurrender() && basic !== 'P') {
-    if ((t === 14 && d === 10 && tc >= 3) || (t === 15 && d === 9 && tc >= 2) || (t === 15 && d === 11 && tc >= 1)) return 'R';
-    if (basic === 'R' && t === 15 && d === 10 && tc < 0) return 'H';
-  }
-  if (basic === 'R' || basic === 'P') return basic;
-  if (canDouble() && ((t === 10 && d >= 10 && tc >= 4) || (t === 9 && d === 7 && tc >= 3))) return 'D';
-  const at = STAND_AT[t + '-' + d];
-  if (at !== undefined && (basic === 'S' || basic === 'H')) return tc >= at ? 'S' : 'H';
-  return basic;
-}
-// expected value of each action at a neutral count (infinite-deck approximation, dealer checked for blackjack)
-const EVX = (() => {
-  const VALS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11], P = v => v === 10 ? 4 / 13 : 1 / 13;
-  const add = (t, soft, v) => { if (v === 11) return t + 11 <= 21 ? [t + 11, true] : [t + 1, soft]; t += v; return t > 21 && soft ? [t - 10, false] : [t, soft]; };
-  const dMemo = {}, dists = {};
-  function dealer(t, soft) {                           // -> probabilities of 17, 18, 19, 20, 21, bust
-    const k = t + (soft ? 's' : 'h'); if (dMemo[k]) return dMemo[k];
-    let r = [0, 0, 0, 0, 0, 0];
-    if (t > 21) r[5] = 1; else if (t >= 17) r[t - 17] = 1;
-    else for (const v of VALS) { const [nt, ns] = add(t, soft, v); dealer(nt, ns).forEach((x, i) => { r[i] += P(v) * x; }); }
-    return (dMemo[k] = r);
-  }
-  function dist(u) {                                     // after the peek: no dealer blackjack
-    if (dists[u]) return dists[u];
-    const r = [0, 0, 0, 0, 0, 0]; let tot = 0;
-    for (const v of VALS) { if ((u === 11 && v === 10) || (u === 10 && v === 11)) continue; tot += P(v);
-      const [t, sf] = add(u === 11 ? 11 : u, u === 11, v); dealer(t, sf).forEach((x, i) => { r[i] += P(v) * x; }); }
-    return (dists[u] = r.map(x => x / tot));
-  }
-  const stand = (t, D) => { if (t > 21) return -1; let e = D[5]; for (let i = 0; i < 5; i++) e += t > 17 + i ? D[i] : t < 17 + i ? -D[i] : 0; return e; };
-  const hMemo = {};
-  function hit(t, soft, u) {
-    const k = t + (soft ? 's' : 'h') + u; if (hMemo[k] !== undefined) return hMemo[k];
-    let e = 0;
-    for (const v of VALS) { const [nt, ns] = add(t, soft, v); e += P(v) * (nt > 21 ? -1 : Math.max(stand(nt, dist(u)), hit(nt, ns, u))); }
-    return (hMemo[k] = e);
-  }
-  const dbl = (t, soft, u) => 2 * VALS.reduce((e, v) => { const [nt] = add(t, soft, v); return e + P(v) * stand(nt, dist(u)); }, 0);
-  function pair(r, u) {                                  // two hands, one card each (aces) or best play with double after split
-    let e = 0;
-    for (const v of VALS) { const [t, sf] = add(r === 11 ? 11 : r, r === 11, v);
-      e += P(v) * (r === 11 ? stand(t, dist(u)) : Math.max(stand(t, dist(u)), hit(t, sf, u), dbl(t, sf, u))); }
-    return 2 * e;
-  }
-  return (act, cards, u) => {
-    const t = handValue(cards), soft = isSoft(cards);
-    return act === 'S' ? stand(t, dist(u)) : act === 'H' ? hit(t, soft, u) : act === 'D' ? dbl(t, soft, u) : act === 'R' ? -0.5 : pair(upVal(cards[0][0]), u);
-  };
-})();
-function judge(act) {                                   // record one decision against the chart (and the count chart)
-  const st = G.st, ins = act === 'I' || act === 'N', tc = trueCount();
-  const basic = ins ? 'N' : bsAction(), expert = ins ? (tc >= 3 ? 'I' : 'N') : expertAction(basic), spot = ins ? 'Insurance' : handLabel();
-  st.bsN++;
-  if (expert !== basic) {                               // a count play was on: making it or playing basic are both fine
-    st.devN++;
-    if (act === expert) { st.devOk++; st.bsOk++; return; }
-    if (act === basic) { st.bsOk++; bump(st.devMiss, spot + '|' + expert, 1, 0); st.devMiss[spot + '|' + expert][1] = Math.round(tc * 10) / 10; return; }
-  } else if (act === basic) { st.bsOk++; return; }
-  const u = upVal(G.dealer[0][0]), h = hand();
-  const cost = ins ? 0.5 / 13 : Math.max(0, EVX(basic, h.cards, u) - EVX(act, h.cards, u)) * (h.bet / G.handBet);
-  st.bsCost += cost; SES.bsCost += cost;
-  bump(st.bsMiss, spot + '|' + act + '|' + basic, 1, cost);
-}
-function bump(map, k, n, cost) {                        // [times, units lost]; keep the 60 most frequent
-  const r = Array.isArray(map[k]) ? map[k] : [+map[k] || 0, 0];
-  map[k] = [r[0] + n, Math.round((r[1] + cost) * 1e4) / 1e4];
-  const keys = Object.keys(map);
-  if (keys.length > 80) keys.sort((a, b) => map[b][0] - map[a][0]).slice(60).forEach(x => delete map[x]);
-}
-
 const canSplit = () => {
   if (!canAct()) return false;
   const h = hand();
@@ -799,26 +664,22 @@ const canSurrender = () => canAct() && G.hands.length === 1 && hand().cards.leng
 
 function hit() {
   if (!canAct()) return;
-  judge('H');
-  const h = hand(), before = handValue(h.cards), stiff = !isSoft(h.cards) && before >= 12 && before <= 16;
+  const h = hand();
   h.cards.push(drawCard()); sfx('card');
   const v = handValue(h.cards);
-  G.st.hitsN++; if (stiff) { G.st.stiffHits++; if (v > 21) G.st.stiffBusts++; }
   if (v > 21) { h.done = true; h.bust = true; setMood('sad', 900); sfx('bust'); render(); setTimeout(nextHand, 500); }
-  else if (v === 21) { render(); stand(true); }
+  else if (v === 21) { render(); stand(); }
   else render();
 }
 
-function stand(auto) {
+function stand() {
   if (!canAct()) return;
-  if (!auto) judge('S');
-  hand().done = true; sfx('stand'); G.st.standsN++;
+  hand().done = true; sfx('stand');
   nextHand();
 }
 
 function doubleDown() {
   if (!canDouble()) { if (canAct() && hand().cards.length === 2 && !hand().aces) { say(pick(LINES.nochips), 2500); } return; }
-  judge('D');
   const h = hand();
   G.chips -= h.bet; G.roundStake += h.bet; h.bet *= 2; h.doubled = true;
   sfx('chips');
@@ -830,7 +691,6 @@ function doubleDown() {
 
 function split() {
   if (!canSplit()) return;
-  judge('P');
   const h = hand();
   G.chips -= h.bet; G.roundStake += h.bet;
   const moved = h.cards.pop();
@@ -851,7 +711,6 @@ function split() {
 
 function surrender() {
   if (!canSurrender()) return;
-  judge('R');
   hand().surrendered = true; hand().done = true; sfx('fold');
   G.state = 'DEALER'; revealHole(); setTimeout(() => sfx('flip'), 200); render();
   setTimeout(() => settle(), 600);
@@ -884,7 +743,6 @@ function finishPlayer() {
 }
 
 function dealerStep() {
-  if (G.dealer.length === 2) G.st.dealerPlays++;
   if (handValue(G.dealer) < 17) {
     G.dealer.push(drawCard()); sfx('card'); render();
     setTimeout(dealerStep, 650);
@@ -951,7 +809,7 @@ function settle() {
 // ---------------------------------------------------------------- stats + VIP
 function recordBetCount() {                           // how your bet tracked the true count (counting practice)
   const tc = trueCount();
-  G.roundTC = tc; G.st.maxTC = Math.max(G.st.maxTC, tc); G.st.minTC = Math.min(G.st.minTC, tc);
+  G.roundTC = tc;
   if (tc >= 2) { G.st.tcHiBet += G.bet; G.st.tcHiN++; }
   else if (tc <= 0) { G.st.tcLoBet += G.bet; G.st.tcLoN++; }
 }
@@ -980,42 +838,17 @@ function recordRound(d, dbj, roundNet, cash) {
 }
 // the main game in units (net / starting bet), so results compare across bet sizes
 function recordAnalysis(roundNet, cash) {
-  const st = G.st, wag = G.hands.reduce((a, h) => a + h.bet, 0), mainNet = G.hands.reduce((a, h) => a + h.net, 0);
+  const st = G.st, mainNet = G.hands.reduce((a, h) => a + h.net, 0);
   const u = Math.round(mainNet / G.handBet * 1000) / 1000;
-  st.units += u; st.mainWag += wag; st.mainNet += mainNet;
-  st.unitsPeak = Math.max(st.unitsPeak, st.units); st.maxDD = Math.max(st.maxDD, st.unitsPeak - st.units);
+  st.units += u;
   st.curve.push(u); if (st.curve.length > CURVE_MAX) st.curve.splice(0, st.curve.length - CURVE_MAX);
-  const up = G.dealer[0][0], ui = up === 'A' ? 9 : 'JQK'.includes(up) || up === '10' ? 8 : +up - 2;
-  const row = st.upT[ui]; row[0]++; row[mainNet > 0 ? 1 : mainNet < 0 ? 2 : 3]++; row[4] += u;
-  const tb = st.tcT[Math.max(-2, Math.min(4, Math.trunc(G.roundTC))) + 2]; tb[0]++; tb[1] += u; tb[2] += G.handBet;
-  const sb = st.stT[startBucket(G.start)]; if (sb) { sb[0]++; sb[1] += u; }
-  for (const h of G.hands) {
-    if (h.doubled) { st.doubleNet += h.net; if (h.net < 0) st.doubleLosses++; }
-    if (h.split) { st.splitHands++; if (h.net < 0) st.splitLosses++; }
-    if (h.res === 'blackjack') st.biggestBJ = Math.max(st.biggestBJ, h.net);
-  }
-  if (G.hands.length === MAX_HANDS) st.fourSplits++;
-  const day = today(); day[0]++; day[1] += roundNet + cash; day[2] += u; day[4] += G.roundStake;
   // session
-  SES.rounds++; SES.hands += G.hands.length; SES.wag += G.roundStake; SES.net += roundNet + cash; SES.units += u;
-  SES.best = Math.max(SES.best, roundNet); SES.worst = Math.min(SES.worst, roundNet);
-  SES.peak = Math.max(SES.peak, SES.net); SES.trough = Math.min(SES.trough, SES.net);
-  SES.bj += G.hands.filter(h => h.res === 'blackjack').length;
-  if (roundNet > 0) SES.won++; else if (roundNet < 0) SES.lost++;
-  SES.curve.push(SES.net); if (SES.curve.length > CURVE_MAX + 1) SES.curve.shift();
+  SES.rounds++; SES.wag += G.roundStake; SES.net += roundNet + cash;
   // hand history
   G.hist.push({ n: st.rounds, t: Date.now(), d: G.dealer.map(c => c.join('')), tc: Math.round(G.roundTC * 10) / 10,
     h: G.hands.map(h => ({ c: h.cards.map(c => c.join('')), b: h.bet, r: h.res, n: h.net })),
     s: G.sideResults.reduce((a, r) => a + r[1], 0), i: G.insResult || 0, net: roundNet, cb: cash });
   if (G.hist.length > HIST_MAX) G.hist.splice(0, G.hist.length - HIST_MAX);
-}
-function startBucket(c) {                              // which of START_LABELS the first two cards were
-  if (!c || c.length < 2) return -1;
-  const v = handValue(c);
-  if (v === 21) return 0;
-  if (c[0][0] === c[1][0]) return 1;
-  if (isSoft(c)) return 2;
-  return v === 20 ? 3 : v >= 17 ? 4 : v >= 12 ? 5 : v >= 9 ? 6 : 7;
 }
 function vipTierUp(from, to) {
   G.st.tierUps++;
@@ -1203,13 +1036,6 @@ function statTiles(rows) {
   return '<div class="sgrid">' + rows.map(([k, v, cls, tip]) => '<div class="stile"' + (tip ? ' title="' + tip + '"' : '') + '><small>' + k + '</small><b class="' + (cls || '') + '">' + v + '</b></div>').join('') + '</div>';
 }
 const signCls = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
-// benchmarks for the analysis pages
-const BENCH_EDGE = -0.0025;                             // perfect basic strategy, these rules (7.3M simulated rounds, ±0.04%), per starting bet
-const SIDE_EDGE = { pp: -0.0097, tp: -0.0095 };          // exact, two decks
-const ROUND_SD = 1.15;                                   // standard deviation of one round, in starting bets
-const BJ_RATE = 2 * (8 / 104) * (32 / 103);              // 4.78%: chance of a natural, player or dealer
-const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x < 0 ? -y : y; };
-const phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
 const fmtU = (u, d = 1) => (u > 0 ? '+' : u < 0 ? '\u2212' : '') + Math.abs(u).toFixed(d) + 'u';
 const cardTxt = c => { const r = c.slice(0, -1), su = c.slice(-1); return '<span class="' + (RED.has(su) ? 'red' : '') + '">' + r + su + '</span>'; };
 const sect = t => '<div class="sgroup">' + t + '</div>';
@@ -1225,135 +1051,36 @@ function sparkline(vals, fmtV, name) {                   // one series: cumulati
     '<polyline class="' + (last >= 0 ? 'up' : 'down') + '" points="' + pts + '"/><g class="hit">' + hits + '</g></svg>' +
     '<div class="sp-lab"><span>high ' + fmtV(hi) + '</span><span>low ' + fmtV(lo) + '</span><b class="' + signCls(last) + '">now ' + fmtV(last) + '</b></div></div>';
 }
-function divBars(labels, vals, tips, counts, cls) {      // diverging bars around zero: above = you won, below = you lost
-  const m = Math.max(1e-9, ...vals.map((v, i) => counts[i] ? Math.abs(v) : 0));
-  return '<div class="dbars ' + (cls || '') + '">' + labels.map((l, i) => {
-    const v = vals[i], h = counts[i] ? Math.max(4, Math.abs(v) / m * 100) : 0;
-    return '<div class="dcol" title="' + tips[i] + '"><div class="dtrack"><i class="' + (v >= 0 ? 'pos' : 'neg') + '" style="height:' + (h / 2).toFixed(1) + '%"></i></div><small class="' + (counts[i] ? '' : 'none') + '">' + l + '</small></div>';
-  }).join('') + '</div>';
-}
-function strategyBlock(st, n) {
-  const rows = m => Object.entries(m).map(([k, v]) => [k, Array.isArray(v) ? v : [v, 0]]);
-  const miss = rows(st.bsMiss).sort((a, b) => b[1][1] - a[1][1] || b[1][0] - a[1][0]).slice(0, 6);
-  const dmiss = rows(st.devMiss).sort((a, b) => b[1][0] - a[1][0]).slice(0, 4), wrong = st.bsN - st.bsOk, acc = st.bsN ? st.bsOk / st.bsN : 0;
-  return statTiles([
-    ['Accuracy', st.bsN ? (acc * 100).toFixed(1) + '%' : '—', st.bsN ? (acc >= 0.95 ? 'pos' : acc < 0.85 ? 'neg' : '') : '',
-      'Decisions that matched basic strategy for these rules (2 decks, dealer stands on 17, double after split, late surrender) or a correct count play'],
-    ['Mistakes', fmt(wrong), wrong ? 'neg' : ''],
-    ['Mistakes cost', st.bsCost ? fmtU(-st.bsCost, 2) : '0u', st.bsCost ? 'neg' : '', 'Expected units given up versus the chart play (neutral count, infinite-deck estimate). About ' + (n ? fmtU(-st.bsCost / n * 100, 2) : '—') + ' per 100 rounds'],
-    ['Count plays made', fmt(st.devOk) + ' / ' + fmt(st.devN), '', 'Spots where the true count changed the right play (Illustrious 18 + Fab 4) and you made the count play. Playing basic there is not a mistake'],
-    ['Count-play rate', pct(st.devOk, st.devN)], ['Cost this session', SES.bsCost ? fmtU(-SES.bsCost, 2) : '0u', SES.bsCost ? 'neg' : '']]) +
-    (miss.length ? '<div class="stable">' + miss.map(([k, [c, u]]) => { const [spot, did, right] = k.split('|');
-      return '<div class="srow miss"><span>' + spot + '</span><span class="neg">' + ACT_NAME[did] + '</span><span>chart: ' + ACT_NAME[right] + '</span><b title="' + fmtU(-u, 2) + ' expected">' + fmt(c) + '×</b></div>'; }).join('') + '</div>' : '') +
-    (dmiss.length ? sect('Count plays you skipped') + '<div class="stable">' + dmiss.map(([k, [c, tc]]) => { const [spot, play] = k.split('|');
-      return '<div class="srow miss"><span>' + spot + '</span><span>' + ACT_NAME[play] + '</span><span>last at TC ' + (tc > 0 ? '+' : '') + tc.toFixed(1) + '</span><b>' + fmt(c) + '×</b></div>'; }).join('') + '</div>' : '');
-}
-function dailyBlock() {                                 // last 30 days: units per day, then a table of the recent days
-  const m = G.st.daily, days = [];
-  for (let i = 29; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i);
-    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); days.push([k, d, m[k] || [0, 0, 0, 0, 0]]); }
-  const played = days.filter(x => x[2][0]);
-  if (!played.length) return '';
-  const tot = played.reduce((a, x) => a.map((v, i) => v + x[2][i]), [0, 0, 0, 0, 0]);
-  return sect('Last 30 days \u00b7 units per day') +
-    divBars(days.map(([, d], i) => i === 0 || i === 29 || d.getDate() % 5 === 0 ? String(d.getDate()) : ''), days.map(x => x[2][2]),
-      days.map(([, d, r]) => d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (r[0] ? ': ' + fmt(r[0]) + ' rounds \u00b7 ' + dur(r[3]) + ' \u00b7 ' + fmtBig(r[1], true) + ' chips \u00b7 ' + fmtU(r[2], 1) : ': no play')),
-      days.map(x => x[2][0]), 'dense') +
-    statTiles([['Days played', fmt(played.length) + ' / 30'], ['30-day net', fmtBig(tot[1], true), signCls(tot[1])], ['30-day units', fmtU(tot[2]), signCls(tot[2])],
-      ['Winning days', fmt(played.filter(x => x[2][1] > 0).length) + ' of ' + fmt(played.length)], ['Hours at table', (tot[3] / 3600000).toFixed(1) + 'h'], ['30-day wagered', fmtBig(tot[4])]]) +
-    '<div class="stable">' + played.slice(-10).reverse().map(([, d, r]) => '<div class="srow day"><span>' + d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
-      '</span><span>' + fmt(r[0]) + ' rds</span><span>' + dur(r[3]) + '</span><span class="' + signCls(r[1]) + '">' + fmtBig(r[1], true) + '</span><b class="' + signCls(r[2]) + '">' + fmtU(r[2], 1) + '</b></div>').join('') + '</div>';
-}
 let statsKey = '';
 function renderStats(periodic) {
   document.querySelectorAll('#statCats button').forEach(b => b.classList.toggle('active', b.dataset.cat === G.statCat));
   const box = $('statBody'), st = G.st, keep = box.scrollTop;
   const key = G.statCat + '|' + st.rounds + '|' + G.hist.length;
-  if (periodic && ['play', 'edge', 'hist'].includes(G.statCat) && key === statsKey) return;   // static pages: redraw only after a round
+  if (periodic && G.statCat === 'hist' && key === statsKey) return;   // static pages: redraw only after a round
   const samePage = statsKey.split('|')[0] === G.statCat;
   statsKey = key;
-  const decided = st.wins + st.losses, n = st.tcT.reduce((a, r) => a + r[0], 0), initBets = st.tcT.reduce((a, r) => a + r[2], 0);
+  const decided = st.wins + st.losses;
   if (G.statCat === 'vip') {
     const i = vipIdx(), t = VIP[i], nx = VIP[i + 1];
     const next = nx ? vipRewards(i + 1).map(it => it.name + ' ' + it.group.toLowerCase()) : [];
-    const rate = SES.tableMs > 120000 ? SES.wag / (SES.tableMs / 3600000) : 0, left = nx ? nx.at - st.wagered : 0;
+    const hrs = SES.tableMs / 3600000, rate = SES.tableMs > 120000 ? SES.wag / hrs : 0, left = nx ? nx.at - st.wagered : 0;
     box.innerHTML =
       '<div class="vipcard" style="--v1:' + t.c[0] + ';--v2:' + t.c[1] + ';--v3:' + t.c[2] + ';--vn:' + (nx ? nx.c[1] : t.c[1]) + '">' + gemSVG(i, 'cardgem') +
       '<div class="vc-main"><div class="vc-top"><b>VIP ' + t.name + '</b><span>' + fmtBig(st.wagered) + (nx ? ' / ' + fmtBig(nx.at) : '') + ' wagered</span></div>' +
       '<div class="vc-bar"><i style="width:' + (vipProgress() * 100).toFixed(2) + '%"></i></div>' +
-      '<div class="vc-next">' + (nx ? '<b>' + nx.name + '</b> in ' + fmtBig(left) + ' wagered' + (next.length ? ' \u00b7 unlocks ' + next.join(', ') : '') : 'Top tier. The house salutes you.') + '</div></div></div>' +
-      '<div class="ladder">' + VIP.map((v, k) => '<span class="rung' + (k < i ? ' got' : k === i ? ' cur' : '') + '" title="' + v.name + ' \u00b7 ' + fmtBig(v.at) + ' wagered\n' + vipPerksText(k) +
+      '<div class="vc-next">' + (nx ? '<b>' + nx.name + '</b> in ' + fmtBig(left) + ' wagered' + (next.length ? ' · unlocks ' + next.join(', ') : '') : 'Top tier. The house salutes you.') + '</div></div></div>' +
+      '<div class="ladder">' + VIP.map((v, k) => '<span class="rung' + (k < i ? ' got' : k === i ? ' cur' : '') + '" title="' + v.name + ' · ' + fmtBig(v.at) + ' wagered\n' + vipPerksText(k) +
         (vipRewards(k).length ? '\nUnlocks: ' + vipRewards(k).map(it => it.name + ' ' + it.group.toLowerCase()).join(', ') : '') + '">' + gemSVG(k) + '</span>').join('') + '</div>' +
-      statTiles([['Total wagered', fmtBig(st.wagered), '', 'Every chip you have put on the table: bets, doubles, splits, side bets, insurance'],
-        ['Wagered this session', fmtBig(SES.wag)], ['Pace', rate ? fmtBig(rate) + '/h' : '\u2014', '', 'Chips wagered per hour at the table this session'],
-        ['Next tier ETA', nx && rate ? (left / rate < 1 ? Math.max(1, Math.round(left / rate * 60)) + ' min' : (left / rate).toFixed(1) + ' h') : '\u2014', '', 'Table time to the next tier at this session\u2019s pace'],
-        ['Avg bet', st.rounds ? fmtBig(Math.round(st.wagered / st.rounds)) : '\u2014', '', 'Total wagered \u00f7 rounds'], ['Biggest stake', fmtBig(st.biggestBet)],
-        ['Income & tips', '\u00d7' + trimZeros(vipMult().toFixed(2)), 'pos'], ['Cashback on losses', cashbackPct() + '%'], ['Broke top-up', fmtBig(topupAmount()), '', 'Only with no casino income']]);
-  } else if (G.statCat === 'session') {
-    const hrs = SES.tableMs / 3600000;
-    box.innerHTML = statTiles([
-      ['Session', dur(Date.now() - SES.t0)], ['At the table', dur(SES.tableMs)], ['Rounds', fmt(SES.rounds)],
-      ['Net result', fmtBig(SES.net, true), signCls(SES.net), 'Blackjack, side bets, insurance and cashback this session'], ['Units', fmtU(SES.units), signCls(SES.units), 'Main game result in starting bets'],
-      ['Hourly', hrs > 0.03 ? fmtBig(Math.round(SES.net / hrs), true) + '/h' : '\u2014', signCls(SES.net), 'Net per hour at the table'],
-      ['Wagered', fmtBig(SES.wag)], ['Rounds / hour', hrs > 0.03 ? fmt(Math.round(SES.rounds / hrs)) : '\u2014'], ['Won / lost', fmt(SES.won) + ' / ' + fmt(SES.lost)],
-      ['Session high', fmtBig(SES.peak, true), SES.peak > 0 ? 'pos' : ''], ['Session low', fmtBig(SES.trough, true), SES.trough < 0 ? 'neg' : ''], ['Blackjacks', fmt(SES.bj)],
-      ['Best round', fmtBig(SES.best, true), SES.best > 0 ? 'pos' : ''], ['Worst round', fmtBig(SES.worst, true), SES.worst < 0 ? 'neg' : ''],
-      ['Casino earned', fmtBig(G.earned - SES.earned0), '', 'Passive income and tips since launch']]) +
-      sect('Session result, chips') + sparkline(SES.curve, v => fmtBig(Math.round(v), true), 'Round') + dailyBlock();
-  } else if (G.statCat === 'play') {
-    const up = st.upT, dealerRate = st.dealerPlays ? st.dealerBusts / st.dealerPlays : 0;
-    box.innerHTML = statTiles([
-      ['Rounds', fmt(st.rounds)], ['Hands', fmt(st.hands)], ['Win rate', pct(st.wins, decided), '', 'Wins \u00f7 (wins + losses), pushes excluded'],
-      ['Won / lost / push', fmt(st.wins) + ' / ' + fmt(st.losses) + ' / ' + fmt(st.pushes)],
-      ['Blackjacks', fmt(st.blackjacks) + ' \u00b7 ' + pct(st.blackjacks, st.rounds), '', 'Expected ' + (BJ_RATE * 100).toFixed(2) + '% of rounds'],
-      ['Dealer blackjacks', fmt(st.dealerBJ) + ' \u00b7 ' + pct(st.dealerBJ, st.rounds), '', 'Expected ' + (BJ_RATE * 100).toFixed(2) + '% of rounds'],
-      ['Your busts', fmt(st.busts) + ' \u00b7 ' + pct(st.busts, st.hands)], ['Dealer busts', st.dealerPlays ? (dealerRate * 100).toFixed(1) + '%' : '\u2014', '', 'Share of rounds where she drew to a finish'],
-      ['Bust hitting 12\u201316', pct(st.stiffBusts, st.stiffHits), '', fmt(st.stiffBusts) + ' busts from ' + fmt(st.stiffHits) + ' hits on hard 12\u201316'],
-      ['Hits / stands', fmt(st.hitsN) + ' / ' + fmt(st.standsN)], ['Doubles W / L', fmt(st.doubleWins) + ' / ' + fmt(st.doubleLosses) + ' of ' + fmt(st.doubles)],
-      ['Doubles net', fmtBig(st.doubleNet, true), signCls(st.doubleNet)],
-      ['Splits', fmt(st.splits) + (st.fourSplits ? ' \u00b7 ' + st.fourSplits + '\u00d74-way' : '')], ['Split hands W / L', fmt(st.splitWins) + ' / ' + fmt(st.splitLosses) + ' of ' + fmt(st.splitHands)],
-      ['Surrenders', fmt(st.surrenders) + ' \u00b7 ' + pct(st.surrenders, st.rounds)],
-      ['Biggest win', fmtBig(st.biggestWin), 'pos'], ['Biggest loss', fmtBig(st.biggestLoss), st.biggestLoss ? 'neg' : ''], ['Biggest blackjack', fmtBig(st.biggestBJ), st.biggestBJ ? 'pos' : ''],
-      ['Best streak', fmt(st.bestStreak) + ' W'], ['Worst streak', fmt(st.worstStreak) + ' L'],
-      ['Current streak', st.streak > 0 ? st.streak + ' W' : st.streak < 0 ? -st.streak + ' L' : '\u2014', signCls(st.streak)]]) +
-      sect('Result by dealer up card \u00b7 units per round') +
-      divBars(UP_LABELS, up.map(r => r[0] ? r[4] / r[0] : 0),
-        up.map((r, i) => 'Dealer shows ' + UP_LABELS[i] + ': ' + fmt(r[0]) + ' rounds \u00b7 won ' + pct(r[1], r[0]) + ', lost ' + pct(r[2], r[0]) + ', push ' + pct(r[3], r[0]) +
-          ' \u00b7 ' + (r[0] ? fmtU(r[4] / r[0], 2) : '\u2014') + ' per round'), up.map(r => r[0])) +
-      sect('Result by your first two cards') +
-      '<div class="stable">' + START_LABELS.map((l, i) => { const [k, u] = st.stT[i];
-        return '<div class="srow"><span>' + l + '</span><span>' + pct(k, n) + '</span><span>' + fmt(k) + ' rds</span><b class="' + signCls(u) + '">' + (k ? fmtU(u / k, 2) + '/rd' : '\u2014') + '</b></div>'; }).join('') + '</div>';
-  } else if (G.statCat === 'edge') {
-    const z = n ? (st.units - n * BENCH_EDGE) / (ROUND_SD * Math.sqrt(n)) : 0, p = phi(z);
-    const z2 = n ? (st.units + st.bsCost - n * BENCH_EDGE) / (ROUND_SD * Math.sqrt(n)) : 0;   // add back what mistakes cost: luck alone
-    const theo = initBets * BENCH_EDGE;
-    const tc = st.tcT, hi = st.tcHiN ? st.tcHiBet / st.tcHiN : 0, lo = st.tcLoN ? st.tcLoBet / st.tcLoN : 0;
-    box.innerHTML =
-      '<div class="luck ' + signCls(z) + '"><div><small>Luck vs perfect basic strategy</small><b>' + (n >= 30 ? (z >= 0 ? '+' : '\u2212') + Math.abs(z).toFixed(2) + '\u03c3' : '\u2014') + '</b></div>' +
-      '<p>' + (n >= 30 ? (z >= 0 ? 'Luckier than ' + (p * 100).toFixed(0) + '% of players' : 'Unluckier than ' + ((1 - p) * 100).toFixed(0) + '% of players') +
-        ' over ' + fmt(n) + ' rounds. Mistakes cost ' + fmtU(-st.bsCost, 1) + '; without them your luck is ' + (z2 >= 0 ? '+' : '\u2212') + Math.abs(z2).toFixed(2) + '\u03c3.' : 'Needs 30 rounds on this version to judge.') + '</p></div>' +
       statTiles([
-        ['Units won', fmtU(st.units), signCls(st.units), 'Main game result in starting bets: +1u = one starting bet won'],
-        ['Units / 100 rounds', n ? fmtU(st.units / n * 100, 2) : '\u2014', signCls(st.units), 'Perfect basic strategy: ' + fmtU(BENCH_EDGE * 100, 2)],
-        ['Chip edge', initBets ? ((st.mainNet / initBets) * 100).toFixed(2) + '%' : '\u2014', signCls(st.mainNet), 'Main game net \u00f7 starting bets, so bigger bets weigh more (units weigh every round the same). Perfect basic strategy: ' + (BENCH_EDGE * 100).toFixed(2) + '%'],
-        ['Main net', fmtBig(st.mainNet, true), signCls(st.mainNet)], ['Theo (expected)', fmtBig(Math.round(theo), true), signCls(theo), 'What perfect basic strategy expects to lose on your starting bets: ' + (BENCH_EDGE * 100).toFixed(2) + '% of ' + fmtBig(initBets)],
-        ['Vs theo', fmtBig(Math.round(st.mainNet - theo), true), signCls(st.mainNet - theo), 'Main net minus theo: luck plus any strategy mistakes'],
-        ['Worst drawdown', fmtU(-st.maxDD), st.maxDD ? 'neg' : '', 'Largest peak-to-trough fall of your running units'], ['Units peak', fmtU(st.unitsPeak)], ['Cashback earned', fmtBig(st.cashback), st.cashback ? 'pos' : '']]) +
-      sect('Side bets \u00b7 house edge ~1%') +
-      statTiles([
-        ['Pairs hits', fmt(st.ppHits) + ' / ' + fmt(st.ppBets) + ' \u00b7 ' + pct(st.ppHits, st.ppBets), '', 'Perfect ' + st.pp1 + ' \u00b7 coloured ' + st.pp2 + ' \u00b7 mixed ' + st.pp3 + '. Expected hit rate 6.80%'],
-        ['Pairs return', st.ppWag ? (st.ppNet / st.ppWag * 100).toFixed(1) + '%' : '\u2014', signCls(st.ppNet), 'Net ' + fmtBig(st.ppNet, true) + ' on ' + fmtBig(st.ppWag) + '. Expected ' + (SIDE_EDGE.pp * 100).toFixed(2) + '%'],
-        ['21+3 hits', fmt(st.tpHits) + ' / ' + fmt(st.tpBets) + ' \u00b7 ' + pct(st.tpHits, st.tpBets), '', 'Flush ' + st.tp1 + ' \u00b7 straight ' + st.tp2 + ' \u00b7 trips ' + st.tp3 + ' \u00b7 straight flush ' + st.tp4 + '. Expected hit rate 9.27%'],
-        ['21+3 return', st.tpWag ? (st.tpNet / st.tpWag * 100).toFixed(1) + '%' : '\u2014', signCls(st.tpNet), 'Net ' + fmtBig(st.tpNet, true) + ' on ' + fmtBig(st.tpWag) + '. Expected ' + (SIDE_EDGE.tp * 100).toFixed(2) + '%'],
-        ['Side bets net', fmtBig(st.sideNet, true), signCls(st.sideNet)], ['Insurance net', fmtBig(st.insNet, true), signCls(st.insNet), 'Won ' + st.insWon + ' of ' + st.insTaken + '. Pays only if the count is high (TC \u2265 +3)']]) +
-      sect('Decisions vs basic strategy') + strategyBlock(st, n) +
-      sect('Result by true count \u00b7 units per 100 rounds') +
-      divBars(TC_LABELS, tc.map(r => r[0] ? r[1] / r[0] * 100 : 0),
-        tc.map((r, i) => 'True count ' + TC_LABELS[i] + ': ' + fmt(r[0]) + ' rounds (' + pct(r[0], n) + ') \u00b7 ' + (r[0] ? fmtU(r[1] / r[0] * 100, 1) + ' per 100 \u00b7 avg bet ' + fmtBig(Math.round(r[2] / r[0])) : '\u2014')),
-        tc.map(r => r[0])) +
-      statTiles([['Avg bet TC \u2265 +2', st.tcHiN ? fmtBig(Math.round(hi)) : '\u2014'], ['Avg bet TC \u2264 0', st.tcLoN ? fmtBig(Math.round(lo)) : '\u2014'],
-        ['Bet spread', hi && lo ? '\u00d7' + (hi / lo).toFixed(2) : '\u2014', hi && lo ? signCls(hi / lo - 1) : '', 'Average bet at a good count \u00f7 at a neutral or bad one. Counters want this well above \u00d71.'],
-        ['Highest TC seen', (st.maxTC > 0 ? '+' : '') + st.maxTC.toFixed(1)], ['Lowest TC seen', st.minTC.toFixed(1)], ['Rounds at TC \u2265 +2', pct(tc[4][0] + tc[5][0] + tc[6][0], n)]]);
+        ['Session net', fmtBig(SES.net, true), signCls(SES.net), 'Blackjack, side bets, insurance and cashback since launch'],
+        ['Hourly', hrs > 0.03 ? fmtBig(Math.round(SES.net / hrs), true) + '/h' : '—', signCls(SES.net), 'Session net per hour at the table'],
+        ['Session rounds', fmt(SES.rounds) + (hrs > 0.03 ? ' · ' + fmt(Math.round(SES.rounds / hrs)) + '/h' : '')],
+        ['Wagered this session', fmtBig(SES.wag)],
+        ['Next tier ETA', nx && rate ? (left / rate < 1 ? Math.max(1, Math.round(left / rate * 60)) + ' min' : (left / rate).toFixed(1) + ' h') : '—', '', 'Table time to the next tier at this session’s pace'],
+        ['Total wagered', fmtBig(st.wagered)],
+        ['Lifetime net', fmtBig(st.net, true), signCls(st.net), 'All rounds incl. side bets, insurance and cashback'],
+        ['Win rate', pct(st.wins, decided), '', 'Wins ÷ (wins + losses), pushes excluded'],
+        ['VIP perks', '×' + trimZeros(vipMult().toFixed(2)) + ' · ' + cashbackPct() + '%', '', vipPerksText(i)]]);
   } else if (G.statCat === 'hist') {
     let cum = 0; const curve = [0].concat(st.curve.map(u => (cum += u)));
     box.innerHTML = sect('Last ' + st.curve.length + ' rounds \u00b7 running units') + sparkline(curve, v => fmtU(v, 1), 'Round') +
@@ -1986,7 +1713,7 @@ const away = offlineEarnings();
 applyCosmetics();
 setTab('table');
 render();
-SES.earned0 = G.earned; G.st.sessions++;
+G.st.sessions++;
 if (G.state !== 'BET') resumeRound();
 save();                                                  // stamp lastSeen now, so a crash can't pay the away earnings twice
 let lastTick = Date.now(), lastSave = Date.now(), lastStats = 0;
@@ -2034,7 +1761,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(pick(LINES.hello)), 1200);
 
 // exposed for automated tests only
-window.__bb = { expertAction, EVX, dailyBlock, bsAction, judge, SES, quickBet, setBet, canTopup, totalText, isSoft, startBucket, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,

@@ -555,15 +555,7 @@ body[data-back="obsidian"] .back { background-color: #15121f;
    ===================================================================== */
 .bar-bet .qb { flex: 0 0 46px; font-size: 12px; color: var(--muted); }
 .bar-bet .qb:hover:not(:disabled) { color: var(--text); }
-#statCats { gap: 2px; }
-#statCats button { height: 24px; }
 .stat-body .sgroup { margin: 3px 0 -2px 2px; }
-.luck { flex: none; display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-radius: 12px; background: var(--surface); }
-.luck div { display: flex; flex-direction: column; flex: none; }
-.luck small { font-size: 10px; color: var(--muted); }
-.luck b { font-size: 20px; font-weight: 700; line-height: 1.1; }
-.luck.pos b { color: var(--good); } .luck.neg b { color: var(--bad); }
-.luck p { margin: 0; font-size: 10.5px; line-height: 1.35; color: var(--muted); }
 .sparkline { flex: none; border-radius: var(--r-md); background: var(--surface); padding: 6px 8px 4px; }
 .sparkline.empty { color: var(--faint); font-size: 11px; padding: 10px; text-align: center; }
 .sparkline svg { display: block; width: 100%; height: 58px; overflow: visible; }
@@ -575,21 +567,6 @@ body[data-back="obsidian"] .back { background-color: #15121f;
 .sp-lab { display: flex; gap: 10px; font-size: 10px; color: var(--muted); margin-top: 2px; }
 .sp-lab b { margin-left: auto; font-weight: 650; color: var(--text); }
 .sp-lab b.pos { color: var(--good); } .sp-lab b.neg { color: var(--bad); }
-.dbars { flex: none; display: flex; gap: 4px; padding: 6px 8px 4px; border-radius: var(--r-md); background: var(--surface); }
-.dcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.dcol:hover .dtrack { background: rgba(255, 255, 255, .05); }
-.dtrack { position: relative; width: 100%; height: 54px; border-radius: 4px; }
-.dtrack::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(255, 255, 255, .14); }
-.dtrack i { position: absolute; left: 22%; right: 22%; }
-.dtrack i.pos { bottom: 50%; background: var(--good); border-radius: 4px 4px 0 0; }
-.dtrack i.neg { top: 50%; background: var(--bad); border-radius: 0 0 4px 4px; }
-.dcol small { font-size: 10px; color: var(--muted); white-space: nowrap; }
-.dcol small.none { color: var(--faint); }
-.stable { flex: none; display: flex; flex-direction: column; gap: 1px; border-radius: var(--r-md); overflow: hidden; }
-.srow { display: grid; grid-template-columns: 1fr 52px 70px 76px; gap: 6px; align-items: center; padding: 3px 9px; background: var(--surface); font-size: 11px; color: var(--muted); }
-.srow span:first-child { color: var(--text); }
-.srow b { text-align: right; font-weight: 650; color: var(--text); }
-.srow b.pos, .hrow b.pos { color: var(--good); } .srow b.neg, .hrow b.neg { color: var(--bad); }
 .hist { flex: none; display: flex; flex-direction: column; gap: 1px; border-radius: var(--r-md); overflow: hidden; }
 .hrow { display: grid; grid-template-columns: 40px minmax(0, 1fr) 78px 76px 58px; gap: 6px; align-items: center; padding: 3px 9px; background: var(--surface); font-size: 11px; }
 .hrow:hover { background: var(--surface-hi); }
@@ -600,13 +577,6 @@ body[data-back="obsidian"] .back { background-color: #15121f;
 .hrow .red { color: #ff8a93; }
 .hrow .hr { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hrow b { text-align: right; font-weight: 650; white-space: nowrap; }
-.srow.miss { grid-template-columns: minmax(0, 1fr) 96px 108px 34px; }
-.srow.miss span.neg { color: var(--bad); }
 .histhead { flex: none; display: flex; align-items: center; justify-content: space-between; }
 .csv { height: 20px; padding: 0 9px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 10.5px; font-weight: 600; }
 .csv:hover { background: var(--surface-hi); color: var(--text); }
-.dbars.dense { gap: 2px; }
-.dbars.dense .dtrack i { left: 12%; right: 12%; }
-.dbars.dense small { overflow: visible; }
-.srow.day { grid-template-columns: minmax(0, 1fr) 58px 58px 70px 56px; }
-.srow.day span.pos { color: var(--good); } .srow.day span.neg { color: var(--bad); }

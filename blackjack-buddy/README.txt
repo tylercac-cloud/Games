@@ -129,31 +129,14 @@ VIP (lifetime, never resets - not even by a franchise)
 - Her vest pin shows your tier colour.
 
 STATS (click the VIP chip). "Units" = results in starting bets, so a 10-chip hand and a 1B hand count
-the same; hover any tile or bar for detail.
-- VIP: tier card and ladder, total wagered, wagered this session, pace per table-hour, time to the
-  next tier at that pace, average and biggest bet, current perks.
-- Session (since launch): time, time at the table, rounds and rounds/hour, net, hourly, units, wagered,
-  session high/low, best/worst round, blackjacks, casino earnings, and a chart of the session result.
-  Last 30 days: units per day chart, days played, 30-day net / units / wagered, winning days, hours at
-  the table, and a table of the last 10 days you played.
-- Play: win rate, blackjack and dealer-blackjack rates vs the expected 4.78%, bust rates (yours,
-  hers, and when hitting hard 12-16), hits/stands, doubles and splits won/lost, surrenders, records,
-  streaks, a chart of your result against each dealer up card, and results by starting hand.
-- Edge: luck in standard deviations vs perfect basic strategy (-0.25% for these rules), units won and
-  units/100, chip-weighted edge, theo (expected loss) vs actual, worst drawdown, side-bet returns vs
-  their expected -0.97% / -0.95%, insurance net, results by true count, bet spread, highest/lowest count.
-  Decisions vs basic strategy: every hit/stand/double/split/surrender/insurance choice is checked
-  silently against the chart for these rules. Where the true count changes the right play (the
-  Illustrious 18 with S17 indices, plus the Fab 4 surrenders), either the count play or the basic
-  play counts as correct; "Count plays made" shows how often you took the count play, and "Count
-  plays you skipped" lists them. Anything else is a mistake, costed in expected units lost versus the
-  chart play (neutral count, infinite-deck EVs, e.g. standing 16 vs 10 instead of hitting = 0.0006u).
-  The luck figure is also shown with mistakes added back, so luck and play quality are separated.
+the same.
+- Overview: VIP tier card and ladder (hover a gem for its perks and unlocks), session net, hourly,
+  rounds, wagered this session, time to the next tier at this session's pace, total wagered,
+  lifetime net, win rate, VIP perks.
 - History: running units over the last 200 rounds and the last 50 hands (hover a row for bets,
   count, side bets, insurance and cashback). Export CSV saves the last 250 hands as a spreadsheet.
 - Casino: lifetime earnings, income, highest balance, tips, attractions, franchises, stars, rank,
   time with her, time at the table, days played, sessions.
-The new analysis stats start counting from 2.1.
 
 SOUND
 - Every action has a sound: dealing, hits, stands, busts, doubles, splits, surrender, insurance,
