@@ -571,16 +571,18 @@ function peek() {                                     // dealer checks the hole 
   }
 }
 
+// the current hand can take an action: not finished, and not still waiting for its second card after a split
+const canAct = () => G.state === 'PLAYER' && !!hand() && !hand().done && hand().cards.length >= 2;
 const canSplit = () => {
-  if (G.state !== 'PLAYER') return false;
+  if (!canAct()) return false;
   const h = hand();
   return h.cards.length === 2 && h.cards[0][0] === h.cards[1][0] && !h.aces && G.hands.length < MAX_HANDS && G.chips >= h.bet;
 };
-const canDouble = () => G.state === 'PLAYER' && hand().cards.length === 2 && !hand().aces && G.chips >= hand().bet;
-const canSurrender = () => G.state === 'PLAYER' && G.hands.length === 1 && hand().cards.length === 2;
+const canDouble = () => canAct() && hand().cards.length === 2 && !hand().aces && G.chips >= hand().bet;
+const canSurrender = () => canAct() && G.hands.length === 1 && hand().cards.length === 2;
 
 function hit() {
-  if (G.state !== 'PLAYER') return;
+  if (!canAct()) return;
   const h = hand();
   h.cards.push(drawCard()); sfx('card');
   const v = handValue(h.cards);
@@ -590,13 +592,13 @@ function hit() {
 }
 
 function stand() {
-  if (G.state !== 'PLAYER') return;
+  if (!canAct()) return;
   hand().done = true; sfx('stand');
   nextHand();
 }
 
 function doubleDown() {
-  if (!canDouble()) { if (G.state === 'PLAYER' && hand().cards.length === 2) { say(pick(LINES.nochips), 2500); } return; }
+  if (!canDouble()) { if (canAct() && hand().cards.length === 2 && !hand().aces) { say(pick(LINES.nochips), 2500); } return; }
   const h = hand();
   G.chips -= h.bet; roundStake += h.bet; h.bet *= 2; h.doubled = true;
   sfx('chips');
@@ -774,12 +776,15 @@ function tick(dtMs) {                                  // passive income, accrue
   if (whole > 0) { G.frac -= whole; G.chips += whole; G.earned += whole; G.runEarned += whole; }
   return whole;
 }
-function offlineEarnings() {
-  if (!G.lastSeen) return 0;
-  const elapsed = Math.min(Math.max(0, Date.now() - G.lastSeen), offlineCapMs());
+function awayEarnings(ms) {                             // the floor keeps earning while she is closed, up to the cap
+  const elapsed = Math.min(Math.max(0, ms), offlineCapMs());
   const earned = Math.floor(incomePerMin() * elapsed / 60000);
   if (earned > 0) { G.chips += earned; G.earned += earned; G.runEarned += earned; }
   return earned;
+}
+const offlineEarnings = () => G.lastSeen ? awayEarnings(Date.now() - G.lastSeen) : 0;
+function greetAway(away) {
+  if (away > 0) { say('While you were away the floor made +' + fmtBig(away) + ' \u2665', 6000); setMood('happy', 3000); sfx('coins'); }
 }
 function buyGen(id) {
   const g = GENS.find(x => x.id === id);
@@ -792,9 +797,9 @@ function buyGen(id) {
   sfx('buy'); save(); setMood('happy', 2500); say(pick(LINES.buy), 3000); renderCasino(); render();
   return true;
 }
-function tipClick(x, y, auto) {
-  const v = tipValue();
-  G.chips += v; G.earned += v; G.runEarned += v; G.tips++;
+function tipClick(x, y, auto, n = 1) {                  // n > 1: a batch of auto-tips credited at once
+  const v = tipValue() * n;
+  G.chips += v; G.earned += v; G.runEarned += v; G.tips += n;
   if (!auto && G.tips % 25 === 0) { say(pick(LINES.tip), 2500); setMood('happy', 1800); }
   if (!auto) sfx('tip');
   if (x !== undefined) {
@@ -803,7 +808,7 @@ function tipClick(x, y, auto) {
     document.body.appendChild(f); setTimeout(() => f.remove(), 900);
     const j = $('tipjar'); j.classList.remove('bump'); void j.offsetWidth; j.classList.add('bump');
   }
-  if (G.tips % 10 === 0) save();
+  if (!auto && G.tips % 10 === 0) save();
   if (!auto) { renderCasino(); render(); }
 }
 function buyBoost(id) {
@@ -1361,6 +1366,7 @@ function setValue(id, v) {
 
 function render() {
   const inHand = G.state !== 'BET', betOk = G.state === 'BET';
+  if (betOk) fitBets();                                // chips spent in the casino or shop: trim the bet so Deal still works
   const broke = G.chips < MIN_BET && !inHand;
   $('chips').textContent = fmtBig(G.chips);
   if (G.chips > G.st.highChips) G.st.highChips = G.chips;
@@ -1442,10 +1448,9 @@ function render() {
   const deal = $('btn-deal');
   deal.textContent = broke ? 'Top up ' + fmtBig(topupAmount()) + ' chips' : 'Deal  \u00b7  ' + fmt(totalStake());
   deal.disabled = !(broke || canDeal());
-  const playing = G.state === 'PLAYER';
-  $('btn-hit').disabled = !playing || hand().done;
-  $('btn-stand').disabled = !playing || hand().done;
-  $('btn-double').disabled = !canDouble() || hand().done;
+  $('btn-hit').disabled = !canAct();
+  $('btn-stand').disabled = !canAct();
+  $('btn-double').disabled = !canDouble();
   $('btn-split').disabled = !canSplit();
   $('btn-surrender').disabled = !canSurrender();
   renderVipBadges();
@@ -1553,16 +1558,33 @@ const away = offlineEarnings();
 applyCosmetics();
 setTab('table');
 render();
+save();                                                  // stamp lastSeen now, so a crash can't pay the away earnings twice
 let lastTick = Date.now(), lastSave = Date.now(), lastStats = 0;
 if (!G.st.since) G.st.since = Date.now();
+// a press in progress: skip the periodic re-render so buttons aren't rebuilt under the cursor (that swallows the click)
+let pressAt = 0;
+window.addEventListener('pointerdown', () => { pressAt = performance.now(); }, true);
+window.addEventListener('pointerup', () => { pressAt = 0; }, true);
+const pressing = () => pressAt && performance.now() - pressAt < 1500;
+let dirty = false;
+const LONG_GAP = 10 * 60000;                             // PC slept (not just a throttled hidden window): the gap counts as time away
 setInterval(() => {
-  const now = Date.now();
-  let changed = tick(now - lastTick) > 0;
-  if (G.owned.autotip) {                                 // auto-tipper: 1 tip/s, 2/s with the second dealer
-    G.autoFrac += (now - lastTick) / 1000 * (G.owned.autotip2 ? 2 : 1);
-    while (G.autoFrac >= 1) { G.autoFrac -= 1; tipClick(undefined, undefined, true); changed = true; }
+  const now = Date.now(), dt = now - lastTick;
+  let changed;
+  if (dt > LONG_GAP) {
+    const away = awayEarnings(dt);
+    changed = away > 0; greetAway(away);
+  } else {
+    changed = tick(dt) > 0;
+    if (G.owned.autotip) {                               // auto-tipper: 1 tip/s, 2/s with the second dealer
+      G.autoFrac += dt / 1000 * (G.owned.autotip2 ? 2 : 1);
+      const n = Math.floor(G.autoFrac);
+      if (n > 0) { G.autoFrac -= n; tipClick(undefined, undefined, true, n); changed = true; }
+    }
   }
-  if (changed) {
+  dirty = dirty || changed;
+  if (dirty && !pressing()) {
+    dirty = false;
     $('chips').textContent = fmtBig(G.chips);
     $('rate').textContent = incomePerMin() > 0 ? '+' + fmtBig(Math.round(incomePerMin())) + '/min' : '';
     if (G.chips > G.st.highChips) G.st.highChips = G.chips;
@@ -1571,18 +1593,18 @@ setInterval(() => {
   G.st.playMs += Math.min(5000, now - lastTick);
   const today = new Date().toDateString();
   if (G.st.lastDay !== today) { G.st.lastDay = today; G.st.days++; }
-  if (G.tab === 'stats' && now - lastStats > 1000) { renderStats(); lastStats = now; }
+  if (G.tab === 'stats' && now - lastStats > 1000 && !pressing()) { renderStats(); lastStats = now; }
   lastTick = now;
   if (now - lastSave > 5000) { save(); lastSave = now; }
 }, 250);
 window.addEventListener('beforeunload', save);
-if (away > 0) setTimeout(() => { say('While you were away the floor made +' + fmtBig(away) + ' \u2665', 6000); setMood('happy', 3000); sfx('coins'); }, 1500);
+if (away > 0) setTimeout(() => greetAway(away), 1500);
 setTimeout(blinkLoop, 2500);
 setTimeout(chatterLoop, 25000);
 setTimeout(() => say(pick(LINES.hello)), 1200);
 
 // exposed for automated tests only
-window.__bb = { buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, compFor, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, compFor, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,

@@ -56,7 +56,7 @@ CASINO TAB (earning chips without playing)
   toward the next tier in its colour, and crossing a tier flashes the row.
 - Boosts (one-time, whole-floor multipliers): Train staff x2 (5K), Ads x2 (250K), Whales x3 (5M),
   The Strip x5 (200M), Star host x3 (10B), Global brand x5 (500B). Only the next one is shown.
-- Away earnings: the floor keeps earning while she is closed, for up to 4 hours (8 or 24 with shop perks).
+- Away earnings: the floor keeps earning while she is closed or the PC sleeps, for up to 4 hours (8 or 24 with shop perks).
 
 FRANCHISE (long-term progression)
 - Button at the bottom of the Casino tab. Unlocks once this run's floor has earned 1M.
