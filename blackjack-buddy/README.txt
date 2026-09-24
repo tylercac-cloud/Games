@@ -24,6 +24,9 @@ CONTROLS
 - Bet / Pairs / 21+3 ... - and + step the main bet by 10 and the side bets by 5.
                          Hold a button and it speeds up (x10 after a second, x100 after three).
                          Shift-click steps x10. No caps: the only limit is your chips.
+- Min / ½ / x2 / Max ... quick-bet buttons next to Deal.
+- Sticky bets .......... after a loss your bets shrink to what you can afford, then grow back to the
+                         amount you picked once your chips allow it.
 - Action bar .......... shows only what you can do right now: Deal while betting; Hit / Stand /
                          Double / Split / Surrender during a hand; Take / No thanks when insurance is offered
 - "-" button ........... hide the table      "x" button ........... quit
@@ -43,7 +46,12 @@ HOUSE RULES
   A 21 on a split hand is not a blackjack and pays 1:1. Surrender only before splitting.
   Split hands sit side by side; the gold underline marks the hand you're playing, and each hand's tag
   shows its total, then its result.
-- You start with 500 chips. If you go broke, the Deal button becomes "Top up" (500, more at higher VIP tiers).
+- You start with 500 chips. If you go broke with an empty casino (no attractions, no auto-tipper), the Deal
+  button becomes "Top up" (500, more at higher VIP tiers). Once your casino earns, it refills you instead:
+  Deal points you to the tip jar. (This closes a loop of spending down to 0 and topping up for free chips.)
+- Totals: soft hands show both values, e.g. 7/17.
+- Quit mid-hand and the same hand is waiting next launch: the shoe and the round are saved, so the cards
+  (and the count) are exactly where you left them.
 
 CASINO TAB (earning chips without playing)
 - Tip jar: click it for chips. "Bigger tips" doubles the tip (100, then 1,000, 10,000, ...).
@@ -100,14 +108,15 @@ SHOP (spend your chips)
   Dealer items can still be hovered to try on.
 
 VIP (lifetime, never resets - not even by a franchise)
-- Every round earns comp points = 10 x log10(1 + chips wagered that round / 10), counting the main bet,
-  doubles, splits, side bets and insurance. 10 chips = 3 pts, 1,000 = 20, 1M = 50, 1T = 110.
-  Bigger bets earn more, but on a log scale, so hands played matter most.
-- 13 tiers:
-    Wood 0 · Bronze 1K · Silver 5K · Gold 15K · Platinum 40K · Pearl 100K · Jade 200K
-    Sapphire 400K · Ruby 700K · Emerald 1.1M · Diamond 1.7M · Obsidian 2.6M · Celestial 4M
-  Calibrated so a typical player (about 45 minutes of hands a day, investing in the casino) reaches
-  Celestial in roughly 4-5 months. Heavy players about 2 months; light players a year or more.
+- Your tier follows total chips wagered: main bet, doubles, splits, side bets and insurance.
+- 13 tiers (Sp = 10^24):
+    Wood 0 · Bronze 10K · Silver 10M · Gold 10B · Platinum 1Qa · Pearl 1Qi · Jade 1Sx
+    Sapphire 10Sx · Ruby 100Sx · Emerald 1Sp · Diamond 3Sp · Obsidian 10Sp · Celestial 30Sp
+  The casino grows your bankroll exponentially, so the ladder is geometric. Calibrated with an economy
+  simulation (greedy casino buyer, a franchise every ~5 days, 45 min of hands a day, bets of about
+  1.5 minutes of casino income): Celestial in about 4 months; heavy players (90 min, bigger bets)
+  about 2.5 months; light players 6+ months. Bet size relative to income moves this more than hours played.
+- Saves from before 2.1 keep the tier they had earned under the old comp-point ladder.
 - Every tier: +5% casino income and tips (x1.6 at Celestial), cashback on losing rounds
   (0.1% at Bronze up to 1.25% at Celestial), a bigger broke top-up (500 x (tier+1)^2), and a one-time
   chip bonus when you reach it.
@@ -117,14 +126,23 @@ VIP (lifetime, never resets - not even by a franchise)
   (Obsidian), Halo + Celestial outfit + Starfield felt (Celestial).
 - Her vest pin shows your tier colour.
 
-STATS (click the VIP chip)
-- VIP: your tier, progress, the full ladder (hover a gem for its perks and unlocks), current perks.
-- Blackjack: rounds, hands, win rate, wins/losses/pushes, blackjacks, busts, dealer busts and
-  blackjacks, doubles won, splits, surrenders, insurance, total wagered, net result, cashback,
-  biggest win / loss / stake, streaks, side-bet hit rates and net, and your average bet at a good
-  true count (+2 or more) vs a neutral or bad one (0 or less) - the "bet spread" counters aim to raise.
+STATS (click the VIP chip). "Units" = results in starting bets, so a 10-chip hand and a 1B hand count
+the same; hover any tile or bar for detail.
+- VIP: tier card and ladder, total wagered, wagered this session, pace per table-hour, time to the
+  next tier at that pace, average and biggest bet, current perks.
+- Session (since launch): time, time at the table, rounds and rounds/hour, net, hourly, units, wagered,
+  session high/low, best/worst round, blackjacks, casino earnings, and a chart of the session result.
+- Play: win rate, blackjack and dealer-blackjack rates vs the expected 4.78%, bust rates (yours,
+  hers, and when hitting hard 12-16), hits/stands, doubles and splits won/lost, surrenders, records,
+  streaks, a chart of your result against each dealer up card, and results by starting hand.
+- Edge: luck in standard deviations vs perfect basic strategy (-0.24% for these rules), units won and
+  units/100, chip-weighted edge, theo (expected loss) vs actual, worst drawdown, side-bet returns vs
+  their expected -0.97% / -0.95%, insurance net, results by true count, bet spread, highest/lowest count.
+- History: running units over the last 200 rounds and the last 50 hands (hover a row for bets,
+  count, side bets, insurance and cashback).
 - Casino: lifetime earnings, income, highest balance, tips, attractions, franchises, stars, rank,
-  time with her, days played.
+  time with her, time at the table, days played, sessions.
+The new analysis stats start counting from 2.1.
 
 SOUND
 - Every action has a sound: dealing, hits, stands, busts, doubles, splits, surrender, insurance,
@@ -143,15 +161,17 @@ CARD COUNTING (Hi-Lo)
 
 SIDE BETS (settled right after the deal)
 - Perfect Pairs, on your first two cards:
-    Mixed pair (same rank, different colour) ...... 6 to 1
-    Coloured pair (same colour, different suit) ... 12 to 1
-    Perfect pair (identical cards) ................ 25 to 1
+    Mixed pair (same rank, different colour) ...... 8 to 1
+    Coloured pair (same colour, different suit) ... 14 to 1
+    Perfect pair (identical cards) ................ 35 to 1
+    House edge 0.97% (was 22.3% with the 6-deck 25/12/6 table).
 - 21+3, on your two cards plus the dealer's up card as a 3-card poker hand:
     Flush ......................................... 5 to 1
     Straight (ace high or low, no wrap-around) .... 10 to 1
-    Three of a kind ............................... 30 to 1
-    Straight flush ................................ 40 to 1
+    Three of a kind ............................... 45 to 1
+    Straight flush ................................ 60 to 1
   Suited three of a kind is impossible with two decks, so that tier is omitted.
+  House edge 0.95% (was 11.2% with trips at 30 and straight flush at 40).
 
 WHERE YOUR DATA LIVES
 Chips, bets, stats, VIP progress and the window position are stored in %APPDATA%\blackjack-buddy.

@@ -86,14 +86,23 @@
   <section class="stats" id="stats">
     <nav class="shop-cats" id="statCats">
       <button data-cat="vip" class="active">VIP</button>
-      <button data-cat="bj">Blackjack</button>
+      <button data-cat="session">Session</button>
+      <button data-cat="play">Play</button>
+      <button data-cat="edge">Edge</button>
+      <button data-cat="hist">History</button>
       <button data-cat="casino">Casino</button>
     </nav>
     <div class="stat-body" id="statBody"></div>
   </section>
 
   <footer class="actions">
-    <div class="bar bar-bet"><button id="btn-deal" class="primary">Deal</button></div>
+    <div class="bar bar-bet">
+      <button class="qb" data-q="min" title="Minimum bet">Min</button>
+      <button class="qb" data-q="half" title="Halve the bet">½</button>
+      <button class="qb" data-q="dbl" title="Double the bet">×2</button>
+      <button class="qb" data-q="max" title="Bet everything (after side bets)">Max</button>
+      <button id="btn-deal" class="primary">Deal</button>
+    </div>
     <div class="bar bar-play">
       <button id="btn-hit" class="primary">Hit</button>
       <button id="btn-stand">Stand</button>
@@ -119,7 +128,9 @@
   <p>Two decks. One card is burned after every shuffle and a cut card is placed at a random depth (55–75% of the shoe). When it comes out, the current hand finishes and the shoe is shuffled before the next deal.</p>
   <p>Dealer stands on all 17s. Blackjack pays 3:2. Dealer peeks for blackjack. Double on any first two cards. Late surrender on the first two cards (half the bet back). Insurance on a dealer ace: half the bet, pays 2:1.</p>
   <p><b>Splitting:</b> split any pair of the same rank for another bet of the same size, up to 4 hands. Double after split is allowed. Split aces get one card each and can't be re-split or doubled. A 21 on a split hand pays 1:1, not 3:2.</p>
-  <p>No bet limits beyond your chips. − / + step by 10 (side bets by 5). Hold a button and it speeds up: ×10 after a second, ×100 after three. Shift-click steps ×10.</p>
+  <p>No bet limits beyond your chips. − / + step by 10 (side bets by 5). Hold a button and it speeds up: ×10 after a second, ×100 after three. Shift-click steps ×10. Min / ½ / ×2 / Max next to Deal set the bet in one click. Bets are sticky: after a loss the bet shrinks to what you can afford and comes back once you can afford it again.</p>
+  <p>Out of chips with an empty casino? Deal turns into a top-up. Once you own attractions or the auto-tipper, your casino refills you instead (tip jar).</p>
+  <p>Quit mid-hand and the same hand (same shoe, same cards) is waiting for you next time.</p>
   <h3>Casino <small>(passive income)</small></h3>
   <p>Spend chips on floor attractions; each pays out every second while she is running, and for up to 4 hours while she is closed (longer with shop perks). Prices rise 15% per copy, and every attraction doubles its own output at 10, 25, 50, 100, 150, 200 and 300 copies. Boosts multiply the whole floor. The tip jar pays per click; "Bigger tips" doubles it.</p>
   <h3>Franchise <small>(long-term progression)</small></h3>
@@ -127,15 +138,15 @@
   <h3>Star shop <small>(Shop → Stars)</small></h3>
   <p>Spend stars on permanent upgrades that survive every franchise: bigger starting chips, keeping boosts, cheaper attractions, stronger milestones, stronger stars, more stars per franchise, bigger tips, longer away earnings. Spent stars stop adding income, so it's a trade: income now for a faster engine every run after.</p>
   <h3>VIP <small>(lifetime, never resets)</small></h3>
-  <p>Every round you play earns comp points: 10 × log10(1 + total chips wagered that round ÷ 10). A 10-chip hand earns 3, a 1,000-chip hand 20, a 1M hand 50. Bigger bets earn more, but hands played matter most. Thirteen tiers from Wood to Celestial. Each tier adds +5% to casino income and tips, raises your cashback on losing rounds (up to 1.25%) and your broke top-up, pays a chip bonus when you reach it, and most unlock exclusive cosmetics. Your VIP pin is on her vest.</p>
+  <p>Your tier follows your total chips wagered: main bets, doubles, splits, side bets and insurance all count. Thirteen tiers from Wood (0) through Bronze 10K, Silver 10M, Gold 10B, Platinum 1Qa, Pearl 1Qi, Jade 1Sx, Sapphire 10Sx, Ruby 100Sx, Emerald 1Sp, Diamond 3Sp, Obsidian 10Sp to Celestial 30Sp. Each tier adds +5% to casino income and tips, raises your cashback on losing rounds (up to 1.25%) and your broke top-up, pays a chip bonus when you reach it, and most unlock exclusive cosmetics. Your VIP pin is on her vest.</p>
   <h3>Shop</h3>
   <p>Perks change how the game plays (auto-tipping, longer away earnings). Everything else is cosmetic: her ribbon, outfit and accessories, card backs and table felt. Shop purchases survive a franchise.</p>
   <h3>Count <small>(Hi-Lo)</small></h3>
   <p>2–6 count +1, 7–9 count 0, 10–A count −1. The running count includes every card you have seen this shoe: not the burn card, and the hole card only once it is turned. True count = running count ÷ decks left in the shoe. Both reset at the shuffle. Click the count pill to hide it and check yourself.</p>
   <h3>Perfect Pairs <small>(your first two cards)</small></h3>
-  <p>Mixed pair 6:1 · Coloured pair 12:1 · Perfect pair 25:1</p>
+  <p>Mixed pair 8:1 · Coloured pair 14:1 · Perfect pair 35:1 <small>(house edge 0.97%)</small></p>
   <h3>21+3 <small>(your two cards + dealer up card)</small></h3>
-  <p>Flush 5:1 · Straight 10:1 · Three of a kind 30:1 · Straight flush 40:1</p>
+  <p>Flush 5:1 · Straight 10:1 · Three of a kind 45:1 · Straight flush 60:1 <small>(house edge 0.95%)</small></p>
 </div>
 
 <script src="app.js"></script>
