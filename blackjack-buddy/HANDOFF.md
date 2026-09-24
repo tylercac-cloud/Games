@@ -9,7 +9,7 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder. Version **2.1.3**.
+lifetime VIP ladder. Version **2.1.4**.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).

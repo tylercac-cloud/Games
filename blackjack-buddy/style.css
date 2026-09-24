@@ -38,6 +38,7 @@ button:disabled { cursor: default; }
 .num, #chips, .pill b, .count, .gen .cost, .row-btn b { font-variant-numeric: tabular-nums; }
 
 /* ---------- the dealer (48x64 sprite at 3x) ---------- */
+/* Keep the hands on her 3px pixel grid: hands left = girl left (273) + 8 sprite px, top = girl top (46) + 40 sprite px. */
 .girl {
   position: absolute; z-index: 1; left: 395px; top: 220px; width: 144px; height: 192px;
   image-rendering: pixelated;
@@ -49,7 +50,7 @@ body.open .girl { left: 273px; top: 46px; }
 @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 .girl.hop { animation: hop .6s steps(1); }
 @keyframes hop { 0% { transform: none; } 20% { transform: translateY(-15px); } 45% { transform: none; } 65% { transform: translateY(-9px); } 85%, 100% { transform: none; } }
-.hands { position: absolute; z-index: 3; left: 293px; top: 165px; width: 96px; height: 30px;
+.hands { position: absolute; z-index: 3; left: 297px; top: 166px; width: 96px; height: 30px;
   image-rendering: pixelated; opacity: 0; transition: opacity .2s; pointer-events: none; }
 body.open .hands { opacity: 1; transition-delay: .35s; }
 
