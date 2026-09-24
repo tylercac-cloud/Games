@@ -651,6 +651,7 @@ function resolveSideBets() {
 function insurance(take) {
   if (G.state !== 'INSURANCE') return;
   if (take && G.chips < Math.floor(G.handBet / 2)) { say(pick(LINES.nochips), 2500); sfx('deny'); return; }   // spent in the casino meanwhile
+  hush();
   if (take) { G.ins = Math.floor(G.handBet / 2); G.chips -= G.ins; G.roundStake += G.ins; G.st.insTaken++; sfx('chips'); } else sfx('click');
   peek();
 }
@@ -880,6 +881,7 @@ function vipTierUp(from, to) {                         // pay every tier crossed
   setTimeout(() => { render(); celebrateVip(to, reward, from); }, 1100);
 }
 
+function clearTable() { G.hands = []; G.dealer = []; G.cur = 0; G.holeHidden = true; G.result = null; G.net = 0; G.sideResults = []; G.insResult = null; G.cashback = 0; }
 // top-up is for an empty casino: with attractions or the auto-tipper, the floor refills you (no spend-down-and-top-up loop)
 // and at most one every 10 minutes, so a free top-up can't be bet all-in over and over (a loss costs nothing)
 const TOPUP_COOLDOWN = 10 * 60000;
@@ -889,7 +891,7 @@ const mmss = ms => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) +
 function topup() {
   if (!canTopup()) return;
   G.chips = topupAmount(); fitBets(); G.st.topups++; G.lastTopup = Date.now();
-  G.result = null; G.net = 0; G.sideResults = []; G.insResult = null; G.cashback = 0;
+  clearTable();
   save(); setMood('happy', 3000); say(pick(LINES.topup), 4000); sfx('coins'); render();
 }
 
@@ -1201,7 +1203,7 @@ function franchise(confirmed) {
   G.stars += gain; G.franchises++;
   G.chips = START_CHIPS * Math.pow(10, su('headstart')); G.gens = {}; G.boosts = {}; G.tipLevel = 0; G.frac = 0; G.runEarned = 0;
   BOOSTS.slice(0, su('keepboosts')).forEach(b => { G.boosts[b.id] = true; });
-  G.result = null; G.sideResults = []; G.insResult = null; G.betWant = 50; G.ppWant = 0; G.tpWant = 0; fitBets();
+  clearTable(); G.betWant = 50; G.ppWant = 0; G.tpWant = 0; fitBets();
   save(); setMood('happy', 4000); hop(); celebrateFranchise(gain, starsBefore); sfx('tierup');
   say('New location! +' + gain + ' \u2605 \u2014 income \u00d7' + fmtMult(starMult()), 6000);
   renderCasino(); render();
@@ -1499,15 +1501,16 @@ function setMood(mood, ms) {
   const tok = ++moodToken;
   if (ms) setTimeout(() => { if (tok === moodToken) { document.body.dataset.mood = 'idle'; drawGirl(); } }, ms);
 }
-function say(text, ms = 4000) {
+function say(text, ms = 4000, quiet) {
   const b = $('bubble');
   b.textContent = text;
   b.classList.remove('show');
   void b.offsetWidth;                                  // restart the pop animation
-  b.classList.add('show'); sfx('pop');
+  b.classList.add('show'); if (!quiet) sfx('pop');
   const tok = ++bubbleToken;
   setTimeout(() => { if (tok === bubbleToken) b.classList.remove('show'); }, ms);
 }
+function hush() { bubbleToken++; $('bubble').classList.remove('show'); }   // take down a question that has been answered
 function hop() {
   const g = $('girl');
   g.classList.remove('hop'); void g.offsetWidth; g.classList.add('hop');
@@ -1522,9 +1525,10 @@ function blinkLoop() {
 }
 function chatterLoop() {
   if (G.state === 'BET' && !$('bubble').classList.contains('show') && document.body.dataset.mood === 'idle') {
-    say(pick(LINES.idle), 4500);
+    say(pick(LINES.idle), 4500, true);
   }
-  setTimeout(chatterLoop, 30000 + Math.random() * 25000);
+  const open = document.body.classList.contains('open');
+  setTimeout(chatterLoop, open ? 30000 + Math.random() * 25000 : 120000 + Math.random() * 120000);
 }
 
 // ---------------------------------------------------------------- rendering
@@ -1540,7 +1544,8 @@ function cardEl(card, hidden) {
 function renderHand(container, cards, hideSecond) {
   // rebuild if any card on screen no longer matches the hand (new deal, etc.)
   const kids = [...container.children];
-  if (kids.length > cards.length || kids.some((el, i) => el.dataset.card !== cards[i].join(''))) container.innerHTML = '';
+  if (kids.some((el, i) => i < cards.length && el.dataset.card !== cards[i].join(''))) container.innerHTML = '';
+  else kids.slice(cards.length).forEach(el => el.remove());   // a split takes a card away: keep the rest where they are (no re-deal animation)
   for (let i = container.children.length; i < cards.length; i++) {
     const el = cardEl(cards[i], hideSecond && i === 1); el.dataset.card = cards[i].join(''); container.appendChild(el);
   }
@@ -1764,6 +1769,7 @@ document.addEventListener('mouseleave', () => {
 // keyboard: H hit, S stand, D double, P split, R surrender, I / N insurance, Space or Enter deal
 const KEYS = { h: () => hit(), s: () => stand(), d: () => doubleDown(), p: () => split(), r: () => surrender() };
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('rules').classList.contains('show')) { $('rules').classList.remove('show'); sfx('click'); return; }
   if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || !document.body.classList.contains('open') || G.tab !== 'table') return;
   const k = e.key.toLowerCase();
   if (G.state === 'INSURANCE' && (k === 'i' || k === 'y' || k === 'n')) insurance(k !== 'n');
