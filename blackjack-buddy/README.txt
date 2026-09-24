@@ -112,12 +112,25 @@ SHOP (spend your chips)
 VIP (lifetime, never resets - not even by a franchise)
 - Your tier follows total chips wagered: main bet, doubles, splits, side bets and insurance.
 - 13 tiers (Sp = 10^24):
-    Wood 0 · Bronze 10K · Silver 10M · Gold 10B · Platinum 1Qa · Pearl 1Qi · Jade 1Sx
-    Sapphire 10Sx · Ruby 100Sx · Emerald 1Sp · Diamond 3Sp · Obsidian 10Sp · Celestial 30Sp
-  The casino grows your bankroll exponentially, so the ladder is geometric. Calibrated with an economy
-  simulation (greedy casino buyer, a franchise every ~5 days, 45 min of hands a day, bets of about
-  1.5 minutes of casino income): Celestial in about 4 months; heavy players (90 min, bigger bets)
-  about 2.5 months; light players 6+ months. Bet size relative to income moves this more than hours played.
+    Tier        Wagered   Badge                 Typical   Heavy    Light
+    Wood        0         wooden token          start
+    Bronze      10K       medal, 1 pip          ~15 min   ~15 min  ~10 min at the table
+    Silver      1B        medal, 2 pips         day 1     day 1    day 2
+    Gold        100Qa     medal, 3 pips         day 2     day 2    day 2
+    Platinum    200Qi     medal, 4 pips         day 5     day 4    day 8
+    Pearl       1Sx       pearl                 day 8     day 6    day 9
+    Jade        10Sx      jade cabochon         day 10    day 9    day 12
+    Sapphire    50Sx      cushion sapphire      day 13    day 10   day 19
+    Ruby        200Sx     heart ruby            day 20    day 12   day 31
+    Emerald     1Sp       emerald cut           day 33    day 21   day 54
+    Diamond     3Sp       brilliant diamond     day 52    day 30   day 83
+    Obsidian    10Sp      obsidian shard        day 81    day 47   day 129
+    Celestial   30Sp      celestial star        day 122   day 71   day 164
+  The casino grows your bankroll exponentially, so the ladder is geometric. Days come from an economy
+  simulation (buys the best casino upgrade every 2 hours, franchises every ~5 days). Typical = 45 min
+  of hands a day betting ~1.5 minutes of casino income; heavy = 90 min at 3 minutes; light = 20 min
+  at 1 minute. A real player shops less often than the sim, so the early tiers stretch out.
+- A tier, once reached, is kept for life, even if the ladder is retuned.
 - Saves from before 2.1 keep the tier they had earned under the old comp-point ladder.
 - Every tier: +5% casino income and tips (x1.6 at Celestial), cashback on losing rounds
   (0.1% at Bronze up to 1.25% at Celestial), a bigger broke top-up (500 x (tier+1)^2), and a one-time

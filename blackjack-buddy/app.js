@@ -115,19 +115,20 @@ const tipCost = () => 100 * Math.pow(10, G.tipLevel);
 const VIP = [
   { name: 'Wood',      at: 0,    c: ['#d9a46b', '#b07a45', '#6b4424'] },
   { name: 'Bronze',    at: 1e4,  c: ['#f2b98a', '#d8925a', '#8a5230'] },
-  { name: 'Silver',    at: 1e7,  c: ['#f4f7fc', '#c8d3e4', '#7d8aa0'] },
-  { name: 'Gold',      at: 1e10, c: ['#fff0b0', '#f5c451', '#b07d12'] },
-  { name: 'Platinum',  at: 1e15, c: ['#ffffff', '#d4e3ee', '#8198aa'] },
-  { name: 'Pearl',     at: 1e18, c: ['#ffffff', '#f2dfec', '#b98fab'] },
-  { name: 'Jade',      at: 1e21, c: ['#b6f0d2', '#5fbf8f', '#2a7a55'] },
-  { name: 'Sapphire',  at: 1e22, c: ['#b3cfff', '#4f8dff', '#1f4fb0'] },
-  { name: 'Ruby',      at: 1e23, c: ['#ffb0bf', '#ff4f6d', '#a8183a'] },
+  { name: 'Silver',    at: 1e9,  c: ['#f6f7f9', '#c3c8cf', '#6c727c'] },
+  { name: 'Gold',      at: 1e17, c: ['#fff0b0', '#f5c451', '#b07d12'] },
+  { name: 'Platinum',  at: 2e20, c: ['#ffffff', '#cdd9fb', '#5d6cb0'] },
+  { name: 'Pearl',     at: 1e21, c: ['#ffffff', '#f2dfec', '#b98fab'] },
+  { name: 'Jade',      at: 1e22, c: ['#b6f0d2', '#5fbf8f', '#2a7a55'] },
+  { name: 'Sapphire',  at: 5e22, c: ['#b3cfff', '#4f8dff', '#1f4fb0'] },
+  { name: 'Ruby',      at: 2e23, c: ['#ffb0bf', '#ff4f6d', '#a8183a'] },
   { name: 'Emerald',   at: 1e24, c: ['#9ff7cf', '#1fd18a', '#0a7a4c'] },
   { name: 'Diamond',   at: 3e24, c: ['#ffffff', '#b9f3ff', '#4fb2d4'] },
   { name: 'Obsidian',  at: 1e25, c: ['#cfc2ff', '#7b5cff', '#241757'] },
   { name: 'Celestial', at: 3e25, c: ['#fff6d0', '#ffc86a', '#ff6fb5'] },
 ];
 const OLD_COMP_AT = [0, 1000, 5000, 15000, 40000, 100000, 200000, 400000, 700000, 1100000, 1700000, 2600000, 4000000];   // pre-2.1 comp ladder
+const V21_AT = [0, 1e4, 1e7, 1e10, 1e15, 1e18, 1e21, 1e22, 1e23, 1e24, 3e24, 1e25, 3e25];                                 // first wagered ladder (2.1)
 const vipIdx = () => { let i = 0; while (i + 1 < VIP.length && G.st.wagered >= VIP[i + 1].at) i++; return Math.max(i, G.st.vipFloor); };
 const vipMult = () => 1 + 0.05 * vipIdx();                         // +5% income and tips per tier above Wood
 const VIP_CASHBACK = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.25];   // % of a losing round refunded
@@ -386,7 +387,7 @@ const NEW_STATS = () => ({
   wagered: 0, net: 0, comp: 0, cashback: 0, biggestWin: 0, biggestLoss: 0, biggestBet: 0, bestStreak: 0, streak: 0, worstStreak: 0,
   tcHiBet: 0, tcHiN: 0, tcLoBet: 0, tcLoN: 0,
   highChips: 0, attractions: 0, playMs: 0, days: 0, lastDay: '', since: 0, topups: 0, tierUps: 0,
-  vipV: 2, vipFloor: 0,                                 // VIP from wagered (2.1+); vipFloor keeps a tier earned under the old comp ladder
+  vipV: 3, vipFloor: 0,                                 // VIP from wagered (2.1+); vipFloor keeps a tier earned under the old comp ladder
   units: 0, tableMs: 0, sessions: 0,
   curve: [],                                           // units of the last 200 rounds
 });
@@ -441,6 +442,10 @@ function load() {
       if (d.st.vipV === undefined) {                      // older save: keep the tier it earned under the comp ladder
         let i = 0; while (i + 1 < OLD_COMP_AT.length && G.st.comp >= OLD_COMP_AT[i + 1]) i++;
         G.st.vipFloor = i; G.st.vipV = 2;
+      }
+      if (G.st.vipV === 2) {                              // ladder was respaced: nobody drops a tier
+        let i = 0; while (i + 1 < V21_AT.length && G.st.wagered >= V21_AT[i + 1]) i++;
+        G.st.vipFloor = Math.max(G.st.vipFloor, i); G.st.vipV = 3;
       }
     }
     if (Array.isArray(d.hist)) G.hist = d.hist.filter(r => r && typeof r === 'object' && Array.isArray(r.h)).slice(-HIST_MAX);
@@ -834,6 +839,7 @@ function recordRound(d, dbj, roundNet, cash) {
   else if (roundNet < 0) { st.streak = Math.min(0, st.streak) - 1; st.worstStreak = Math.max(st.worstStreak, -st.streak); }
   recordAnalysis(roundNet, cash);
   const after = vipIdx();
+  st.vipFloor = after;                                  // tiers are for life, even if the ladder is retuned
   if (after > before) setTimeout(() => vipTierUp(before, after), 1100);
 }
 // the main game in units (net / starting bet), so results compare across bet sizes
@@ -983,15 +989,56 @@ function celebrateFranchise(gain, before) {
 }
 
 // ---------------------------------------------------------------- VIP + stats visuals
-function gemSVG(i, cls) {                             // faceted hexagon gem in the tier's colours
+// each tier family has its own silhouette, so tiers read apart even at 16px
+const GEM_SHAPES = [
+  // 0 Wood: turned wooden token with grain rings
+  (hi, mid, lo, g) => '<circle cx="12" cy="12" r="9.6" fill="url(#' + g + ')" stroke="' + lo + '" stroke-width="1.2"/>' +
+    '<circle cx="12" cy="12" r="6.3" fill="none" stroke="' + lo + '" stroke-width=".9" opacity=".55"/><circle cx="12" cy="12" r="3" fill="none" stroke="' + lo + '" stroke-width=".9" opacity=".55"/>' +
+    '<path d="M6.5 7.5a7 7 0 0 1 4-2.6" stroke="#fff" stroke-width="1.1" stroke-linecap="round" fill="none" opacity=".55"/>',
+  null, null, null, null,                                  // 1-4 metals: faceted hex medal (below)
+  // 5 Pearl: glossy sphere
+  (hi, mid, lo, g) => '<circle cx="12" cy="12.5" r="9.2" fill="url(#' + g + 'r)" stroke="' + lo + '" stroke-width=".9"/>' +
+    '<ellipse cx="9" cy="8.6" rx="3.4" ry="2.2" fill="#fff" opacity=".85" transform="rotate(-30 9 8.6)"/><circle cx="15.5" cy="16.5" r="1.3" fill="#fff" opacity=".35"/>',
+  // 6 Jade: polished oval cabochon
+  (hi, mid, lo, g) => '<ellipse cx="12" cy="12" rx="8.2" ry="10" fill="url(#' + g + 'r)" stroke="' + lo + '" stroke-width="1.1"/>' +
+    '<ellipse cx="12" cy="12" rx="5.4" ry="7" fill="none" stroke="' + hi + '" stroke-width=".8" opacity=".6"/><path d="M8.2 7.2a5 6 0 0 1 3-3.2" stroke="#fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".8"/>',
+  // 7 Sapphire: cushion octagon with a star table
+  (hi, mid, lo, g) => '<path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+    '<path d="M9.5 6.5h5l3 3v5l-3 3h-5l-3-3v-5z" fill="url(#' + g + ')"/><path d="M8 2 9.5 6.5M16 2l-1.5 4.5M22 8l-4.5 1.5M22 16l-4.5-1.5M16 22l-1.5-4.5M8 22l1.5-4.5M2 16l4.5-1.5M2 8l4.5 1.5" stroke="' + hi + '" stroke-width=".7" opacity=".7"/>' +
+    '<path d="M10 8.5l2-1" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".9"/>',
+  // 8 Ruby: heart cut
+  (hi, mid, lo, g) => '<path d="M12 21.5 3.2 12.4A5.2 5.2 0 0 1 12 5.6a5.2 5.2 0 0 1 8.8 6.8z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+    '<path d="M12 18 6.4 12.2a3.2 3.2 0 0 1 5.6-3.1 3.2 3.2 0 0 1 5.6 3.1z" fill="url(#' + g + ')"/><path d="M6.2 8.6a2.6 2.6 0 0 1 2.4-1.5" stroke="#fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".85"/>',
+  // 9 Emerald: step-cut rectangle
+  (hi, mid, lo, g) => '<path d="M7.5 2h9L20 5.5v13L16.5 22h-9L4 18.5v-13z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+    '<path d="M9 5h6l2 2v10l-2 2H9l-2-2V7z" fill="none" stroke="' + hi + '" stroke-width=".8" opacity=".75"/><path d="M10.2 8h3.6l.9.9v6.2l-.9.9h-3.6l-.9-.9V8.9z" fill="url(#' + g + ')"/>' +
+    '<path d="M10.4 9.6v2.6" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".85"/>',
+  // 10 Diamond: round brilliant, side view
+  (hi, mid, lo, g) => '<path d="M2.5 9 7 3.5h10L21.5 9 12 21.5z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+    '<path d="M2.5 9 7 3.5h10L21.5 9z" fill="url(#' + g + ')"/><path d="M2.5 9h19M7 3.5 9.5 9 12 3.5 14.5 9 17 3.5M9.5 9 12 21.5 14.5 9" fill="none" stroke="' + lo + '" stroke-width=".7" opacity=".7"/>' +
+    '<path d="M8.2 5.2 7.4 7" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>',
+  // 11 Obsidian: volcanic shard with a violet edge
+  (hi, mid, lo, g) => '<path d="M12 1.5 19 9.5 14.5 22.5 5 15.5 6.5 6z" fill="' + lo + '" stroke="' + mid + '" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '<path d="M12 1.5 13 11 19 9.5M13 11l1.5 11.5M13 11 5 15.5M13 11 6.5 6" fill="none" stroke="' + mid + '" stroke-width=".7" opacity=".8"/>' +
+    '<path d="M12 1.5 6.5 6 13 11z" fill="url(#' + g + ')" opacity=".75"/>',
+  // 12 Celestial: four-point star with a halo
+  (hi, mid, lo, g) => '<circle cx="12" cy="12" r="10.5" fill="none" stroke="' + mid + '" stroke-width=".8" opacity=".6"/>' +
+    '<path d="M12 1 14.2 9.8 23 12l-8.8 2.2L12 23l-2.2-8.8L1 12l8.8-2.2z" fill="url(#' + g + ')" stroke="' + lo + '" stroke-width=".9" stroke-linejoin="round"/>' +
+    '<path d="M12 5.5 13 11l-1 1-1-1z" fill="#fff" opacity=".85"/><circle cx="18.5" cy="5.5" r="1" fill="' + hi + '"/><circle cx="5.2" cy="18.4" r=".8" fill="' + hi + '"/>',
+];
+const METAL = (hi, mid, lo, g, tier) => '<path d="M12 1.5 21.5 7v10L12 22.5 2.5 17V7z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+  '<path d="M12 1.5 21.5 7 17 9.2 12 6.4 7 9.2 2.5 7z" fill="' + hi + '" opacity=".9"/>' +
+  '<path d="M2.5 17 7 14.8 12 17.6 17 14.8 21.5 17 12 22.5z" fill="' + lo + '" opacity=".75"/>' +
+  '<path d="M12 6.4 17 9.2v5.6l-5 2.8-5-2.8V9.2z" fill="url(#' + g + ')"/>' +
+  // 1-4 pips on the medal face: Bronze one ... Platinum four
+  [[12], [10.3, 13.7], [9.2, 12, 14.8], [8.6, 10.9, 13.1, 15.4]][tier - 1].map(x => '<circle cx="' + x + '" cy="12.4" r=".95" fill="' + lo + '" opacity=".75"/>').join('') +
+  '<path d="M8.4 9.6 12 7.6" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".8"/>';
+function gemSVG(i, cls) {                             // the tier's badge, in its colours
   const [hi, mid, lo] = VIP[i].c, id = 'gm' + (++svgId);
   return '<svg class="gem ' + (cls || '') + (i === VIP.length - 1 ? ' celestial' : '') + '" viewBox="0 0 24 24"><defs>' +
-    '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + hi + '"/><stop offset="1" stop-color="' + mid + '"/></linearGradient></defs>' +
-    '<path d="M12 1.5 21.5 7v10L12 22.5 2.5 17V7z" fill="' + mid + '" stroke="' + lo + '" stroke-width="1.1" stroke-linejoin="round"/>' +
-    '<path d="M12 1.5 21.5 7 17 9.2 12 6.4 7 9.2 2.5 7z" fill="' + hi + '" opacity=".9"/>' +
-    '<path d="M2.5 17 7 14.8 12 17.6 17 14.8 21.5 17 12 22.5z" fill="' + lo + '" opacity=".75"/>' +
-    '<path d="M12 6.4 17 9.2v5.6l-5 2.8-5-2.8V9.2z" fill="url(#' + id + ')"/>' +
-    '<path d="M8.4 9.6 12 7.6" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".8"/></svg>';
+    '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + hi + '"/><stop offset="1" stop-color="' + mid + '"/></linearGradient>' +
+    '<radialGradient id="' + id + 'r" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="' + hi + '"/><stop offset=".6" stop-color="' + mid + '"/><stop offset="1" stop-color="' + lo + '"/></radialGradient></defs>' +
+    (GEM_SHAPES[i] ? GEM_SHAPES[i](hi, mid, lo, id) : METAL(hi, mid, lo, id, i)) + '</svg>';
 }
 function vipPerksText(i) {
   return 'Income & tips \u00d7' + trimZeros((1 + 0.05 * i).toFixed(2)) + ' \u00b7 Cashback ' + cashbackPct(i) + '% \u00b7 Top-up ' + fmtBig(START_CHIPS * Math.pow(i + 1, 2));
@@ -1761,7 +1808,7 @@ setTimeout(chatterLoop, 25000);
 setTimeout(() => say(pick(LINES.hello)), 1200);
 
 // exposed for automated tests only
-window.__bb = { SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
+window.__bb = { gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,
   renderStats, renderVipBadges, sfx, starsExact, runForStars, vipRewards, OUTFITS, recordRound, NEW_STATS, G, handValue, perfectPairs, twentyOnePlusThree, startHand, hit, stand, doubleDown, surrender,
   insurance, adjustBet, adjustSide, fitBets, shuffle, topup, setMood, say, render, toggle, canDeal, totalStake, settle,
   hiLo, runningCount, trueCount, decksLeft, tick, offlineEarnings, buyGen, tipClick, buyTipUpgrade, genCost, incomePerMin,
