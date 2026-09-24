@@ -9,7 +9,7 @@ has already accepted or rejected.
 A Windows desktop widget (Electron 44): a pixel-art redhead dealer stands on the taskbar; click her
 to open a 544×220 blackjack table. Around the blackjack game is an idle/incremental casino economy
 (attractions, boosts, tip jar, franchise/prestige with stars, a star shop), a cosmetics shop, and a
-lifetime VIP ladder. Version **2.1.4**.
+lifetime VIP ladder. Version **2.1.5**.
 
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).
@@ -25,7 +25,9 @@ Keep replies terse. Ask before adding features; the owner has already trimmed st
 | `style.css` | All styles. Window is 560×412; colour tokens in `:root`. |
 | `sprites/`, `fonts/`, `icon.png` | Assets. Sprite recolouring swaps exact palette RGBs (`RIBBON_SRC`, `VEST_SRC`, ...). |
 | `README.txt` | Player manual. **CRLF line endings — preserve them.** |
-| `Run Blackjack Buddy.bat` | First-run `npm install`, then launches Electron. |
+| `Run Blackjack Buddy.bat` | First-run `npm install` + desktop shortcut, then launches Electron. |
+| `Create Desktop Shortcut.bat` | PowerShell one-liner: desktop `.lnk` to the .bat with `icon.ico`, minimized console. Dry-run tested with PowerShell 7 on Linux (COM stubbed). |
+| `icon.png` / `icon.ico` | Her face; the .ico (16–256 px) is used by the shortcut and `npm run package` (`--icon`). |
 
 `app.js` section banners (`// ------ name`): casino, star shop, VIP ladder, shop catalogue, sound,
 rules, state, saving an unfinished round, shoe, bets, game flow, stats + VIP, casino flow,

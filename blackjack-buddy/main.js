@@ -73,7 +73,7 @@ function create() {
   win.on('closed', () => { win = null; });
   createTray();
 
-  if (process.env.BB_TEST) require('./test-hook')(win, app);
+  if (process.env.BB_TEST) { try { require('./test-hook')(win, app); } catch (e) { /* not shipped in the packaged app */ } }
 }
 
 function toggleVisible() {

@@ -14,5 +14,7 @@ if not exist "node_modules\electron\dist\electron.exe" (
     pause
     exit /b 1
   )
+  rem first run only: add a desktop shortcut with her icon (delete it any time)
+  call "Create Desktop Shortcut.bat" >nul 2>nul
 )
 start "" "node_modules\electron\dist\electron.exe" .

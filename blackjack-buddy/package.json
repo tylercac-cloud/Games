@@ -1,12 +1,12 @@
 {
   "name": "blackjack-buddy",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A tiny always-on-top desktop blackjack table with a redhead dealer.",
   "main": "main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "package": "npx @electron/packager . BlackjackBuddy --platform=win32 --arch=x64 --out=dist --overwrite --ignore=\"dist|test-hook.js|shots\""
+    "package": "npx @electron/packager . BlackjackBuddy --platform=win32 --arch=x64 --out=dist --overwrite --icon=icon.ico --ignore=\"^/(dist|shots|test-hook\\.js|HANDOFF\\.md|Create Desktop Shortcut\\.bat|Run Blackjack Buddy\\.bat)\""
   },
   "devDependencies": {
     "electron": "^44.4.5"

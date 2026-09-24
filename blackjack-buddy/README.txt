@@ -6,6 +6,8 @@ SETUP (once)
 2. Unzip this folder somewhere you'll keep it, e.g. Documents\BlackjackBuddy.
 3. Double-click "Run Blackjack Buddy.bat".
    The first run downloads Electron (about 100 MB) and takes a minute. After that it starts instantly.
+   The first run also puts a "Blackjack Buddy" shortcut with her face on your desktop - use that from
+   now on. (Deleted it? Double-click "Create Desktop Shortcut.bat" to get it back.)
    She appears bottom-right, standing on the taskbar.
 
 CONTROLS
@@ -185,11 +187,12 @@ Chips, bets, stats, VIP progress and the window position are stored in %APPDATA%
 Your existing save carries over; lifetime stats and VIP start counting from this version.
 
 START WITH WINDOWS (optional)
-Win+R, type  shell:startup , Enter. Put a shortcut to "Run Blackjack Buddy.bat" in that folder.
+Win+R, type  shell:startup , Enter. Copy the "Blackjack Buddy" desktop shortcut into that folder.
 
 STANDALONE .EXE (optional)
 Open a command prompt in this folder and run:  npm run package
-You get dist\BlackjackBuddy-win32-x64\BlackjackBuddy.exe - that folder runs on any Windows PC without Node.
+You get dist\BlackjackBuddy-win32-x64\BlackjackBuddy.exe (with her icon) - that folder runs on any Windows
+PC without Node. It shares the same save as the .bat version.
 
 TROUBLESHOOTING
 - Black box instead of a transparent widget: open main.js in Notepad and remove the two slashes
