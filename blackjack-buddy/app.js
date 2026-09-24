@@ -491,7 +491,7 @@ function loadRound(r) {
 }
 function resumeRound() {                                 // pick up where the saved round stopped
   if (G.state === 'DEALING') return dealSeq(['p', 'd', 'p', 'd'].slice(G.hands[0].cards.length + G.dealer.length), afterDeal);
-  if (G.state === 'PLAYER') { say('Where were we? Your hand~', 3500); return nextHand(); }
+  if (G.state === 'PLAYER') return nextHand();
   if (G.state === 'DEALER') {
     const h0 = G.hands[0], natural = G.hands.length === 1 && !h0.split && h0.cards.length === 2 && handValue(h0.cards) === 21;
     revealHole(); render();
@@ -520,7 +520,10 @@ function shuffle() {
 }
 
 function drawCard(faceDown) {
-  if (!G.shoe.length) shuffle();                        // ran dry mid-hand (very rare)
+  if (!G.shoe.length) {                                 // ran dry mid-hand (very rare): reshuffle without the cards on the table
+    shuffle();
+    for (const c of G.dealer.concat(...G.hands.map(h => h.cards))) { const i = G.shoe.findIndex(x => x[0] === c[0] && x[1] === c[1]); if (i >= 0) G.shoe.splice(i, 1); }
+  }
   const card = G.shoe.pop();
   G.dealt++;
   if (!faceDown) G.seen.push(card);
@@ -636,6 +639,7 @@ function resolveSideBets() {
 
 function insurance(take) {
   if (G.state !== 'INSURANCE') return;
+  if (take && G.chips < Math.floor(G.handBet / 2)) { say(pick(LINES.nochips), 2500); sfx('deny'); return; }   // spent in the casino meanwhile
   if (take) { G.ins = Math.floor(G.handBet / 2); G.chips -= G.ins; G.roundStake += G.ins; G.st.insTaken++; sfx('chips'); } else sfx('click');
   peek();
 }
@@ -840,7 +844,7 @@ function recordRound(d, dbj, roundNet, cash) {
   recordAnalysis(roundNet, cash);
   const after = vipIdx();
   st.vipFloor = after;                                  // tiers are for life, even if the ladder is retuned
-  if (after > before) setTimeout(() => vipTierUp(before, after), 1100);
+  if (after > before) vipTierUp(before, after);
 }
 // the main game in units (net / starting bet), so results compare across bet sizes
 function recordAnalysis(roundNet, cash) {
@@ -856,12 +860,13 @@ function recordAnalysis(roundNet, cash) {
     s: G.sideResults.reduce((a, r) => a + r[1], 0), i: G.insResult || 0, net: roundNet, cb: cash });
   if (G.hist.length > HIST_MAX) G.hist.splice(0, G.hist.length - HIST_MAX);
 }
-function vipTierUp(from, to) {
-  G.st.tierUps++;
-  const reward = Math.max(1000 * Math.pow(to + 1, 2), Math.floor(incomePerMin() * 15));
+const tierReward = t => Math.max(1000 * Math.pow(t + 1, 2), Math.floor(incomePerMin() * 15));
+function vipTierUp(from, to) {                         // pay every tier crossed right away; the celebration follows
+  let reward = 0;
+  for (let t = from + 1; t <= to; t++) { reward += tierReward(t); G.st.tierUps++; }
   G.chips += reward;
-  save(); render();
-  celebrateVip(to, reward);
+  save();
+  setTimeout(() => { render(); celebrateVip(to, reward); }, 1100);
 }
 
 // top-up is for an empty casino: with attractions or the auto-tipper, the floor refills you (no spend-down-and-top-up loop)
@@ -1644,6 +1649,7 @@ function render() {
   renderVipBadges();
   $('mute').classList.toggle('off', G.muted);
   $('ins-cost').textContent = fmt(Math.floor(G.handBet / 2));
+  $('ins-yes').disabled = G.chips < Math.floor(G.handBet / 2);
 }
 
 // ---------------------------------------------------------------- input
@@ -1805,7 +1811,7 @@ window.addEventListener('beforeunload', save);
 if (away > 0) setTimeout(() => greetAway(away), 1500);
 setTimeout(blinkLoop, 2500);
 setTimeout(chatterLoop, 25000);
-setTimeout(() => say(pick(LINES.hello)), 1200);
+setTimeout(() => say(G.state === 'BET' ? pick(LINES.hello) : 'Where were we? Your hand~ \u2665'), 1200);
 
 // exposed for automated tests only
 window.__bb = { gemSVG, SES, quickBet, setBet, canTopup, totalText, isSoft, resumeRound, canAct, awayEarnings, buyStarUp, STAR_UPS, banked, starBonus, costGrowth, finderMult, su, split, canSplit, canDouble, canSurrender, nextHand, VIP, vipIdx, vipMult, cashbackPct, topupAmount, vipTierUp, celebrateVip,

@@ -103,17 +103,26 @@ f31e2b3 Blackjack Buddy 2.1: fair side bets, VIP by wagered, stats overhaul
 3a4a3fd Add Blackjack Buddy 2.0.0 as uploaded
 ```
 
+## Real Electron smoke test (Linux, no display)
+
+`npm install` then:
+`BB_TEST=1 BB_PHASE=1 xvfb-run -a node_modules/electron/dist/electron . --no-sandbox` and again with `BB_PHASE=2`.
+`test-hook.js` (loaded by `main.js` when `BB_TEST` is set; excluded from `npm run package`) plays 5
+rounds by keyboard, quits mid-hand via the app's quit path, exports CSV, then on phase 2 checks the
+hand resumes identically and finishes it. Screenshots/CSV go to `shots/` (or `BB_OUT`). Last run: all
+checks passed, zero renderer errors.
+
 ## How to test without Windows
 
 Serve the folder (`python3 -m http.server 8701`) and drive it with Playwright/Chromium; `file://`
 taints the sprite canvas, so use HTTP. `window.__bb` exposes internals (G, startHand, hit, stand,
 split, insurance, fitBets, setTab, renderStats, franchise, VIP, vipIdx, ...). For fast simulations
 replace `setTimeout` with a manual queue and stub `render`, `say`, `sfx`, `drawGirl`, **and `save`**
-(hundreds of thousands of localStorage writes exhaust headless Chromium's memory). Never tested in
-the real Electron shell in this session — do a quick manual run on Windows after changes.
+(hundreds of thousands of localStorage writes exhaust headless Chromium's memory). A random-action
+fuzzer (24 seeds x 6,000 actions incl. mid-hand relaunches) checks: chips integer and never negative,
+wagered never decreasing, bets fit chips, no card more than twice, tier never below its floor.
+The Windows build itself (tray, click-through) still needs a manual check.
 
 ## Known limitations / ideas not built
 
-- Rare mid-hand reshuffle (shoe empty) can duplicate cards already on the table.
-- Only the final tier's chip reward pays if one round crosses two tiers (practically never).
 - Possible next steps the owner may ask for: in-game coach, hand replay, two-deck count indices.
