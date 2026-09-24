@@ -70,6 +70,16 @@ module.exports = (win, app) => {
         log('migrated', JSON.stringify(await run(`({ chips: __bb.G.chips, wagered: __bb.G.st.wagered, rounds: __bb.G.st.rounds, tier: __bb.VIP[__bb.vipIdx()].name })`)),
           'save.json now exists:', fs.existsSync(path.join(app.getPath('userData'), 'save.json')));
         app.quit();
+      } else if (phase === 'ontop1') {
+        log('default on top:', win.isAlwaysOnTop(), 'setting:', app.bb.settings.onTop);
+        app.bb.setOnTop(false); await wait(300);
+        log('after turning off:', win.isAlwaysOnTop(), '| her line:', await run(`document.getElementById('bubble').textContent`));
+        app.quit();
+      } else if (phase === 'ontop2') {
+        log('after relaunch:', win.isAlwaysOnTop(), 'setting:', app.bb.settings.onTop);
+        app.bb.setOnTop(true); await wait(300);
+        log('after turning on:', win.isAlwaysOnTop(), 'visible:', win.isVisible());
+        app.quit();
       } else if (phase === 'hold') {
         // hold the bet + button, drift off the panel onto empty space, release there
         await run(`__bb.G.muted = true; __bb.G.chips = 1e9; __bb.fitBets(); __bb.toggle(); __bb.setBet(10);`); await wait(900);

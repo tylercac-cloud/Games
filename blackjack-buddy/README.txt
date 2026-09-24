@@ -14,6 +14,9 @@ CONTROLS
 - Click her ............ open / close the table (she steps behind it)
 - Tray icon ............ her face lives in the taskbar's notification area: click it to hide/show her,
                          right-click it for the menu (rules, reset chips, quit)
+- Always on top ........ on by default. Watching a movie or playing fullscreen? Untick "Always on top" in the
+                         tray menu (or right-click her) and windows can cover her. "Bring her to front" in
+                         the tray menu, or launching the shortcut again, brings her back. The choice is remembered.
 - Count pill ........... top of the table: Hi-Lo running count and true count (decks left shows on the table).
                          Click it to hide the count and count along yourself; click again to check.
 - Table / Casino / Shop  switch between blackjack, the casino (passive income) and the shop

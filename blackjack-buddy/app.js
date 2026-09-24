@@ -1786,6 +1786,8 @@ if (window.buddy) window.buddy.onMenu(cmd => {
   else if (cmd === 'rules') { $('rules').classList.toggle('show'); sfx('click'); }
   else if (cmd === 'reset') { if (canTopup()) topup(); else say(G.chips < MIN_BET && G.state === 'BET' ? (topupWait() && incomePerMin() === 0 && !G.owned.autotip ? 'Next top-up in ' + mmss(topupWait()) + ' \u2014 tip jar meanwhile~' : 'Your casino pays you, hun~ try the tip jar') : 'Top-ups are for when you\'re broke~', 3000); }
   else if (cmd === 'mute') { G.muted = !G.muted; save(); render(); }
+  else if (cmd === 'ontop-off') say('Movie time? I\'ll stay behind your windows~ \u2665', 4000);
+  else if (cmd === 'ontop-on') say('Back on top of everything~', 3000);
   else if (cmd === 'stats') { if (!document.body.classList.contains('open')) toggle(); setTab('stats'); }
 });
 
