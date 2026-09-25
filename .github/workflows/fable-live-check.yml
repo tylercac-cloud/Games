@@ -1,0 +1,44 @@
+# Fable 5k: check the live (public) Coinbase features against the real API. No key, no account, no trading.
+name: Fable 5k live check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths: ['Fable-5k/**', '.github/workflows/fable-live-check.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: Fable-5k
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test tools
+        run: |
+          python -m pip install cryptography pyjwt playwright
+          python -m playwright install --with-deps chromium
+      - name: Launcher self-check (python market-scan/server.py --check)
+        run: python market-scan/server.py --check
+        continue-on-error: true
+      - name: Live check (launcher, public routes, both pages)
+        run: python tests/desk/live_check.py
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-check-${{ matrix.os }}
+          path: Fable-5k/tests/artifacts/live-check.json
+          if-no-files-found: warn
