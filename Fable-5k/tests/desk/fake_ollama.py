@@ -14,7 +14,11 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         body=json.loads(self.rfile.read(int(self.headers['Content-Length'])));STATE['reqs'].append((self.path,body))
         if self.path=='/api/pull':
-            tot=2_600_000_000;self.lines([{'status':'pulling manifest'}]+[{'status':'downloading','total':tot,'completed':int(tot*k/4)} for k in range(5)]+[{'status':'verifying sha256 digest'},{'status':'success'}],0.05)
+            # Shape of a real Ollama 0.34 pull: each layer's first line has a total but no "completed"; small layers follow.
+            tot=2_600_000_000;L='pulling 3e4cb1417446';self.lines([{'status':'pulling manifest'},{'status':L,'digest':'sha256:3e4c','total':tot}]
+                +[{'status':L,'digest':'sha256:3e4c','total':tot,'completed':int(tot*k/4)} for k in range(1,5)]
+                +[{'status':'pulling ae370d884f10','digest':'sha256:ae37','total':1660},{'status':'pulling ae370d884f10','digest':'sha256:ae37','total':1660,'completed':1660},
+                  {'status':'verifying sha256 digest'},{'status':'writing manifest'},{'status':'success'}],0.05)
             STATE['installed'].append(body['model']);return
         last=body['messages'][-1]
         if last['role']=='tool':

@@ -26,6 +26,7 @@ try:
             if 'is ready' in t:break
             pg.wait_for_timeout(100)
         ok(any('GB (' in x for x in seen),'download shows progress in GB and % ('+next((x for x in seen if 'GB (' in x),'none')+')')
+        ok(not any('NaN' in x or ' 0.00 GB' in x for x in seen),'progress never shows NaN or a 0.00 GB layer (real Ollama omits "completed" at first)')
         ok('qwen3:4b is ready' in pg.inner_text('#cryptaSettings') and 'Local AI · qwen3:4b · free' in pg.inner_text('#cryptaMode'),'after download she switches to the local model automatically')
         def ask(q):
             pg.fill('#cryptaInput',q);pg.press('#cryptaInput','Enter');pg.wait_for_function("!document.querySelector('#cryptaLog .crypta-msg.streaming')",timeout=30000);pg.wait_for_timeout(250)

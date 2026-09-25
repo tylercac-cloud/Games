@@ -1,0 +1,596 @@
+{
+ "ranAt": "2026-09-25T03:47:47.476650+00:00",
+ "mode": "live Coinbase",
+ "results": [
+  {
+   "check": "launcher prints \"Live data: OK\" twice",
+   "ok": true,
+   "detail": "['Live data: OK   Coinbase Advanced (daily scan) (332 ms)', 'Live data: OK   Coinbase Exchange (candles, live stats) (169 ms)']"
+  },
+  {
+   "check": "launcher reports no key (none supplied)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "/health ok",
+   "ok": true,
+   "detail": "['Coinbase Advanced (daily scan) OK', 'Coinbase Exchange (candles, live stats) OK']"
+  },
+  {
+   "check": "/health: Exchange answered directly (no fallback needed)",
+   "ok": true,
+   "detail": "['Coinbase Advanced (daily scan)', 'Coinbase Exchange (candles, live stats)']"
+  },
+  {
+   "check": "listing: paginates and ends",
+   "ok": true,
+   "detail": "10 pages, 923 products, 408 USD spot"
+  },
+  {
+   "check": "listing: fields the scan reads are present on USD spot products",
+   "ok": true,
+   "detail": "{'product_id': 0, 'product_type': 0, 'quote_currency_id': 0, 'price': 0, 'volume_24h': 0}"
+  },
+  {
+   "check": "listing: BTC/ETH/SOL-USD listed with a price",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "BTC-USD: trade-ticket rounding rules present",
+   "ok": true,
+   "detail": "{'base_increment': 1e-08, 'quote_increment': 0.01, 'base_min_size': 1e-08, 'quote_min_size': 1.0}"
+  },
+  {
+   "check": "BTC-USD: Advanced price > 0",
+   "ok": true,
+   "detail": "84143.39"
+  },
+  {
+   "check": "ETH-USD: trade-ticket rounding rules present",
+   "ok": true,
+   "detail": "{'base_increment': 1e-08, 'quote_increment': 0.01, 'base_min_size': 1e-08, 'quote_min_size': 1.0}"
+  },
+  {
+   "check": "ETH-USD: Advanced price > 0",
+   "ok": true,
+   "detail": "2675.01"
+  },
+  {
+   "check": "SOL-USD: trade-ticket rounding rules present",
+   "ok": true,
+   "detail": "{'base_increment': 1e-08, 'quote_increment': 0.01, 'base_min_size': 1e-08, 'quote_min_size': 1.0}"
+  },
+  {
+   "check": "SOL-USD: Advanced price > 0",
+   "ok": true,
+   "detail": "116.51"
+  },
+  {
+   "check": "Advanced daily candles: 200 completed days, all fields numeric",
+   "ok": true,
+   "detail": "{'bars': 200, 'first': 1773014400, 'last': 1790208000, 'order': 'newest first'}"
+  },
+  {
+   "check": "Advanced daily candles: UTC-midnight starts inside the window",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "Advanced daily candles: low <= open/close <= high",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "check": "BTC-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 84177.19, 'bid': 84177.19, 'ask': 84177.2, 'spreadBps': 0.0, '24hopen': 83928.17, '24hhigh': 84929.78, '24hlow': 82708.96, '24hlast': 84152.89, '24hvolume': 6960.21566741, 'source': 'exchange'}"
+  },
+  {
+   "check": "BTC-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 83928.17, 'high': 84929.78, 'low': 82708.96, 'last': 84152.89, 'volume': 6960.21566741}"
+  },
+  {
+   "check": "ETH-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 2675.46, 'bid': 2675.79, 'ask': 2675.8, 'spreadBps': 0.04, '24hopen': 2676.32, '24hhigh': 2706.26, '24hlow': 2626.94, '24hlast': 2674.58, '24hvolume': 93132.56580017, 'source': 'exchange'}"
+  },
+  {
+   "check": "ETH-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 2676.32, 'high': 2706.26, 'low': 2626.94, 'last': 2674.58, 'volume': 93132.56580017}"
+  },
+  {
+   "check": "SOL-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 116.52, 'bid': 116.52, 'ask': 116.53, 'spreadBps': 0.86, '24hopen': 114.68, '24hhigh': 118.45, '24hlow': 112.41, '24hlast': 116.56, '24hvolume': 1336763.78996339, 'source': 'exchange'}"
+  },
+  {
+   "check": "SOL-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 114.68, 'high': 118.45, 'low': 112.41, 'last': 116.56, 'volume': 1336763.78996339}"
+  },
+  {
+   "check": "LTC-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 70.657, 'bid': 70.66, 'ask': 70.683, 'spreadBps': 3.25, '24hopen': 66.469, '24hhigh': 80.25, '24hlow': 65.501, '24hlast': 70.629, '24hvolume': 816352.3032394, 'source': 'exchange'}"
+  },
+  {
+   "check": "LTC-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 66.469, 'high': 80.25, 'low': 65.501, 'last': 70.629, 'volume': 816352.3032394}"
+  },
+  {
+   "check": "LINK-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 13.336, 'bid': 13.341, 'ask': 13.343, 'spreadBps': 1.5, '24hopen': 12.286, '24hhigh': 13.52, '24hlow': 12.09, '24hlast': 13.316, '24hvolume': 2650883.92, 'source': 'exchange'}"
+  },
+  {
+   "check": "LINK-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 12.286, 'high': 13.52, 'low': 12.09, 'last': 13.316, 'volume': 2650883.92}"
+  },
+  {
+   "check": "AVAX-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 10.173, 'bid': 10.172, 'ask': 10.176, 'spreadBps': 3.93, '24hopen': 10.231, '24hhigh': 10.694, '24hlow': 9.969, '24hlast': 10.167, '24hvolume': 1625456.63701401, 'source': 'exchange'}"
+  },
+  {
+   "check": "AVAX-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 10.231, 'high': 10.694, 'low': 9.969, 'last': 10.167, 'volume': 1625456.63701401}"
+  },
+  {
+   "check": "DOGE-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 0.09488, 'bid': 0.09487, 'ask': 0.09492, 'spreadBps': 5.27, '24hopen': 0.09318, '24hhigh': 0.09753, '24hlow': 0.09138, '24hlast': 0.09477, '24hvolume': 237007443.8, 'source': 'exchange'}"
+  },
+  {
+   "check": "DOGE-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 0.09318, 'high': 0.09753, 'low': 0.09138, 'last': 0.09477, 'volume': 237007443.8}"
+  },
+  {
+   "check": "ADA-USD: ticker price/bid/ask/time, bid <= ask",
+   "ok": true,
+   "detail": "{'price': 0.24667, 'bid': 0.24676, 'ask': 0.24681, 'spreadBps': 2.03, '24hopen': 0.2387, '24hhigh': 0.25329, '24hlow': 0.23278, '24hlast': 0.24682, '24hvolume': 105457777.2992012, 'source': 'exchange'}"
+  },
+  {
+   "check": "ADA-USD: 24h stats open/high/low/last/volume",
+   "ok": true,
+   "detail": "{'open': 0.2387, 'high': 0.25329, 'low': 0.23278, 'last': 0.24682, 'volume': 105457777.2992012}"
+  },
+  {
+   "check": "Exchange candles 86400s: rows are [time, low, high, open, close, volume]",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790208000, 'expectedLatest': 1790208000, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange candles 86400s: low <= open/close <= high",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "Exchange candles 86400s: last completed bucket present, in-progress bucket absent",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790208000, 'expectedLatest': 1790208000, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange vs Advanced: last 5 daily closes agree within 0.5%",
+   "ok": true,
+   "detail": "['0.0000%', '0.0000%', '0.0000%', '0.0000%', '0.0000%']"
+  },
+  {
+   "check": "Exchange candles 21600s: rows are [time, low, high, open, close, volume]",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790272800, 'expectedLatest': 1790272800, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange candles 21600s: low <= open/close <= high",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "Exchange candles 21600s: last completed bucket present, in-progress bucket absent",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790272800, 'expectedLatest': 1790272800, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange candles 3600s: rows are [time, low, high, open, close, volume]",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790301600, 'expectedLatest': 1790301600, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange candles 3600s: low <= open/close <= high",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "Exchange candles 3600s: last completed bucket present, in-progress bucket absent",
+   "ok": true,
+   "detail": "{'rows': 300, 'newestFirst': True, 'latest': 1790301600, 'expectedLatest': 1790301600, 'gaps': 0, 'inProgressIncluded': False}"
+  },
+  {
+   "check": "Exchange vs Advanced: BTC-USD price agrees within 1%",
+   "ok": true,
+   "detail": "(84177.19, 84143.39)"
+  },
+  {
+   "check": "Advanced fallback ticker matches Exchange within 1%",
+   "ok": true,
+   "detail": "{'price': '84181.99', 'bid': '84181.99', 'ask': '84182', 'time': '2026-09-25T03:47:03.232952Z', 'source': 'coinbase-advanced'}"
+  },
+  {
+   "check": "Advanced fallback stats usable (last, open, volume)",
+   "ok": true,
+   "detail": "{'last': '84177.19', 'open': '83969.99', 'volume': '7006.718507', 'source': 'coinbase-advanced'}"
+  },
+  {
+   "check": "Advanced fallback daily candles: 30 rows, newest first, last completed day",
+   "ok": true,
+   "detail": "{'ticker': {'price': '84181.99', 'bid': '84181.99', 'ask': '84182', 'time': '2026-09-25T03:47:03.232952Z', 'source': 'coinbase-advanced'}, 'stats': {'last': '84177.19', 'open': '83969.99', 'volume': '7006.718507', 'source': 'coinbase-advanced'}, 'dailyRows': 30, 'latest': 1790208000}"
+  },
+  {
+   "check": "desk: live market strip shows prices",
+   "ok": true,
+   "detail": "{'status': 'Updated just now \u00b7 Coinbase Exchange via launcher \u00b7 auto-refresh 30s', 'grid': 'BTC $84,182 +0.30% 24h 24h $82,709 \u2013 $84,930 Vol $586.0M \u00b7 spread 0.0 bps ETH $2,676 -0.01% 24h 24h $2,627 \u2013 $2,706 Vol $249.2M \u00b7 spread 0.2 bps SOL $116.56 +1.64% 24h 24h $112.41 \u2013 $118.45 Vol $155.8M \u00b7 spread 1.7 bps', 'diag': ''}"
+  },
+  {
+   "check": "desk: daily scan completes",
+   "ok": true,
+   "detail": "{'status': 'Observed 2026-09-25T03:47:11.603Z \u00b7 Scan complete. 406 USD spot products; latest candle bucket 2026-09-24. Late observation: historical next-open prices are not executable now.', 'tableRows': 31}"
+  },
+  {
+   "check": "desk Fetch BTC-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED BTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "desk Fetch ETH-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED ETH-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "desk Fetch SOL-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED SOL-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "desk Fetch LTC-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED LTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "desk Fetch LINK-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED LINK-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf"
+  },
+  {
+   "check": "desk Fetch AVAX-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED AVAX-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf"
+  },
+  {
+   "check": "desk Fetch DOGE-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED DOGE-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf"
+  },
+  {
+   "check": "desk Fetch ADA-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED ADA-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "desk Fetch BTC-USD 6-hour",
+   "ok": true,
+   "detail": "1800 BARS LOADED BTC-USD, 2025-07-02 00:00:00 to 2026-09-24 18:00:00 \u2014 about 1.23 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps."
+  },
+  {
+   "check": "desk Fetch BTC-USD hourly",
+   "ok": true,
+   "detail": "1800 BARS LOADED BTC-USD, 2026-07-12 03:00:00 to 2026-09-25 02:00:00 \u2014 about 0.21 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps."
+  },
+  {
+   "check": "desk: Capital plan fill without a key sets a live entry price near the ticker",
+   "ok": true,
+   "detail": "{'entry': 84158.61, 'status': '10:47:42 PM \u00b7 Filled: entry price, entry slippage, exit slippage, stop (30-day low). Account not connected (optional): equity, cash and fees stay manual \u2014 see private/README.txt.'}"
+  },
+  {
+   "check": "desk: Capital plan fill explains the account is not connected",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "lab Fetch BTC-USD daily",
+   "ok": true,
+   "detail": "1800 BARS LOADED BTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  {
+   "check": "no script or console errors on the pages",
+   "ok": true,
+   "detail": "[]"
+  }
+ ],
+ "facts": {
+  "launcherOutput": [
+   "Fable 5k: http://127.0.0.1:38017/ - leave this window open; Ctrl+C to stop.",
+   "Live data: OK   Coinbase Advanced (daily scan) (332 ms)",
+   "Live data: OK   Coinbase Exchange (candles, live stats) (169 ms)",
+   "Account:   not connected (optional: put a View-only key file in private/)"
+  ],
+  "health": {
+   "checkedAt": "2026-09-25T03:46:54.700227+00:00",
+   "ok": true,
+   "checks": [
+    {
+     "name": "Coinbase Advanced (daily scan)",
+     "ok": true,
+     "ms": 176,
+     "btcUsd": 84143.39
+    },
+    {
+     "name": "Coinbase Exchange (candles, live stats)",
+     "ok": true,
+     "ms": 169,
+     "btcUsd": 84143.39
+    }
+   ]
+  },
+  "listing": {
+   "pages": 10,
+   "products": 923,
+   "usdSpot": 408,
+   "keysOfFirst": [
+    "about_description",
+    "alias",
+    "alias_to",
+    "approximate_quote_24h_volume",
+    "auction_mode",
+    "base_cbrn",
+    "base_currency_id",
+    "base_display_symbol",
+    "base_increment",
+    "base_max_size",
+    "base_min_size",
+    "base_name",
+    "best_ask_price",
+    "best_bid_price",
+    "cancel_only",
+    "display_name",
+    "display_name_overwrite",
+    "fcm_trading_session_details",
+    "hidden_from_discovery",
+    "high_24h",
+    "icon_color",
+    "icon_url",
+    "is_alpha_testing",
+    "is_disabled",
+    "limit_only",
+    "low_24h",
+    "market_cap",
+    "mid_market_price",
+    "new",
+    "new_at",
+    "post_only",
+    "price",
+    "price_increment",
+    "price_percentage_change_24h",
+    "product_cbrn",
+    "product_id",
+    "product_type",
+    "product_venue",
+    "quote_cbrn",
+    "quote_currency_id",
+    "quote_display_symbol",
+    "quote_increment",
+    "quote_max_size",
+    "quote_min_size",
+    "quote_name",
+    "status",
+    "trading_disabled",
+    "view_only",
+    "volume_24h",
+    "volume_percentage_change_24h",
+    "watched"
+   ],
+   "approximate_quote_24h_volume": 404,
+   "price_percentage_change_24h": 404
+  },
+  "productRules": {
+   "BTC-USD": {
+    "base_increment": 1e-08,
+    "quote_increment": 0.01,
+    "base_min_size": 1e-08,
+    "quote_min_size": 1.0
+   },
+   "ETH-USD": {
+    "base_increment": 1e-08,
+    "quote_increment": 0.01,
+    "base_min_size": 1e-08,
+    "quote_min_size": 1.0
+   },
+   "SOL-USD": {
+    "base_increment": 1e-08,
+    "quote_increment": 0.01,
+    "base_min_size": 1e-08,
+    "quote_min_size": 1.0
+   }
+  },
+  "advancedDaily": {
+   "bars": 200,
+   "first": 1773014400,
+   "last": 1790208000,
+   "order": "newest first"
+  },
+  "quotes": {
+   "BTC-USD": {
+    "price": 84177.19,
+    "bid": 84177.19,
+    "ask": 84177.2,
+    "spreadBps": 0.0,
+    "24hopen": 83928.17,
+    "24hhigh": 84929.78,
+    "24hlow": 82708.96,
+    "24hlast": 84152.89,
+    "24hvolume": 6960.21566741,
+    "source": "exchange"
+   },
+   "ETH-USD": {
+    "price": 2675.46,
+    "bid": 2675.79,
+    "ask": 2675.8,
+    "spreadBps": 0.04,
+    "24hopen": 2676.32,
+    "24hhigh": 2706.26,
+    "24hlow": 2626.94,
+    "24hlast": 2674.58,
+    "24hvolume": 93132.56580017,
+    "source": "exchange"
+   },
+   "SOL-USD": {
+    "price": 116.52,
+    "bid": 116.52,
+    "ask": 116.53,
+    "spreadBps": 0.86,
+    "24hopen": 114.68,
+    "24hhigh": 118.45,
+    "24hlow": 112.41,
+    "24hlast": 116.56,
+    "24hvolume": 1336763.78996339,
+    "source": "exchange"
+   },
+   "LTC-USD": {
+    "price": 70.657,
+    "bid": 70.66,
+    "ask": 70.683,
+    "spreadBps": 3.25,
+    "24hopen": 66.469,
+    "24hhigh": 80.25,
+    "24hlow": 65.501,
+    "24hlast": 70.629,
+    "24hvolume": 816352.3032394,
+    "source": "exchange"
+   },
+   "LINK-USD": {
+    "price": 13.336,
+    "bid": 13.341,
+    "ask": 13.343,
+    "spreadBps": 1.5,
+    "24hopen": 12.286,
+    "24hhigh": 13.52,
+    "24hlow": 12.09,
+    "24hlast": 13.316,
+    "24hvolume": 2650883.92,
+    "source": "exchange"
+   },
+   "AVAX-USD": {
+    "price": 10.173,
+    "bid": 10.172,
+    "ask": 10.176,
+    "spreadBps": 3.93,
+    "24hopen": 10.231,
+    "24hhigh": 10.694,
+    "24hlow": 9.969,
+    "24hlast": 10.167,
+    "24hvolume": 1625456.63701401,
+    "source": "exchange"
+   },
+   "DOGE-USD": {
+    "price": 0.09488,
+    "bid": 0.09487,
+    "ask": 0.09492,
+    "spreadBps": 5.27,
+    "24hopen": 0.09318,
+    "24hhigh": 0.09753,
+    "24hlow": 0.09138,
+    "24hlast": 0.09477,
+    "24hvolume": 237007443.8,
+    "source": "exchange"
+   },
+   "ADA-USD": {
+    "price": 0.24667,
+    "bid": 0.24676,
+    "ask": 0.24681,
+    "spreadBps": 2.03,
+    "24hopen": 0.2387,
+    "24hhigh": 0.25329,
+    "24hlow": 0.23278,
+    "24hlast": 0.24682,
+    "24hvolume": 105457777.2992012,
+    "source": "exchange"
+   }
+  },
+  "exchangeCandles": {
+   "86400": {
+    "rows": 300,
+    "newestFirst": true,
+    "latest": 1790208000,
+    "expectedLatest": 1790208000,
+    "gaps": 0,
+    "inProgressIncluded": false
+   },
+   "21600": {
+    "rows": 300,
+    "newestFirst": true,
+    "latest": 1790272800,
+    "expectedLatest": 1790272800,
+    "gaps": 0,
+    "inProgressIncluded": false
+   },
+   "3600": {
+    "rows": 300,
+    "newestFirst": true,
+    "latest": 1790301600,
+    "expectedLatest": 1790301600,
+    "gaps": 0,
+    "inProgressIncluded": false
+   }
+  },
+  "dailyCloseMaxDiff": 0.0,
+  "fallback": {
+   "ticker": {
+    "price": "84181.99",
+    "bid": "84181.99",
+    "ask": "84182",
+    "time": "2026-09-25T03:47:03.232952Z",
+    "source": "coinbase-advanced"
+   },
+   "stats": {
+    "last": "84177.19",
+    "open": "83969.99",
+    "volume": "7006.718507",
+    "source": "coinbase-advanced"
+   },
+   "dailyRows": 30,
+   "latest": 1790208000
+  },
+  "liveStrip": {
+   "status": "Updated just now \u00b7 Coinbase Exchange via launcher \u00b7 auto-refresh 30s",
+   "grid": "BTC $84,182 +0.30% 24h 24h $82,709 \u2013 $84,930 Vol $586.0M \u00b7 spread 0.0 bps ETH $2,676 -0.01% 24h 24h $2,627 \u2013 $2,706 Vol $249.2M \u00b7 spread 0.2 bps SOL $116.56 +1.64% 24h 24h $112.41 \u2013 $118.45 Vol $155.8M \u00b7 spread 1.7 bps",
+   "diag": ""
+  },
+  "scan": {
+   "status": "Observed 2026-09-25T03:47:11.603Z \u00b7 Scan complete. 406 USD spot products; latest candle bucket 2026-09-24. Late observation: historical next-open prices are not executable now.",
+   "tableRows": 31
+  },
+  "fetch": {
+   "desk BTC-USD 86400s": "1800 BARS LOADED BTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi",
+   "desk ETH-USD 86400s": "1800 BARS LOADED ETH-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi",
+   "desk SOL-USD 86400s": "1800 BARS LOADED SOL-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi",
+   "desk LTC-USD 86400s": "1800 BARS LOADED LTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi",
+   "desk LINK-USD 86400s": "1800 BARS LOADED LINK-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf",
+   "desk AVAX-USD 86400s": "1800 BARS LOADED AVAX-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf",
+   "desk DOGE-USD 86400s": "1800 BARS LOADED DOGE-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent conf",
+   "desk ADA-USD 86400s": "1800 BARS LOADED ADA-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi",
+   "desk BTC-USD 21600s": "1800 BARS LOADED BTC-USD, 2025-07-02 00:00:00 to 2026-09-24 18:00:00 \u2014 about 1.23 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.",
+   "desk BTC-USD 3600s": "1800 BARS LOADED BTC-USD, 2026-07-12 03:00:00 to 2026-09-25 02:00:00 \u2014 about 0.21 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.",
+   "lab BTC-USD 86400s": "1800 BARS LOADED BTC-USD, 2021-10-21 to 2026-09-24 \u2014 about 4.93 years.  Integrity checks passed: high/low bracket open/close on every bar, no duplicates, no gaps.  At 4.93 years your search budget is 43 independent confi"
+  },
+  "capitalPlanFill": {
+   "entry": 84158.61,
+   "status": "10:47:42 PM \u00b7 Filled: entry price, entry slippage, exit slippage, stop (30-day low). Account not connected (optional): equity, cash and fees stay manual \u2014 see private/README.txt."
+  }
+ }
+}

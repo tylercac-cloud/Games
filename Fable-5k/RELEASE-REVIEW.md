@@ -1,3 +1,16 @@
+# Release 23.1 — live verification (2026-09-25)
+
+One fix (Crypta download progress). First run of the app against the real Coinbase public API; before this, every connection had only been tested against simulators.
+
+- **How:** `tests/desk/live_check.py` starts the real launcher with no key and checks every public route the pages use (fields the code reads, sane values, Exchange vs Advanced agreement, the Advanced fallback), then drives both pages in Chromium. The build sandbox cannot reach Coinbase, so it ran on GitHub Actions (`.github/workflows/fable-live-check.yml`), ubuntu-latest and windows-latest, Python 3.12, 2026-09-25 03:41 and 03:44 UTC.
+- **Result: 62/62 on both.** Launcher printed `Live data: OK` for Advanced (63 ms) and Exchange (47 ms) and `Account: not connected`. Listing: 10 pages, 923 products, 406 USD spot; all carry the fields the scan needs; 402 of 406 carry `approximate_quote_24h_volume` and `price_percentage_change_24h` (the scan falls back when absent). Exchange tickers, 24h stats and candles (daily, 6-hour, hourly) have the expected shapes: newest first, last completed bucket present, in-progress bucket absent, no gaps in 300 bars. Exchange and Advanced agree: last 5 BTC daily closes identical, BTC price within 0.02% (84,298.34 vs 84,308.23 on Linux; identical on Windows). The Advanced fallback returns usable ticker, stats and 30 daily candles.
+- **Pages:** live strip showed BTC/ETH/SOL with no diagnosis; the daily scan completed (406 USD spot products, latest bucket 2026-09-24); Fetch loaded 1,800 clean daily bars for all 8 pairs, plus BTC 6-hour and hourly, in both tools; Capital plan fill set the entry from the live price and said the account is not connected. No script or console errors.
+- **Simulator vs reality:** real SOL-USD `base_increment` is 0.00000001; the simulator uses 0.001 to exercise coarse rounding. Kept on purpose; the app reads the live value.
+- **Fixed:** Crypta's model download progress showed "NaN of 2.50 GB (NaN%)" against a real Ollama 0.34.4 (a layer's first line has `total` but no `completed`; small layers follow). Missing `completed` counts as 0; GB progress only for layers of 100 MB+. Simulator updated to the real stream shape; the updated `e2e_crypta_local.py` fails on the old code and passes on the fix.
+- **Not verified:** everything that needs a key or the owner's PC: account snapshot, fills, open orders, deposits, open risk, journal P&L, Crypta on Claude, Crypta on Ollama, taskbar install.
+
+---
+
 # Release 23 — Crypta on a free local model
 
 - **Brains:** Automatic (Claude if an Anthropic key is present, else a local model, else the guide), Claude, Local model, or Guide only — chosen in settings.

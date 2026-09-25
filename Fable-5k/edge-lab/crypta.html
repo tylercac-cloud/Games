@@ -398,7 +398,8 @@
       for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
         while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line)continue;let ev;try{ev=JSON.parse(line)}catch(e){continue}
           if(ev.error)throw Error(ev.error);last=ev.status||last;
-          out.textContent=ev.total?model+': '+(ev.completed/1e9).toFixed(2)+' of '+(ev.total/1e9).toFixed(2)+' GB ('+Math.floor(100*ev.completed/ev.total)+'%)':model+': '+last}}
+          // Real Ollama sends a layer's total before any "completed", and a few tiny layers: show GB only for the big one.
+          const got=+ev.completed||0;out.textContent=ev.total>=1e8?model+': '+(got/1e9).toFixed(2)+' of '+(ev.total/1e9).toFixed(2)+' GB ('+Math.floor(100*got/ev.total)+'%)':model+': '+last}}
       if(!/success/i.test(last))throw Error('download ended early ('+last+')');
       LS.set('crypta:settings',{...settings(),localModel:model});await refreshStatus();renderSettings();$('cryptaPull')&&($('cryptaPull').textContent=model+' is ready. I will use it for answers.');
     }catch(e){out.textContent='Download failed: '+e.message;$('cryptaSettings').querySelectorAll('button[data-pull]').forEach(b=>b.disabled=false)}

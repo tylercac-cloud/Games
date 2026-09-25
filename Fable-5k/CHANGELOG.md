@@ -6,6 +6,10 @@ Read README.md and RELEASE-REVIEW.md first. The historical content below is pres
 
 # Edge Lab — Audit History
 
+## Release 23.1 — live verification (2026-09-25)
+- New `tests/desk/live_check.py` (62 checks) runs the real launcher with no key against the real Coinbase public API and drives both pages in Chromium; `--sim` runs it against the simulator. GitHub workflow `fable-live-check.yml` runs it on Linux and Windows. Both passed 62/62.
+- Fixed (found against a real Ollama 0.34.4): Crypta's model download showed "NaN of 2.50 GB (NaN%)" and "NaN of 0.00 GB" because real Ollama sends a layer's total before any `completed`, then tiny layers. Missing `completed` now counts as 0 and only layers of 100 MB+ show GB progress. `fake_ollama.py` now sends the real stream shape; `e2e_crypta_local.py` fails on the old code (9/10) and passes on the fix (10/10).
+
 ## Release 23 — free local brain for Crypta (2026-09-24)
 - Ollama support with one-click model download; brain selector; same tools and stream as Claude.
 
