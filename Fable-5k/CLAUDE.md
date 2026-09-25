@@ -1,6 +1,6 @@
 # CLAUDE.md — Fable 5k handoff
 
-You're picking up **Fable 5k (release 23)** on the owner's real Windows PC. It was built and tested in a sandbox with no internet, so every external connection has only been tested against simulators. **Your main job is to verify it against the real world and fix only confirmed bugs.**
+You're picking up **Fable 5k (release 23.1)** on the owner's real Windows PC. It was built in a sandbox. Public Coinbase data and Crypta's local model have since been verified against the real services (see "Verified in 23.1"); everything that needs a key has only been tested against simulators. **Your main job is to verify it against the real world and fix only confirmed bugs.**
 
 ## Owner
 - Tyler. Works in spirits operations and does not code, so explain in plain words and keep it short.
@@ -73,15 +73,23 @@ Key suites:
 - Attack from another website: `e2e_hostile_site.py`
 - Crypta: `test_crypta.py`, `e2e_crypta.py`, `test_crypta_local.py`, `e2e_crypta_local.py`
 
-The simulators (`sim_coinbase.py`, `fake_anthropic.py`, `fake_ollama.py`) follow published API docs. **Where real behavior differs, the app is what should change.** Then update the simulator to match reality and keep the test.
+Live checks (real services, not in `run_all.sh`):
+- `python tests/desk/live_check.py`: real launcher, no key, real Coinbase public API; both pages in Chromium (62 checks). `--sim` runs it offline. Also runs on GitHub (`.github/workflows/fable-live-check.yml`, Linux + Windows) on every push to `claude/**` that touches `Fable-5k/`.
+- `python tests/desk/live_crypta_local.py [qwen3:4b-instruct|qwen3:8b|llama3.1:8b]`: needs Ollama running; downloads the model through Crypta's settings and asks her about the plan and Journal.
+
+The simulators (`sim_coinbase.py`, `fake_anthropic.py`, `fake_ollama.py`) follow published API docs, corrected where reality differed (see RELEASE-REVIEW 23.1). **Where real behavior differs, the app is what should change.** Then update the simulator to match reality and keep the test.
+
+## Verified in 23.1 (2026-09-25, real services, no keys)
+- Coinbase public data end to end (Linux and Windows runners plus the build sandbox): `Live data: OK` twice, listing/candles/ticker/stats shapes, Exchange vs Advanced agreement, the Advanced fallback, live strip, daily scan, Fetch for all 8 pairs, Capital plan fill without a key.
+- Crypta on a real Ollama 0.34.4: one-click download, switch to the local brain, streamed answers, go_to_tab and read_journal tools, no usage recorded. Two bugs found and fixed (NaN download progress; reasoning from always-thinking `qwen3:4b` leaking into answers).
 
 ## Never verified — please check these on the real machine
-1. **Launcher output.** `START-WINDOWS.bat` should print `Live data: OK` twice and `Account: OK View-only key accepted (ES256)`. Report the lines verbatim.
+1. **Launcher output.** `START-WINDOWS.bat` should print `Live data: OK` twice (verified on a Windows runner) and `Account: OK View-only key accepted (ES256)` (needs the key: not verified). Report the lines verbatim.
 2. **Coinbase field names.** Response shapes are assumed from docs: portfolio breakdown, `transaction_summary`, open orders' `order_configuration`, fills (especially `size` when `size_in_quote` is true), and v2 transactions for deposit detection. Compare Capital plan equity, cash and fee % with the Coinbase app.
 3. **Open risk after Tyler's first real stop.** It should equal size × (price − limit + limit × fee).
 4. **Journal P&L after the first real round trip.** It should equal the change in Coinbase equity.
 5. **Deposit detection.** Confirm it only suggests real deposits and ignores the starting balance.
-6. **Crypta on Ollama.** Download a model from her settings, then ask about the Capital plan and Journal. Report answer quality and whether her tools fire.
+6. **Crypta on Ollama on Tyler's PC.** Verified on a 4-core cloud CPU (answers 3–6 min each there; a desktop should be faster). Still check speed on his PC, and that `qwen3:8b` explains the plan arithmetic correctly: `qwen3:4b-instruct` gave the right size but left fees out of its working.
 7. **Crypta on Claude** (only if Tyler adds a key file). Confirm one real answer and that usage is recorded.
 8. **Taskbar install.** Install Crypta from `127.0.0.1:8765/crypta` in Edge and pin her. She should open with the launcher off and say it isn't running.
 

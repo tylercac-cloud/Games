@@ -1,0 +1,121 @@
+{
+ "ranAt": "2026-09-25T04:17:47.770171+00:00",
+ "results": [
+  {
+   "check": "Capital plan filled from live data and calculated",
+   "ok": true,
+   "detail": "{'rAsset': 'BTC-USD', 'rEquity': '5000', 'rCash': '5000', 'rEntry': '84150.21', 'rStop': '74887.5', 'rEF': '0.6', 'rXF': '0.6', 'rES': '1', 'rXS': '1'}"
+  },
+  {
+   "check": "her settings find Ollama running",
+   "ok": true,
+   "detail": "BRAIN\nAutomatic (Claude if a key is set, else local, else guide)\nClaude (Anthropic API key, paid)\nLocal model on this PC (free, via Ollama)\nBuilt-in guide only\nLocal model (free)\n\u00b7 Ollama running\nMODE"
+  },
+  {
+   "check": "one-click download of qwen3:4b-instruct finishes",
+   "ok": true,
+   "detail": "{'seconds': 9, 'progressSamples': ['Starting download of qwen3:4b-instruct\u2026', 'qwen3:4b-instruct: 0.00 of 2.50 GB (0%)', 'qwen3:4b-instruct: 0.68 of 2.50 GB (27%)', 'qwen3:4b-instruct: pulling 0914c7781e00', 'qwen3:4b-instruct: verifying sha256 digest', 'qwen3:4b-instruct is ready. I will use it for answers.']}"
+  },
+  {
+   "check": "download shows progress in GB and %",
+   "ok": true,
+   "detail": "['Starting download of qwen3:4b-instruct\u2026', 'qwen3:4b-instruct: 0.00 of 2.50 GB (0%)', 'qwen3:4b-instruct: 0.68 of 2.50 GB (27%)', 'qwen3:4b-instruct: 1.51 of 2.50 GB (60%)']"
+  },
+  {
+   "check": "she switches to the local model",
+   "ok": true,
+   "detail": "Local AI \u00b7 qwen3:4b-instruct \u00b7 free"
+  },
+  {
+   "check": "plan question answered",
+   "ok": true,
+   "detail": "The Capital plan currently gives a position size of 0.002443113187184995 BTC.\n\nThis size is determined by the following arithmetic:\n\nStep 1: Per-trade risk budget\n\nTotal equity = $5,000\nPer-trade risk"
+  },
+  {
+   "check": "navigation tool fired (switched to the Journal)",
+   "ok": true,
+   "detail": "jrn"
+  },
+  {
+   "check": "journal question answered",
+   "ok": true,
+   "detail": "Your journal shows no trades logged yet.\n\nKey details:\n\nTotal trades: 0\nNet P&L: $0\nWins/losses: 0\nFees recorded: 0\nNo entries in the \"recent\" list\n\nThis means no round-trip trades have been logged in"
+  },
+  {
+   "check": "at least one read-only tool fired",
+   "ok": true,
+   "detail": "['\u2713 Read the Journal', '\u2713 Switched tab']"
+  },
+  {
+   "check": "no failed tool calls",
+   "ok": true,
+   "detail": "['\u2713 Read the Journal', '\u2713 Switched tab']"
+  },
+  {
+   "check": "no Claude usage recorded (local model is free)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "no page errors",
+   "ok": true,
+   "detail": "[]"
+  }
+ ],
+ "facts": {
+  "model": "qwen3:4b-instruct",
+  "answers": [
+   {
+    "q": "What position size does my Capital plan give right now, and which limit decides it? Show the arithmetic.",
+    "seconds": 333,
+    "answer": "The Capital plan currently gives a position size of 0.002443113187184995 BTC.\n\nThis size is determined by the following arithmetic:\n\nStep 1: Per-trade risk budget\n\nTotal equity = $5,000\nPer-trade risk = 0.5% of equity\nRisk budget = 0.5% \u00d7 $5,000 = $25.00\n\nStep 2: Entry price and slippage\n\nReference entry price = $84,150.21\nEntry slippage = 1 basis point (0.01%)\nSo, effective entry price = $84,150.21 \u00d7 (1 + 0.0001) = $84,158.625\n\nStep 3: Stop price (30-day low)\n\nPlanned stop price = $74,887.50\nThis is the trigger price for the stop-loss.\n\nStep 4: Loss per unit\n\nLoss per unit = (Entry price \u2212 Stop price)\n= $84,158.625 \u2212 $74,887.50 = $9,271.125 per BTC\n\nStep 5: Quantity calculation\n\nWe want the total loss to equal the risk budget ($25.00)\nSo:\n\nQuantity = Risk budget / Loss per unit\n\n= $25.00 / $9,271.125\n\n= 0.002697 BTC\n\nBut the plan rounds down to the smallest allowed increment (Coinbase\u2019s step of 1e-8 BTC), and also respects the modeled stop loss.\n\nThe plan shows a modeled stop loss of $24.999999999999996, which is effectively $25.00 \u2014 confirming the risk is fully contained.\n\nThe final quantity is 0.002443113187184995 BTC, which is rounded down to match Coinbase\u2019s minimum order size (1e-8 BTC step).\n\nWhy this size?\n\nThe stop price is based on the 30-day low (a historical low), which is used as the stop trigger.\nThe entry price is adjusted for slippage (1 bps).\nThe quantity is calculated to ensure the loss if the stop fills is exactly $25.00 \u2014 the risk budget.\nThe result is rounded down to the smallest allowed increment.\n\n\u2705 Final answer:\n\nPosition size: 0.00244311 BTC\n\nLimit that decides it: 30-day low (stop price)\n\nArithmetic: $25.00 / ($84,158.625 \u2212 $74,887.50) = 0.002443 BTC (rounded down)",
+    "toolChipsSoFar": [],
+    "tab": "control"
+   },
+   {
+    "q": "Take me to the Journal tab.",
+    "seconds": 189,
+    "answer": "You're now in the Journal tab.\n\nThe Journal shows all unlogged trades from the last 120 days. To log a trade, tap one of the entries (e.g., \"Followed\", \"Partly\", or \"Didn't\") and fill in the size, entry, exit, fees, and close time.\n\nIf you'd like, I can help you:\n\nCheck what trades are waiting to be logged\nReview the cooling-off status\nOr see the journal's net P&L and splits\n\nLet me know what you'd like to do next.",
+    "toolChipsSoFar": [
+     "\u2713 Switched tab"
+    ],
+    "tab": "jrn"
+   },
+   {
+    "q": "What does my journal show so far?",
+    "seconds": 196,
+    "answer": "Your journal shows no trades logged yet.\n\nKey details:\n\nTotal trades: 0\nNet P&L: $0\nWins/losses: 0\nFees recorded: 0\nNo entries in the \"recent\" list\n\nThis means no round-trip trades have been logged in the last 120 days.\n\n\u2705 The cooling-off rule is not active (no losses in the last 24 hours).\n\n\u2705 You can now log your first trade by opening the journal and tapping a trade entry (e.g., \"Followed\", \"Partly\", or \"Didn't\").\n\nLet me know when you're ready to log a trade or check another part of the app.",
+    "toolChipsSoFar": [
+     "\u2713 Read the Journal",
+     "\u2713 Switched tab"
+    ],
+    "tab": "jrn"
+   }
+  ],
+  "plan": {
+   "rAsset": "BTC-USD",
+   "rEquity": "5000",
+   "rCash": "5000",
+   "rEntry": "84150.21",
+   "rStop": "74887.5",
+   "rEF": "0.6",
+   "rXF": "0.6",
+   "rES": "1",
+   "rXS": "1",
+   "result": "Experiment status: WITHIN_LIMITS \u00b7 P&L from $5,000: $0.00 \u00b7 remaining before hard/trailing pause: $1,000.00. Effective per-trade risk cap 0.50%. Paper planning only; no live authorization.\nMODELED LIMITS \u00b7 NOT PERMISSION TO TRADE\nQuantity \u2264 0.00244311 \u00b7 cash required $206.84 \u00b7 modeled stop loss $25.00. Round quantity down to the venue\u2019s permitted increment; do not round up to its minimum order.\nRisk budget = min(per-trade, remaining total)\nmin($25.00, $50.00) = $25.00\nModeled entry / stop fill\n$84,158.63 / $74,880.01\nLoss per unit, including both fees\n$84,158.63 \u00d7 (1 + 0.60%) \u2212 $74,880.01 \u00d7 (1 \u2212 0.60%) = $10,232.85\nQuantity = min(risk budget / loss per unit, available cash / entry cash per u"
+  },
+  "settingsBefore": "BRAIN\nAutomatic (Claude if a key is set, else local, else guide)\nClaude (Anthropic API key, paid)\nLocal model on this PC (free, via Ollama)\nBuilt-in guide only\nLocal model (free)\n\u00b7 Ollama running\nMODEL\nqwen3:4b\nqwen3:8b\nDownload Qwen3 4B Instruct \u00b7 lighter \u00b7 ~2.5 GB download \u00b7 8 GB RAM\nDownload Llama 3.1 8B \u00b7 alternative \u00b7 ~5 GB download\nRefresh\nClaude\n\u00b7 no key\n\nPaid, and not included in a Claude ",
+  "download": {
+   "seconds": 9,
+   "progressSamples": [
+    "Starting download of qwen3:4b-instruct\u2026",
+    "qwen3:4b-instruct: 0.00 of 2.50 GB (0%)",
+    "qwen3:4b-instruct: 0.68 of 2.50 GB (27%)",
+    "qwen3:4b-instruct: pulling 0914c7781e00",
+    "qwen3:4b-instruct: verifying sha256 digest",
+    "qwen3:4b-instruct is ready. I will use it for answers."
+   ]
+  },
+  "mode": "Local AI \u00b7 qwen3:4b-instruct \u00b7 free"
+ }
+}
