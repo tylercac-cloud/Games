@@ -288,8 +288,8 @@ function renderJrn(){
     <div class="st"><div class="v">${(ph*100).toFixed(1)}%</div><div class="k">Win rate</div></div>
     <div class="st"><div class="v ${pnl>=0?'good':'bad'}">$${pnl.toFixed(0)}</div><div class="k">Net P&amp;L</div></div>
     <div class="st"><div class="v ${slip<=0.1?'good':'bad'}">${slip.toFixed(2)}%</div><div class="k">Avg slippage</div></div>`;
-  tb.innerHTML=`<table><thead><tr><th>Date</th><th>Symbol</th><th>Trial</th><th class="n">Slip %</th><th class="n">P&amp;L</th></tr></thead><tbody>`+
-    TRADES.slice().reverse().map(t=>`<tr><td class="n">${htmlSafe(t.d)}</td><td>${htmlSafe(t.sym)}</td><td class="n">${htmlSafe(t.rule||'—')}</td>
+  tb.innerHTML=`<table><thead><tr><th>Date</th><th>Symbol</th><th>Trial</th><th>Plan</th><th class="n">Fees</th><th class="n">Slip %</th><th class="n">P&amp;L</th></tr></thead><tbody>`+
+    TRADES.slice().reverse().map(t=>`<tr><td class="n">${htmlSafe(t.d)}</td><td>${htmlSafe(t.sym)}</td><td class="n">${htmlSafe(t.rule||'—')}</td><td title="${htmlSafe(t.note||'')}">${htmlSafe(t.follow||'—')}</td><td class="n">${Number.isFinite(t.fee)?'$'+t.fee.toFixed(2):'—'}</td>
       <td class="n" style="color:${t.slip>0.2?'var(--kill)':'inherit'}">${t.slip.toFixed(2)}</td>
       <td class="n" style="color:${t.pnl>=0?'var(--live)':'var(--kill)'}">$${t.pnl.toFixed(0)}</td></tr>`).join('')+'</tbody></table>';
   // Win rate alone can't judge a rule whose wins and losses differ in size
@@ -412,16 +412,23 @@ document.getElementById('addTrade').addEventListener('click',async()=>{
   const e=parseFloat(jExp.value),a=parseFloat(jAct.value),x=parseFloat(jExit.value),
         s=parseFloat(jSize.value),f=fieldNumber('jFee');
   if(![e,a,x,s].every(v=>Number.isFinite(v)&&v>0)||!Number.isFinite(f)||f<0){alert('Size and prices must be positive; fees must be zero or positive.');return}
+  const follow=document.getElementById('jFollow').value||null;   // optional; the review lists trades without an answer
+  const closedAt=(window.fableAuto&&window.fableAuto.pendingClose())||new Date().toISOString();
   TRADES.push({d:new Date().toISOString().slice(0,10),sym:jSym.value||'—',rule:jRule.value,
-    slip:(jDir.value==='Long'?1:-1)*(a-e)/e*100,pnl:(jDir.value==='Long'?1:-1)*(x-a)*(s/a)-f,ret:((jDir.value==='Long'?1:-1)*(x-a)*(s/a)-f)/s});
-  await S.set('trades',TRADES);renderJrn();autoSaveIfNeeded();[jExp,jAct,jExit].forEach(i=>i.value='')});
+    slip:(jDir.value==='Long'?1:-1)*(a-e)/e*100,pnl:(jDir.value==='Long'?1:-1)*(x-a)*(s/a)-f,ret:((jDir.value==='Long'?1:-1)*(x-a)*(s/a)-f)/s,
+    size:s,fee:f,exp:e,act:a,exit:x,dir:jDir.value,follow,note:String(document.getElementById('jNote').value||'').slice(0,200),closedAt,
+    trip:(window.fableAuto&&window.fableAuto.pendingTrip())||null});
+  await S.set('trades',TRADES);renderJrn();autoSaveIfNeeded();[jExp,jAct,jExit].forEach(i=>i.value='');
+  document.getElementById('jFollow').value='';document.getElementById('jNote').value='';
+  if(window.fableAuto){const jc=document.getElementById('jClosed');if(jc)jc.value=window.fableAuto.today();window.fableAuto.renderReview()}});
 document.getElementById('clrHyp').addEventListener('click',()=>{exportState();});
 document.getElementById('clrJrn').addEventListener('click',async()=>{
   if(confirm('Delete all logged trades?')){TRADES=[];await S.clear('trades');renderJrn();autoSaveIfNeeded()}});
 
 async function exportState(){
   const blob={format:'edge-lab',version:3,exported:new Date().toISOString(),
-              budget:BUDGET,hyp:HYP,trades:TRADES,research:RESEARCH,protocol:PROTOCOL_ENVELOPE,history:HISTORY_MANIFEST};
+              budget:BUDGET,hyp:HYP,trades:TRADES,research:RESEARCH,protocol:PROTOCOL_ENVELOPE,history:HISTORY_MANIFEST,
+              desk:window.fableAuto?window.fableAuto.exportExtras():undefined};
   const saved=await saveFile(`edge-lab-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(blob,null,2),'application/json');
   if(!saved){document.getElementById('ioOut').innerHTML='<div class="verdict weak"><b>Download unavailable</b>Copy the full backup from the text box below.</div>';autoSaveIfNeeded();return}
   document.getElementById('ioOut').innerHTML=
@@ -471,6 +478,7 @@ async function importState(text){
   if(o.budget&&!BUDGET){BUDGET=o.budget;bY.value=BUDGET.years;bSR.value=BUDGET.sr;bRho.value=BUDGET.rho}
   await S.set('hyp',HYP); await S.set('trades',TRADES); if(BUDGET)await S.set('budget',BUDGET);
   RESEARCH=stagedResearch;saveResearchState();recordResearch('backup-import',{summary:'Imported '+addedH+' active entries and '+addedT+' journal entries; earlier history remains unknown'});
+  if(o.desk&&window.fableAuto)window.fableAuto.importExtras(o.desk);
   refreshHeader();renderHyp();renderJrn();autoSaveIfNeeded();
   io.innerHTML=`<div class="verdict pass"><b>Merged</b>Added ${addedH} register entries and ${addedT} trades. Total now <strong>${spentTotal()} configurations searched</strong> across ${HYP.length} entries.</div>`;
 }
@@ -563,7 +571,8 @@ document.getElementById('planRisk').addEventListener('click',()=>{
     const requestedInputs={...c},experiment=experimentRisk(c.equity,c.peak,PROTOCOL.riskPolicy);
     c.risk=Math.min(c.risk,experiment.riskFraction);c.portfolioRisk=Math.min(c.portfolioRisk,PROTOCOL.riskPolicy.portfolioOpenRiskFraction);c.maxPosition=Math.min(c.maxPosition,PROTOCOL.riskPolicy.maxPositionCashFraction);
     if(!experiment.newRiskAllowed)c.cash=0;
-    const r=positionPlan(c);LAST_RISK={requestedInputs,experiment,format:'edge-lab-risk-plan',created:new Date().toISOString(),inputs:c,result:r};
+    const cooling=window.fableAuto?window.fableAuto.coolingOff():null;if(cooling)c.cash=0;
+    const r=positionPlan(c);LAST_RISK={requestedInputs,experiment,cooling,format:'edge-lab-risk-plan',created:new Date().toISOString(),inputs:c,result:r};
     document.getElementById('riskOut').innerHTML=`<div class="note"><strong>Experiment status: ${experiment.stage}</strong> · P&amp;L from $5,000: ${money(c.equity-PROTOCOL.riskPolicy.initialCapital)} · remaining before hard/trailing pause: ${money(experiment.remaining)}. Effective per-trade risk cap ${pct(c.risk)}. ${!experiment.newRiskAllowed?'New position size is forced to zero.':'Paper planning only; no live authorization.'}</div><div class="verdict ${r.qty>0?'weak':'fail'}"><b>${r.halt?'Paused: drawdown limit reached':r.qty===0?'No room for a new position':'Modeled limits · not permission to trade'}</b>Quantity ≤ <strong>${r.qty.toFixed(8)}</strong> · cash required ${money(r.debit)} · modeled stop loss ${money(r.stopLoss)}. Round quantity down to the venue’s permitted increment; do not round up to its minimum order.</div>
       <div class="kv"><span>Risk budget = min(per-trade, remaining total)</span><span>min(${money(c.equity*c.risk)}, ${money(r.headroom)}) = ${money(r.riskBudget)}</span></div>
       <div class="kv"><span>Modeled entry / stop fill</span><span>${money(r.entryFill)} / ${money(r.stopFill)}</span></div>

@@ -14,10 +14,11 @@ class FakeCoinbase(BaseHTTPRequestHandler):
         if MODE['nonjson']:
             b=b'<html>blocked</html>';self.send_response(200);self.send_header('Content-Type','text/html');self.send_header('Content-Length',str(len(b)));self.end_headers();self.wfile.write(b);return
         p=self.path.split('?')[0]
-        if p.endswith('/ticker'):body={'price':'64123.45','bid':'64120.00','ask':'64125.00','time':'2026-09-22T12:00:00Z'}
-        elif p.endswith('/stats'):body={'open':'63000','high':'64500','low':'62800','last':'64123.45','volume':'12000.5'}
-        elif p.startswith('/brk/market/products/') and p.endswith('/candles'):body={'candles':[{'start':'1758412800','open':'1','high':'2','low':'0.5','close':'1.5','volume':'10'}]}
-        elif p.startswith('/brk/market/products/'):body={'product_id':p.rsplit('/',1)[1],'price':'64123.45'}
+        if p.startswith('/exg/') and p.endswith('/ticker'):body={'price':'64123.45','bid':'64120.00','ask':'64125.00','time':'2026-09-22T12:00:00Z'}
+        elif p.startswith('/exg/') and p.endswith('/stats'):body={'open':'63000','high':'64500','low':'62800','last':'64123.45','volume':'12000.5'}
+        elif p.startswith('/brk/market/products/') and p.endswith('/candles'):body={'candles':[{'start':'1758412800','open':'1','high':'2','low':'0.5','close':'1.5','volume':'10'},{'start':'1758499200','open':'1.5','high':'2.5','low':'1','close':'2','volume':'11'}]}
+        elif p.startswith('/brk/market/products/') and p.endswith('/ticker'):body={'trades':[{'price':'64123.45','time':'2026-09-22T12:00:00Z'}],'best_bid':'64120.00','best_ask':'64125.00'}
+        elif p.startswith('/brk/market/products/'):body={'product_id':p.rsplit('/',1)[1],'price':'64123.45','price_percentage_change_24h':'1.78','volume_24h':'12000.5'}
         elif p=='/brk/market/products':body={'products':[{'product_id':'BTC-USD'}],'num_products':1}
         elif p.startswith('/exg/products/') and p.endswith('/candles'):body=[[1758412800,62800,64500,63000,64100,12000]]
         else:
@@ -65,6 +66,25 @@ class LiveProxy(unittest.TestCase):
     def test_health(self):
         s,b=self.get('/health');self.assertEqual(s,200);self.assertTrue(b['ok'],b);self.assertEqual(len(b['checks']),2);self.assertAlmostEqual(b['checks'][0]['btcUsd'],64123.45)
         MODE['nonjson']=True;server._CACHE.clear();s,b=self.get('/health');self.assertFalse(b['ok']);self.assertTrue(all('non-JSON' in c['error'] for c in b['checks']))
+
+class ExchangeFallback(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.saved=server.EXCHANGE;server.EXCHANGE='http://127.0.0.1:9/exg'   # nothing listens on port 9
+        cls.httpd=server.ThreadingHTTPServer(('127.0.0.1',0),server.Handler);threading.Thread(target=cls.httpd.serve_forever,daemon=True).start()
+    @classmethod
+    def tearDownClass(cls):server.EXCHANGE=cls.saved;cls.httpd.shutdown();cls.httpd.server_close()
+    def get(self,path):
+        c=http.client.HTTPConnection('127.0.0.1',self.httpd.server_port,timeout=10);c.request('GET',path);r=c.getresponse();b=r.read();c.close();return r.status,json.loads(b)
+    def setUp(self):SEEN.clear();MODE['nonjson']=False;server._CACHE.clear()
+    def test_ticker_stats_candles_survive_exchange_outage(self):
+        s,b=self.get('/coinbase-exchange/products/BTC-USD/ticker');self.assertEqual(s,200,b);self.assertEqual((b['bid'],b['ask'],b['price']),('64120.00','64125.00','64123.45'))
+        s,b=self.get('/coinbase-exchange/products/BTC-USD/stats');self.assertEqual(s,200,b);self.assertAlmostEqual(float(b['open']),64123.45/1.0178,4);self.assertEqual(b['volume'],'12000.5')
+        s,b=self.get('/coinbase-exchange/products/BTC-USD/candles?granularity=86400&start=2025-09-20T00:00:00Z&end=2025-09-22T23:59:59Z');self.assertEqual(s,200,b)
+        self.assertEqual(b,[[1758499200,1.0,2.5,1.5,2.0,11.0],[1758412800,0.5,2.0,1.0,1.5,10.0]])   # Exchange order: newest first, [t,low,high,open,close,vol]
+        self.assertTrue(any('/brk/market/products/BTC-USD/candles?' in p and 'granularity=ONE_DAY' in p for p in SEEN))
+    def test_health_reports_fallback_as_ok(self):
+        s,b=self.get('/health');self.assertTrue(b['ok'],b);self.assertIn('via Advanced fallback',b['checks'][1]['name'])
 
 class FailureReasons(unittest.TestCase):
     def test_messages_are_specific(self):

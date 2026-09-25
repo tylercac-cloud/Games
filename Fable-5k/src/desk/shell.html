@@ -104,7 +104,7 @@ code{font-family:var(--mono);font-size:12px;background:#EEF2F6;padding:1px 5px;b
 <body><div class="shell">
 
 <header>
-  <div class="title">Fable / Desk <small>Locked research · daily observation · release 12</small></div>
+  <div class="title">Fable / Desk <small>Locked research · daily observation · release 23</small></div>
   <div class="counter">
     <div class="cbox"><div class="v" id="cN">0</div><div class="k">Trials used</div></div>
     <div class="cbox warn"><div class="v" id="cB">—</div><div class="k">Budget</div></div>
@@ -193,6 +193,8 @@ code{font-family:var(--mono);font-size:12px;background:#EEF2F6;padding:1px 5px;b
     </div>
     <div class="btns"><button class="act" id="planRisk">Calculate limits</button><button class="act sec" id="exportRisk">Download calculation</button></div>
     <div id="riskOut" aria-live="polite"></div>
+    <div id="ticketOut"></div>
+    <div id="equityLogOut"></div>
   </div>
   <div class="card"><h2>Before a larger allocation</h2><p class="hint">These are evidence requirements, not a formula that certifies safety.</p>
     <table><thead><tr><th>Evidence</th><th>Current position</th></tr></thead><tbody>
@@ -379,12 +381,17 @@ code{font-family:var(--mono);font-size:12px;background:#EEF2F6;padding:1px 5px;b
       <div><label for="jAct">Actual entry</label><input type="number" id="jAct" step="any"></div>
       <div><label for="jExit">Exit price</label><input type="number" id="jExit" step="any"></div>
       <div><label for="jFee">Fees $</label><input type="number" id="jFee" value="0" step="any"></div>
+      <div><label for="jClosed">Closed on</label><input type="date" id="jClosed"></div>
+      <div><label for="jFollow">Followed the plan?</label><select id="jFollow"><option value="">— choose —</option><option>Yes</option><option>Partly</option><option>No</option></select></div>
+      <div><label for="jNote">What differed (optional)</label><input id="jNote" maxlength="200" placeholder="e.g. moved stop, sold early"></div>
     </div>
-    <div class="btns"><button class="act" id="addTrade">Add trade</button><button class="act sec" id="importFills" type="button">Import from Coinbase</button></div>
+    <div class="btns"><button class="act" id="addTrade">Add trade</button><button class="act sec" id="importFills" type="button">Refresh Coinbase trades</button></div>
     <div id="fillsOut"></div>
   </div>
   <div class="card"><h2>Record</h2>
-    <div class="stats" id="jStats"></div><div id="jTable"></div><div id="jVerdict"></div>
+    <div class="stats" id="jStats"></div><div id="jTable"></div><div id="jVerdict"></div><div id="jReview"></div>
+    <div class="btns" style="margin-top:14px"><label for="taxYear" style="align-self:center;margin:0 8px 0 0">Tax year</label><select id="taxYear" style="width:auto"></select><button class="act sec" id="taxCsv" type="button">Tax CSV (Form 8949 style)</button></div>
+    <div id="taxOut"></div>
     <div class="btns" style="margin-top:12px"><button class="act sec" id="clrJrn">Clear journal</button></div>
   </div>
 </section>

@@ -49,9 +49,10 @@ spec=importlib.util.spec_from_file_location('acct_server',ROOT/'market-scan/serv
 acct=server.acct
 LOG=io.StringIO()
 
-def write_key(secret,name=KEY_NAME):
-    for f in Path(KEYDIR).glob('*.json'):f.unlink()
-    if secret is not None:Path(KEYDIR,'cdp_api_key.json').write_text(json.dumps({'name':name,'privateKey':secret}))
+def write_key(secret,name=KEY_NAME,filename='cdp_api_key.json'):
+    for f in Path(KEYDIR).iterdir():
+        if f.name.lower()!='readme.txt':f.unlink()
+    if secret is not None:Path(KEYDIR,filename).write_text(json.dumps({'name':name,'privateKey':secret}))
     server._ACC_CACHE.clear()
 
 class Crypto(unittest.TestCase):
@@ -73,6 +74,111 @@ class Crypto(unittest.TestCase):
     def test_bad_keys_rejected(self):
         for bad in ['not a key','-----BEGIN RSA PRIVATE KEY-----\nAAAA\n-----END RSA PRIVATE KEY-----',base64.b64encode(b'x'*20).decode()]:
             with self.assertRaises(Exception):acct.parse_private_key(bad)
+
+class Detection(unittest.TestCase):
+    def setUp(self):
+        for f in Path(KEYDIR).iterdir():f.unlink()
+    def test_misnamed_and_duplicate_downloads_are_found(self):
+        Path(KEYDIR,'README.txt').write_text('setup instructions')
+        secret=json.dumps({'name':KEY_NAME,'privateKey':ec_pem(ser.PrivateFormat.TraditionalOpenSSL)})
+        Path(KEYDIR,'cdp_api_key.json 2.txt').write_text(secret)
+        self.assertEqual(acct.find_key_file().name,'cdp_api_key.json 2.txt')
+        self.assertIsNone(acct.find_key_file() and None)  # sanity no-op
+        k=acct.load_key();self.assertEqual(k['kid'],KEY_NAME)
+    def test_a_real_json_file_wins_over_a_misnamed_one(self):
+        Path(KEYDIR,'stray.txt').write_text(json.dumps({'name':'stray','privateKey':'x'}))
+        Path(KEYDIR,'cdp_api_key.json').write_text(json.dumps({'name':KEY_NAME,'privateKey':ec_pem(ser.PrivateFormat.TraditionalOpenSSL)}))
+        self.assertEqual(acct.find_key_file().name,'cdp_api_key.json')
+    def test_raw_key_text_alone_gets_a_specific_message(self):
+        Path(KEYDIR,'key from phone.txt').write_text(ec_pem(ser.PrivateFormat.TraditionalOpenSSL))
+        with self.assertRaises(acct.AccountError) as cm:acct.load_key()
+        self.assertIn('Download button',str(cm.exception))
+    def test_readme_and_unrelated_files_ignored(self):
+        Path(KEYDIR,'README.txt').write_text('setup instructions, contains the word privateKey too')
+        Path(KEYDIR,'notes.txt').write_text('just a note, nothing json-like')
+        self.assertIsNone(acct.find_key_file())
+
+class DetectionMore(unittest.TestCase):
+    def setUp(self):
+        for f in Path(KEYDIR).iterdir():f.unlink()
+    def test_non_key_json_does_not_hide_the_real_key(self):
+        Path(KEYDIR,'backup.json').write_text(json.dumps({'format':'edge-lab','trades':[]}))
+        Path(KEYDIR,'cdp_api_key.txt').write_text(json.dumps({'name':KEY_NAME,'privateKey':ec_pem(ser.PrivateFormat.TraditionalOpenSSL)}))
+        self.assertEqual(acct.find_key_file().name,'cdp_api_key.txt')
+    def test_only_unrelated_files_explained(self):
+        Path(KEYDIR,'backup.json').write_text('{"format":"edge-lab"}')
+        with self.assertRaises(acct.AccountError) as cm:acct.load_key()
+        self.assertIn('backup.json',str(cm.exception));self.assertIn('Download button',str(cm.exception))
+    def test_bare_ed25519_secret_explained(self):
+        Path(KEYDIR,'from phone').write_text(ED_RAW)
+        with self.assertRaises(acct.AccountError) as cm:acct.load_key()
+        self.assertIn('only the private key text',str(cm.exception))
+    def test_oversized_files_ignored(self):
+        Path(KEYDIR,'video.mp4').write_bytes(b'0'*200000);self.assertIsNone(acct.find_key_file())
+    def test_ed25519_401_suggests_ecdsa(self):
+        a=acct.Account({'kid':'k','alg':'EdDSA','secret':b'\x01'*32},opener=lambda req,**kw:(_ for _ in ()).throw(type('E',(Exception,),{'code':401})()))
+        with self.assertRaises(acct.AccountError) as cm:a.get('/key_permissions')
+        self.assertIn('ECDSA',str(cm.exception))
+
+class RiskAndUnits(unittest.TestCase):
+    def acct_with(self,responses):
+        class R:
+            def __init__(s,b):s.b=json.dumps(b).encode()
+            def __enter__(s):return s
+            def __exit__(s,*a):pass
+            def read(s,n):return s.b
+        def opener(req,**kw):
+            path=req.full_url.split('api/v3/brokerage')[1].split('?')[0]
+            for k,v in responses.items():
+                if path.endswith(k):return R(v)
+            raise AssertionError(path)
+        return acct.Account({'kid':'k','alg':'ES256','secret':EC_KEY.private_numbers().private_value},opener)
+    def base(self,orders,fills=None):
+        return {'/key_permissions':STATE['perms'],'/portfolios/pf-1':{'breakdown':{'portfolio_balances':{'total_balance':{'value':'1000'}},'spot_positions':[{'asset':'BTC','total_balance_fiat':600,'total_balance_crypto':0.01}]}},
+                '/transaction_summary':{'fee_tier':{'taker_fee_rate':'0.01'}},'/orders/historical/batch':{'orders':orders},'/orders/historical/fills':{'fills':fills or []}}
+    def test_oversized_and_usdc_stop_orders(self):
+        orders=[{'product_id':'BTC-USDC','side':'SELL','order_configuration':{'stop_limit_stop_limit_gtc':{'base_size':'0.05','stop_price':'55000','limit_price':'54000'}}}]
+        b=self.acct_with(self.base(orders)).snapshot()['positions'][0]
+        self.assertAlmostEqual(b['stopRiskUSD'],0.01*((60000-54000)+54000*0.01));self.assertAlmostEqual(b['unprotectedUSD'],0)   # 0.01 held, not 0.05
+    def test_partial_stop_coverage(self):
+        orders=[{'product_id':'BTC-USD','side':'SELL','order_configuration':{'stop_limit_stop_limit_gtc':{'base_size':'0.004','stop_price':'57000','limit_price':'57000'}}}]
+        b=self.acct_with(self.base(orders)).snapshot()['positions'][0]
+        self.assertAlmostEqual(b['stopRiskUSD'],0.004*(3000+570));self.assertAlmostEqual(b['unprotectedUSD'],0.006*60000)
+    def test_transfers_net_and_skip(self):
+        pages={'/v2/accounts':{'data':[{'id':'u','currency':{'code':'USD'},'updated_at':'2026-09-01T00:00:00Z'},{'id':'b','currency':'BTC','updated_at':'2026-09-02T00:00:00Z'},{'id':'x','currency':{'code':'DOGE'},'updated_at':'2025-01-01T00:00:00Z'}]},
+               '/v2/accounts/u/transactions':{'data':[{'type':'fiat_deposit','status':'completed','native_amount':{'amount':'1000.00'},'created_at':'2026-08-20T00:00:00Z'},
+                    {'type':'fiat_withdrawal','status':'completed','native_amount':{'amount':'-200.00'},'created_at':'2026-08-25T00:00:00Z'},{'type':'fiat_deposit','status':'pending','native_amount':{'amount':'50'},'created_at':'2026-08-26T00:00:00Z'},
+                    {'type':'fiat_deposit','status':'completed','native_amount':{'amount':'999'},'created_at':'2026-06-01T00:00:00Z'}]},
+               '/v2/accounts/b/transactions':{'data':[{'type':'send','status':'completed','native_amount':{'amount':'-300.00'},'created_at':'2026-08-28T00:00:00Z'},{'type':'pro_deposit','status':'completed','native_amount':{'amount':'5'},'created_at':'2026-08-29T00:00:00Z'},{'type':'advanced_trade_fill','status':'completed','native_amount':{'amount':'77'},'created_at':'2026-08-29T00:00:00Z'}]}}
+        class R:
+            def __init__(s,b):s.b=json.dumps(b).encode()
+            def __enter__(s):return s
+            def __exit__(s,*a):pass
+            def read(s,n):return s.b
+        seen=[]
+        def opener(req,**kw):
+            path=req.full_url.split('api.coinbase.com')[-1].split('127.0.0.1')[-1];path='/'+path.split('/',1)[1] if not path.startswith('/v2') else path
+            path=req.full_url[req.full_url.index('/v2/'):].split('?')[0];seen.append(path);return R(pages[path])
+        r=acct.Account({'kid':'k','alg':'ES256','secret':EC_KEY.private_numbers().private_value},opener).transfers('2026-08-01')
+        pages['/v2/accounts/u/transactions']['data'].append({'type':'fiat_deposit','status':'completed','native_amount':{'amount':'40.00'},'created_at':'2026-07-31T20:00:00-07:00'})   # = Aug 1 03:00 UTC: inside the window
+        r=acct.Account({'kid':'k','alg':'ES256','secret':EC_KEY.private_numbers().private_value},opener).transfers('2026-08-01')
+        self.assertAlmostEqual(r['net'],1000-200-300+40);pages['/v2/accounts/u/transactions']['data'].pop()
+        r=acct.Account({'kid':'k','alg':'ES256','secret':EC_KEY.private_numbers().private_value},opener).transfers('2026-08-01')
+        self.assertAlmostEqual(r['net'],1000-200-300);self.assertEqual(len(r['rows']),3);self.assertEqual(r['skipped'],{'pro_deposit':1});self.assertNotIn('/v2/accounts/x/transactions',seen)
+    def test_gapped_stop_limit_protects_nothing(self):
+        orders=[{'product_id':'BTC-USD','side':'SELL','order_configuration':{'stop_limit_stop_limit_gtc':{'base_size':'0.01','stop_price':'62000','limit_price':'61000'}}}]
+        b=self.acct_with(self.base(orders)).snapshot()['positions'][0]   # BTC at 60,000: already below the 61,000 limit
+        self.assertEqual(b['stopRiskUSD'],0);self.assertAlmostEqual(b['unprotectedUSD'],600)
+    def test_missing_quantity_is_never_zero_risk(self):
+        r=self.base([]);r['/portfolios/pf-1']['breakdown']['spot_positions']=[{'asset':'SOL','total_balance_fiat':300}]
+        p=self.acct_with(r).snapshot()['positions'][0];self.assertTrue(p['quantityUnknown']);self.assertEqual(p['unprotectedUSD'],300)
+    def test_quote_sized_fill_units(self):
+        fills=[{'trade_id':'1','order_id':'a','trade_time':'1','side':'BUY','price':'60000','size':'600','size_in_quote':True,'commission':'7.2','product_id':'BTC-USD'},
+               {'trade_id':'2','order_id':'b','trade_time':'2','side':'BUY','price':'60000','size':'0.01','size_in_quote':True,'commission':'7.2','product_id':'BTC-USD'},
+               {'trade_id':'3','order_id':'c','trade_time':'3','side':'BUY','price':'60000','size':'600','size_in_quote':True,'commission':'0','product_id':'BTC-USD'}]
+        q=[f['qty'] for f in self.acct_with(self.base([],fills)).fills('BTC-USD')['fills']]
+        dup=self.acct_with(self.base([],fills+fills[:1])).fills('BTC-USD')['fills'];self.assertEqual(len(dup),3)
+        for x in q:self.assertAlmostEqual(x,0.01)
 
 class Routes(unittest.TestCase):
     @classmethod
@@ -98,9 +204,9 @@ class Routes(unittest.TestCase):
         s,b=self.get('/account/snapshot');self.assertEqual(s,200,b);d=json.loads(b)
         self.assertEqual(d['equity'],5123.45);self.assertEqual(d['cash'],3100);self.assertEqual(d['fees']['taker'],0.012)
         btc=[p for p in d['positions'] if p['asset']=='BTC'][0];eth=[p for p in d['positions'] if p['asset']=='ETH'][0]
-        self.assertAlmostEqual(btc['price'],60000);self.assertAlmostEqual(btc['stopRiskUSD'],75);self.assertAlmostEqual(btc['unprotectedUSD'],0)
+        self.assertAlmostEqual(btc['price'],60000);self.assertAlmostEqual(btc['stopRiskUSD'],0.025*((60000-56900)+56900*0.012));self.assertAlmostEqual(btc['unprotectedUSD'],0)
         self.assertAlmostEqual(eth['unprotectedUSD'],500);self.assertEqual(len(d['positions']),2)
-        self.assertAlmostEqual(d['openStopRisk'],75);self.assertTrue(all(x.split('?')[0].startswith('/api/v3/brokerage/') for x in STATE['seen']))
+        self.assertAlmostEqual(d['openStopRisk'],94.57);self.assertTrue(all(x.split('?')[0].startswith('/api/v3/brokerage/') for x in STATE['seen']))
     def test_eddsa_key_works(self):
         write_key(ED_RAW);STATE.update(pub=ED_KEY.public_key(),alg='EdDSA');s,b=self.get('/account/snapshot');self.assertEqual(s,200,b)
     def test_fills(self):

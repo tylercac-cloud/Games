@@ -1,4 +1,4 @@
-# Release 12 maintenance contract
+# Release 21 maintenance contract
 
 Read README.md and RELEASE-REVIEW.md before changing this workspace. Historical HANDOFF.md, REVIEW.md and CHANGELOG.md describe earlier versions and contain superseded claims. Their old fee, live-entry, pre-registration and holdout statements are not current guarantees.
 
@@ -27,3 +27,6 @@ The lab's historical same-close engine/statistical formula and the desk's next-o
 The lab uses `edgelab:` storage; the desk uses `fable-desk:` storage. Their backup formats have different extensions. Never overwrite one with the other. Keep backup signatures based on full normalized content (excluding transport timestamps). Keep live trading and credentials absent. The launcher is the only network path: add public GET routes to its allowlist with bounds and a `test_live_proxy.py` case; pages call Coinbase through `routePublic()`. Account access is View-only by construction: only fixed GET routes in `market-scan/account.py`, trade/transfer keys refused, key never sent to the page, `X-Fable-Local` header required. Never add order endpoints. `src/autofill.js` must never overwrite typed values or feed the study. The Live market strip is informational and must never feed the study, scanner, sizing or verdicts. Manual equity and risk limits cannot enforce exchange-side liquidation.
 
 No parallel agents are required by these instructions.
+
+
+Crypta: the system prompt, tools, model list and spending cap live in `market-scan/crypta.py` and must stay server-side; the page sends only the conversation, its state snapshot and guide excerpts. Crypta's tools may only navigate, highlight or refresh reads; never add tools that change data, trade, or touch the locked study. Keep `looksSecret` blocking keys before any request. Update `src/crypta/guide.md` when features change; `tests/desk/test_crypta_guide.js` pins typical questions to sections.

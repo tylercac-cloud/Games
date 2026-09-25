@@ -125,11 +125,60 @@ body{background-image:radial-gradient(ellipse at 80% 0,#172c35 0,transparent 55%
 .auto-status .kill,#acctOut .kill{color:var(--kill)}
 input.autofilled{border-left:3px solid var(--silver)!important}
 @media(max-width:620px){.auto-bar{grid-template-columns:1fr}}
+#cryptaRoot{--c-bg:var(--card,#fbfaf7);--c-ink:var(--ink,#1c1a22);--c-mut:var(--muted,#6b6873);--c-line:var(--line,#dedad2);--c-acc:#1f8a8a;--c-acc2:#6b3fa0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--c-ink)}
+.crypta-fab{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;border:2px solid var(--c-acc);background:var(--c-bg);padding:6px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:2147483000;transition:transform .15s}
+.crypta-fab:hover{transform:translateY(-2px)}.crypta-fab.open{border-color:var(--c-acc2)}.crypta-fab svg{width:100%;height:100%;image-rendering:pixelated}
+.crypta-panel{position:fixed;right:18px;bottom:90px;width:min(400px,calc(100vw - 36px));height:min(620px,calc(100vh - 120px));display:flex;flex-direction:column;background:var(--c-bg);border:1px solid var(--c-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.25);z-index:2147483000;overflow:hidden}
+.crypta-panel[hidden]{display:none}
+.crypta-standalone .crypta-panel{position:static;width:100%;height:100vh;height:100dvh;border:0;border-radius:0;box-shadow:none}
+.crypta-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--c-line);background:linear-gradient(90deg,rgba(31,138,138,.10),rgba(107,63,160,.08))}
+.crypta-head strong{display:block;font-size:15px;letter-spacing:.02em}
+.crypta-ava{width:38px;height:38px;border-radius:10px;background:#f4efe6;border:1px solid var(--c-line);padding:3px;flex:none}.crypta-ava svg{width:100%;height:100%}
+.crypta-mode{display:block;font-size:11.5px;color:var(--c-mut)}.crypta-mode.ai{color:var(--c-acc)}
+.crypta-sp{flex:1}.crypta-head button{background:transparent;border:1px solid transparent;border-radius:8px;color:var(--c-ink);font-size:15px;width:32px;height:32px;cursor:pointer}
+.crypta-head button:hover{border-color:var(--c-line)}
+.crypta-statusline{font-size:12px;color:var(--c-mut);padding:6px 12px;border-bottom:1px solid var(--c-line)}
+.crypta-settings{padding:10px 12px;border-bottom:1px solid var(--c-line);display:grid;gap:8px;font-size:13px;max-height:45%;overflow:auto}
+.crypta-settings label{display:grid;gap:4px}.crypta-settings .crypta-row{display:flex;gap:8px;align-items:center}
+.crypta-settings select,.crypta-settings input[type=number]{font:inherit;padding:5px 8px;border:1px solid var(--c-line);border-radius:7px;background:transparent;color:inherit}
+.crypta-settings button,.crypta-chips button{font:inherit;font-size:12.5px;padding:5px 10px;border:1px solid var(--c-line);border-radius:999px;background:transparent;color:inherit;cursor:pointer}
+.crypta-note{margin:0;color:var(--c-mut);font-size:12.5px}
+.crypta-log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.crypta-msg{display:flex;gap:8px;max-width:92%}.crypta-msg.user{align-self:flex-end}
+.crypta-msg .crypta-text{padding:8px 11px;border-radius:12px;border:1px solid var(--c-line);overflow-wrap:anywhere}
+.crypta-msg.user .crypta-text{background:rgba(31,138,138,.12);border-color:rgba(31,138,138,.35)}
+.crypta-msg .crypta-text p{margin:0 0 6px}.crypta-msg .crypta-text p:last-child{margin:0}.crypta-msg .crypta-text ul,.crypta-msg .crypta-text ol{margin:4px 0 6px 18px;padding:0}
+.crypta-msg .crypta-text code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:rgba(0,0,0,.06);padding:0 4px;border-radius:4px}
+.crypta-mini{width:26px;height:26px;flex:none;margin-top:2px}.crypta-mini svg{width:100%;height:100%}
+.crypta-msg.streaming .crypta-text:empty::after,.crypta-msg.streaming .crypta-text::after{content:'▍';animation:cryptaBlink 1s steps(2) infinite;color:var(--c-acc)}
+@keyframes cryptaBlink{50%{opacity:0}}
+.crypta-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}.crypta-chips:empty{display:none}
+.crypta-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--c-line)}
+.crypta-form textarea{flex:1;resize:none;font:inherit;padding:8px 10px;border:1px solid var(--c-line);border-radius:10px;background:transparent;color:inherit;max-height:120px}
+.crypta-form button{width:42px;border:0;border-radius:10px;background:var(--c-acc);color:#fff;font-size:16px;cursor:pointer}
+.crypta-glow{outline:3px solid #f0c040!important;outline-offset:3px;box-shadow:0 0 0 8px rgba(240,192,64,.25)!important;transition:outline-color .3s}
+@media (prefers-color-scheme:dark){#cryptaRoot:not(.crypta-light){--c-bg:var(--card,#1d1b24);--c-ink:var(--ink,#ece9f2);--c-line:var(--line,#35313f)}.crypta-ava{background:#2a2633}}
+@media (prefers-reduced-motion:reduce){.crypta-fab{transition:none}.crypta-msg.streaming .crypta-text::after{animation:none}}
+.crypta-panel:not([hidden]){resize:both;min-width:320px;min-height:380px;max-width:calc(100vw - 24px);max-height:calc(100vh - 100px)}
+.crypta-standalone .crypta-panel{resize:none;max-width:none;max-height:none}
+.crypta-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+.crypta-tools{display:flex;flex-wrap:wrap;gap:4px}.crypta-tools:empty{display:none}
+.crypta-chip-tool{font-size:11.5px;padding:2px 8px;border-radius:999px;background:rgba(31,138,138,.12);color:var(--c-acc);border:1px solid rgba(31,138,138,.3)}
+.crypta-chip-tool.bad{background:rgba(200,60,60,.1);color:#c04040;border-color:rgba(200,60,60,.3)}
+.crypta-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s}.crypta-msg:hover .crypta-actions,.crypta-msg:focus-within .crypta-actions{opacity:1}
+.crypta-actions button{font:inherit;font-size:11.5px;padding:1px 8px;border:1px solid var(--c-line);border-radius:999px;background:transparent;color:var(--c-mut);cursor:pointer}
+.crypta-msg .crypta-text pre{margin:4px 0;padding:8px;background:rgba(0,0,0,.06);border-radius:8px;overflow:auto;font-size:12.5px}
+.crypta-table{overflow-x:auto;margin:4px 0}.crypta-table table{border-collapse:collapse;font-size:12.5px}.crypta-table th,.crypta-table td{border:1px solid var(--c-line);padding:3px 7px;text-align:left}
+.crypta-msg .crypta-text a{color:var(--c-acc)}.crypta-h{margin-top:6px!important}
+.crypta-msg.assistant{max-width:96%}
+.crypta-box{border:1px solid var(--c-line);border-radius:10px;padding:8px 10px;display:grid;gap:6px}
+.crypta-dl{display:grid;gap:4px}.crypta-dl button{text-align:left;border-radius:8px}
+.crypta-settings a{color:var(--c-acc)}
 </style></head>
 <body><div class="shell">
 
 <header>
-  <div class="title">Fable / Lab <small>Pooled strategy research · release 12</small></div>
+  <div class="title">Fable / Lab <small>Pooled strategy research · release 23</small></div>
   <div class="counter">
     <div class="cbox"><div class="v" id="cN">0</div><div class="k">Trials used</div></div>
     <div class="cbox warn"><div class="v" id="cB">—</div><div class="k">Budget</div></div>
@@ -1670,8 +1719,9 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
   const money=n=>Number.isFinite(n)?'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
   const round=(n,d)=>Math.round(n*10**d)/10**d;
   const LS={get(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-  const K={costs:'fable-shared:costs',equity:'fable-shared:equity',hwm:'fable-desk:hwm',plans:'fable-desk:plans',logged:'fable-desk:logged-trips'};
+  const K={costs:'fable-shared:costs',equity:'fable-shared:equity',hwm:'fable-desk:hwm',plans:'fable-desk:plans',elog:'fable-desk:equity-log',deposits:'fable-desk:net-deposits',expOnly:'fable-desk:experiment-only',logged:'fable-desk:logged-trips',xferDismiss:'fable-desk:transfer-dismissed'};
   const INITIAL=5000;
+  const ts=v=>Date.parse(String(v||'').replace(/(\.\d{3})\d+/,'$1'));   // '…:41.395380Z' → '…:41.395Z'
 
   /* ---- who owns a field: you (typed) or autofill ---- */
   const USER=new Set();
@@ -1680,7 +1730,9 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
     el.value=String(value);el.classList.add('autofilled');el.title='Auto: '+source+'. Type to override; clear the field to hand it back.';return true;
   }
   document.addEventListener('input',e=>{const el=e.target;if(!e.isTrusted||!el||!el.id)return;
-    if(el.value==='')USER.delete(el.id);else{USER.add(el.id);el.classList.remove('autofilled');el.title=''}
+    if(el.value===''){USER.delete(el.id);const k=LINK_OF[el.id];if(k){const c=costs();if(k.includes('Fee'))delete c.feeSource;else delete c.slipSource;LS.set(K.costs,c)}return}
+    USER.add(el.id);el.classList.remove('autofilled');el.title='';
+    if(el.id==='rPeak'&&+el.value>0)LS.set(K.hwm,{value:+el.value,at:new Date().toISOString(),typed:true});
     if(LINK_OF[el.id])linkFrom(el.id)},true);
 
   /* ---- linked costs (shared by both tools) ---- */
@@ -1688,9 +1740,19 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
   const LINK_OF={};Object.entries(LINKS).forEach(([k,ids])=>ids.forEach(id=>LINK_OF[id]=k));
   function costs(){return LS.get(K.costs)||{}}
   function applyCosts(){
-    const c=costs(),src=c.feeSource==='coinbase'?'your Coinbase fee tier':c.slipSource==='spread'?'live spread':'your earlier entry';
-    for(const [k,ids] of Object.entries(LINKS))if(Number.isFinite(c[k]))ids.forEach(id=>setAuto(id,c[k],k.includes('Fee')?(c.feeSource==='coinbase'?'Coinbase taker fee':'fee you entered'):(c.slipSource==='spread'?'half live spread':'slippage you entered')));
-    if(['entryFee','exitFee','entrySlip','exitSlip'].every(k=>Number.isFinite(c[k])))setAuto('cost',round(c.entryFee+c.exitFee+(c.entrySlip+c.exitSlip)/100,3),'fees + slippage, both legs ('+src+')');
+    const c=costs(),manualSlip=c.slipSource==='manual';
+    for(const [k,ids] of Object.entries(LINKS)){
+      if(!Number.isFinite(c[k]))continue;
+      if(k.includes('Slip')&&!manualSlip)continue;   // live spread is per asset and per minute: it never becomes a shared setting
+      ids.forEach(id=>setAuto(id,c[k],k.includes('Fee')?(c.feeSource==='coinbase'?'Coinbase taker fee':'fee you entered'):'slippage you entered'));
+    }
+    // Test round-trip cost: fees both legs + your slippage (or 1 bp a side). Stable by design: it only moves when your fee
+    // tier or your slippage entry changes, and never while a pre-registered lock is active (the lock signs the cost).
+    const locked=typeof CURRENT_LOCK!=='undefined'&&CURRENT_LOCK;
+    if(!locked&&Number.isFinite(c.entryFee)&&Number.isFinite(c.exitFee)){
+      const slip=manualSlip&&Number.isFinite(c.entrySlip)&&Number.isFinite(c.exitSlip)?c.entrySlip+c.exitSlip:2;
+      setAuto('cost',round(c.entryFee+c.exitFee+slip/100,3),'fees both legs + '+(manualSlip?'your slippage':'1 bp slippage a side'));
+    }
   }
   function linkFrom(id){
     const k=LINK_OF[id],v=parseFloat($(id).value);if(!k||!Number.isFinite(v)||v<0)return;
@@ -1710,6 +1772,19 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
   }
   const tickerURL=p=>onLauncher?'/coinbase-exchange/products/'+p+'/ticker':'https://api.exchange.coinbase.com/products/'+p+'/ticker';
 
+  /* ---- deposits: money you add is not profit ---- */
+  const netDeposits=()=>{const v=+(LS.get(K.deposits)?.value);return Number.isFinite(v)?v:0};
+  const experimentEquity=()=>SNAP?SNAP.equity-netDeposits():null;
+  function applyEquity(){
+    if(!SNAP)return;const eq=experimentEquity();if(!(eq>0))return;
+    setAuto('rEquity',round(eq,2),netDeposits()?'Coinbase total minus your net deposits':'Coinbase portfolio total');
+    const expCash=Math.min(SNAP.cash,eq);USER.has('rCash')||setAuto('rCash',round(expCash,2),expCash<SNAP.cash?'USD + USDC available, capped at experiment equity':'USD + USDC available');
+    // Store the raw peak (so deposit corrections are exactly reversible); apply the $5,000 floor only when used.
+    const stored=Math.max(LS.get(K.hwm)?.value??-Infinity,eq);LS.set(K.hwm,{value:stored,at:SNAP.asOf});
+    setAuto('rPeak',round(Math.max(INITIAL,stored),2),'highest experiment equity recorded here (never below $5,000)');
+    LS.set(K.equity,{value:eq,at:SNAP.asOf});
+  }
+
   /* ---- account snapshot (View-only key via launcher) ---- */
   let SNAP=null,ACCOUNT=null;
   async function accountStatus(){
@@ -1724,64 +1799,98 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
     out.innerHTML='<div class="note"><strong>Coinbase · View-only</strong> · '+esc(SNAP.asOf)+' · equity '+money(SNAP.equity)+' · cash '+money(SNAP.cash)+' · fee tier '+esc(SNAP.fees.tier||'—')+' (taker '+(SNAP.fees.taker!==null?round(SNAP.fees.taker*100,3)+'%':'—')+', maker '+(SNAP.fees.maker!==null?round(SNAP.fees.maker*100,3)+'%':'—')+')'
       +(rows?'<table style="margin-top:8px"><thead><tr><th>Position</th><th class="n">Value</th><th class="n">Stop orders</th><th class="n">Counted risk</th></tr></thead><tbody>'+rows+'</tbody></table>':'<br>No crypto positions.')
       +(SNAP.unprotectedUSD>0?'<p class="hint" style="margin-top:6px">Positions with no stop order are counted at full value in open risk. Place a stop in Coinbase, or type your own figure in "Existing modeled stop risk".</p>':'')
-      +'<p class="hint" style="margin-top:6px">Equity is the whole portfolio the key can see. Deposits and withdrawals are not netted out; adjust High-water equity if you add or remove money.</p></div>';
+      +'<div class="row r4" style="margin-top:10px;align-items:end"><div><label for="acctDeposits">Net deposits since start ($)</label><input type="number" id="acctDeposits" step="0.01" value="'+netDeposits()+'"></div>'
+      +'<div style="grid-column:span 3" class="hint"><span style="white-space:nowrap">Detect since <input type="date" id="acctSince" value="'+esc(defaultSince())+'" style="width:auto;display:inline-block"> <button class="act sec" type="button" id="acctDetect" style="width:auto">Detect from Coinbase</button></span><div id="acctTransfers"></div>Add every deposit to Main, subtract every withdrawal. Coinbase total '+money(SNAP.equity)+' − net deposits '+money(netDeposits())+' = <strong>experiment equity '+money(experimentEquity())+'</strong>, which Capital plan uses so deposits never count as profit or hide a loss.</div></div>'
+      +(TRANSFER_HINT?'<div class="verdict weak" style="margin-top:8px"><b>Coinbase shows '+esc(money(TRANSFER_HINT.net))+' net deposits since '+esc(TRANSFER_HINT.since)+'</b>You have '+esc(money(netDeposits()))+' entered ('+TRANSFER_HINT.n+' transfer'+(TRANSFER_HINT.n>1?'s':'')+' found). Press Detect to see each line, or <button class="act sec" type="button" id="acctUseHint" style="width:auto">Use '+esc(money(TRANSFER_HINT.net))+'</button> <button class="act sec" type="button" id="acctDismissHint" style="width:auto">Keep my figure</button></div>':'')
+      +(!LS.get(K.expOnly)&&experimentEquity()>INITIAL*1.5?'<div class="verdict weak" style="margin-top:8px"><b>Experiment equity is '+money(experimentEquity())+'</b>If all of this is challenge money (gains, or deposits you have entered above), confirm once. If the portfolio also holds other money, scope the key to a portfolio that holds only the experiment.<br><button class="act sec" type="button" id="acctExperimentOnly" style="margin-top:8px">All of it is experiment money</button></div>':'')
+      +'</div>';
+    const dep=$('acctDeposits');if(dep)dep.addEventListener('change',()=>{
+      const v=parseFloat(dep.value);if(!Number.isFinite(v)){dep.value=netDeposits();return}
+      const delta=v-netDeposits();LS.set(K.deposits,{value:v,at:new Date().toISOString()});
+      // A peak recorded before this change included the money just declared: shift it by the same amount.
+      const h=LS.get(K.hwm);if(h&&Number.isFinite(h.value))LS.set(K.hwm,{value:h.value-delta,at:new Date().toISOString()});
+      ['rEquity','rPeak'].forEach(id=>USER.delete(id));applyEquity();logEquity();TRANSFER_HINT=null;renderAccount();
+      $('autoStatus').insertAdjacentHTML('beforeend',' <strong>Net deposits set to '+esc(money(v))+'; high-water mark shifted by '+esc(money(-delta))+'. Check it matches your best experiment equity.</strong>');
+      if(['rEquity','rPeak','rCash','rOpen','rEntry','rStop','rEF','rXF','rES','rXS'].every(id=>$(id).value!==''))$('planRisk').click();
+    });
+    const det=$('acctDetect');if(det)det.addEventListener('click',detectTransfers);
+    const hint=$('acctUseHint');if(hint)hint.addEventListener('click',()=>{$('acctDeposits').value=String(round(TRANSFER_HINT.net,2));$('acctDeposits').dispatchEvent(new Event('change'))});
+    const dh=$('acctDismissHint');if(dh)dh.addEventListener('click',()=>{LS.set(K.xferDismiss,{net:TRANSFER_HINT.net,at:new Date().toISOString()});TRANSFER_HINT=null;renderAccount()});   // until the Coinbase figure changes
+    const conf=$('acctExperimentOnly');if(conf)conf.addEventListener('click',()=>{LS.set(K.expOnly,true);renderAccount()});
   }
 
   /* ---- Capital plan autofill ---- */
-  let FILLING=false,LAST_FILL=0;
+  let FILLING=false,LAST_FILL=0,REFILL=false,LAST_TICK=null,PENDING_END=null,TICKET=null,TRANSFER_HINT=null;
+  // A value autofill can no longer vouch for is removed, never left behind: a stale price, stop or balance
+  // would otherwise feed the automatic calculation. Your own typed values are never touched.
+  const clearAuto=(...ids)=>ids.forEach(id=>{const el=$(id);if(el&&!USER.has(id)&&el.classList.contains('autofilled')){el.value='';el.classList.remove('autofilled');el.title=''}});
   async function fillPlan(){
-    if(!isDesk||FILLING)return;FILLING=true;const btn=$('autoFill'),status=$('autoStatus');btn.disabled=true;status.textContent='Reading live data…';
-    const asset=$('rAsset').value,done=[],kept=[],fails=[];
+    if(!isDesk)return;if(FILLING){REFILL=true;return}
+    FILLING=true;REFILL=false;TICKET=null;if($('ticketOut'))$('ticketOut').innerHTML='';const btn=$('autoFill'),status=$('autoStatus');btn.disabled=true;status.textContent='Reading live data…';
+    const asset=$('rAsset').value,done=[],kept=[],fails=[],current=()=>$('rAsset').value===asset;
     const note=(id,label,ok)=>{if(ok)done.push(label);else if(USER.has(id))kept.push(label)};
     try{
       // Public: mid price and spread.
       try{const t=await getJSON(tickerURL(asset)),bid=+t.bid,ask=+t.ask;
+        if(!current())throw new Error('asset changed');
         if(!(bid>0&&ask>=bid))throw new Error('no bid/ask');
-        const mid=(bid+ask)/2,half=Math.max(1,Math.ceil((ask-bid)/mid/2*1e4*10)/10);
+        LAST_TICK={asset,bid,ask};const mid=(bid+ask)/2,half=Math.max(1,Math.ceil((ask-bid)/mid/2*1e4*10)/10);
         note('rEntry','entry price',setAuto('rEntry',round(mid,mid>=100?2:6),asset+' live mid'));
-        if(costs().slipSource!=='manual'){const c=costs();c.entrySlip=half;c.exitSlip=half;c.slipSource='spread';c.at=new Date().toISOString();LS.set(K.costs,c)}
-        ['rES','rXS'].forEach(id=>note(id,id==='rES'?'entry slippage':'exit slippage',setAuto(id,costs()[id==='rES'?'entrySlip':'exitSlip'],costs().slipSource==='spread'?'half live spread, minimum 1 bp; market impact not included':'slippage you entered')));
-      }catch(e){fails.push('price: '+e.message)}
+        const c=costs(),own=c.slipSource==='manual';
+        note('rES','entry slippage',setAuto('rES',own?c.entrySlip:half,own?'slippage you entered':'half the live '+asset+' spread, minimum 1 bp; market impact not included'));
+        note('rXS','exit slippage',setAuto('rXS',own?c.exitSlip:half,own?'slippage you entered':'half the live '+asset+' spread, minimum 1 bp; market impact not included'));
+      }catch(e){clearAuto('rEntry','rES','rXS');if(e.message!=='asset changed')fails.push('price: '+e.message)}
       // Public: 30-day low of completed daily candles (H2 exit level).
       try{if(typeof fetchCandles!=='function')throw new Error('downloader unavailable');
-        const bars=await fetchCandles(asset,86400,30,()=>{});if(bars.length<30)throw new Error('only '+bars.length+' days');
+        const bars=await fetchCandles(asset,86400,30,()=>{});if(!current())throw new Error('asset changed');if(bars.length<30)throw new Error('only '+bars.length+' days');
         const low=Math.min(...bars.map(b=>b.l)),entry=parseFloat($('rEntry').value);
-        if(Number.isFinite(entry)&&low>=entry)fails.push('stop: price is at or below the 30-day low; set the stop yourself');
+        if(Number.isFinite(entry)&&low>=entry){clearAuto('rStop');fails.push('stop: price is at or below the 30-day low; set the stop yourself')}
         else note('rStop','stop (30-day low)',setAuto('rStop',round(low,low>=100?2:6),'lowest low of the last 30 completed days — the H2 exit level'));
-      }catch(e){fails.push('stop: '+e.message)}
+      }catch(e){clearAuto('rStop');if(e.message!=='asset changed')fails.push('stop: '+e.message)}
       // Account (optional).
-      if(!ACCOUNT)await accountStatus();
+      if(!ACCOUNT||!ACCOUNT.configured||ACCOUNT.ok===false)await accountStatus();   // picks up a key added after the page opened
       if(ACCOUNT&&ACCOUNT.configured&&ACCOUNT.ok!==false){
-        try{SNAP=await getJSON('/account/snapshot',true);
-          note('rEquity','equity',setAuto('rEquity',round(SNAP.equity,2),'Coinbase portfolio total'));
-          note('rCash','cash',setAuto('rCash',round(SNAP.cash,2),'USD + USDC available'));
+        try{SNAP=await getJSON('/account/snapshot',true);delete ACCOUNT.error;
+          if(!(experimentEquity()>0))throw new Error('net deposits exceed the Coinbase total; fix Net deposits');
+          // The planner requires cash ≤ equity. After a deposit is netted out, Coinbase cash can exceed experiment
+          // equity; only experiment money may be committed, so cash is capped at experiment equity.
+          const expCash=Math.min(SNAP.cash,experimentEquity());
+          note('rCash','cash',setAuto('rCash',round(expCash,2),expCash<SNAP.cash?'USD + USDC available, capped at experiment equity':'USD + USDC available'));
           note('rOpen','open risk',setAuto('rOpen',round(SNAP.openStopRisk+SNAP.unprotectedUSD,2),'open positions to their stop orders; no-stop positions at full value'));
-          const hwm=Math.max(INITIAL,LS.get(K.hwm)?.value||0,SNAP.equity);LS.set(K.hwm,{value:hwm,at:SNAP.asOf});
-          note('rPeak','high-water mark',setAuto('rPeak',round(hwm,2),'highest equity recorded here (starts at $5,000)'));
-          LS.set(K.equity,{value:SNAP.equity,at:SNAP.asOf});
-          if(Number.isFinite(SNAP.fees.taker)&&SNAP.fees.taker>=0){const c=costs();c.entryFee=round(SNAP.fees.taker*100,4);c.exitFee=c.entryFee;c.feeSource='coinbase';c.at=SNAP.asOf;LS.set(K.costs,c)}
-        }catch(e){SNAP=null;ACCOUNT={...ACCOUNT,error:e.message};fails.push('account: '+e.message)}
-      }
+          applyEquity();logEquity();maybeCheckTransfers();['rEquity','rPeak'].forEach(id=>note(id,id==='rEquity'?'equity':'high-water mark',$(id).classList.contains('autofilled')));
+          if(Number.isFinite(SNAP.fees.taker)&&SNAP.fees.taker>=0&&costs().feeSource!=='manual'){const c=costs();c.entryFee=round(SNAP.fees.taker*100,4);c.exitFee=c.entryFee;c.feeSource='coinbase';c.at=SNAP.asOf;LS.set(K.costs,c)}
+        }catch(e){SNAP=null;ACCOUNT={...ACCOUNT,error:e.message};clearAuto('rEquity','rPeak','rCash','rOpen');fails.push('account: '+e.message)}
+      }else if(ACCOUNT&&ACCOUNT.configured&&ACCOUNT.ok===false){SNAP=null;clearAuto('rEquity','rPeak','rCash','rOpen')}
       applyCosts();['rEF','rXF'].forEach(id=>{if(USER.has(id))kept.push(id==='rEF'?'entry fee':'exit fee');else if($(id).classList.contains('autofilled'))done.push(id==='rEF'?'entry fee':'exit fee')});
       renderAccount();LAST_FILL=Date.now();
       const acctMsg=!onLauncher?'Account: open via the launcher.':!ACCOUNT||!ACCOUNT.configured?'Account not connected (optional): equity, cash and fees stay manual — see private/README.txt.':ACCOUNT.error?'':'Account read with View-only key.';
       status.innerHTML='<strong>'+new Date().toLocaleTimeString()+'</strong> · Filled: '+esc(done.join(', ')||'nothing')+'. '+(kept.length?'Kept your edits: '+esc(kept.join(', '))+'. ':'')+(fails.length?'<span class="kill">'+esc(fails.join(' · '))+'</span> ':'')+esc(acctMsg);
       const ready=['rEquity','rPeak','rCash','rOpen','rEntry','rStop','rEF','rXF','rES','rXS'].every(id=>$(id).value!=='');
-      if(ready)$('planRisk').click();
-    }finally{FILLING=false;btn.disabled=false}
+      if(ready&&current())$('planRisk').click();
+    }finally{FILLING=false;btn.disabled=false;if(REFILL||!current())setTimeout(fillPlan,0)}
   }
   // Remember each calculated plan for the Journal.
   if(isDesk)$('planRisk').addEventListener('click',()=>setTimeout(()=>{
-    if(typeof LAST_RISK==='undefined'||!LAST_RISK||!LAST_RISK.result)return;
+    if(typeof LAST_RISK==='undefined'||!LAST_RISK||!LAST_RISK.result){TICKET=null;if($('ticketOut'))$('ticketOut').innerHTML='';return}   // a failed calculation must not leave the previous ticket on screen
     const p=LS.get(K.plans)||{},asset=$('rAsset').value,r=LAST_RISK.result;
-    p[asset]={entry:+$('rEntry').value,stop:+$('rStop').value,qty:r.qty,sizeUSD:r.qty*r.entryFill,at:new Date().toISOString()};LS.set(K.plans,p);
+    // Keep a short history per coin: the Journal must match a trade to the plan that existed BEFORE it, not a later one.
+    const list=planList(p,asset);list.push({entry:+$('rEntry').value,stop:+$('rStop').value,qty:r.qty,sizeUSD:r.qty*r.entryFill,at:new Date().toISOString()});
+    p[asset]=list.slice(-30);LS.set(K.plans,p);TICKET={asset,risk:LAST_RISK};renderTicket();
   },0));
 
   /* ---- Journal ---- */
+  function planList(p,asset){const x=p[asset];return Array.isArray(x)?x.slice():x?[x]:[]}
+  function planBefore(asset,iso){
+    const t=ts(iso);if(!Number.isFinite(t))return null;
+    // Latest plan made strictly before the first fill, at most 7 days earlier. No grace window: opening Capital plan
+    // right after buying records a new plan, and that one must never be taken as the trade's expected price.
+    // (If your PC clock runs ahead of Coinbase, no plan matches and the Journal asks you for the price instead.)
+    return planList(LS.get(K.plans)||{},asset).filter(x=>{const a=ts(x.at);return a<t&&t-a<=7*86400e3}).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))[0]||null;
+  }
   const sym=v=>String(v||'').trim().toUpperCase().replace('/','-');
   function prefillJournal(){
     if(!$('jSym')||$('jSym').value)return;
-    const p=LS.get(K.plans)||{},latest=Object.entries(p).sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at)))[0];if(!latest)return;
+    const p=LS.get(K.plans)||{},latest=Object.keys(p).map(a=>[a,planList(p,a).at(-1)]).filter(x=>x[1]).sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at)))[0];if(!latest)return;
     const [asset,plan]=latest;$('jSym').value=asset;$('jSym').classList.add('autofilled');
     setAuto('jExp',plan.entry,'last Capital plan entry for '+asset);if(plan.sizeUSD>0)setAuto('jSize',round(plan.sizeUSD,2),'last Capital plan size');
   }
@@ -1789,46 +1898,62 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
     const orders=[];for(const f of fills){const o=orders.at(-1);if(o&&o.id===f.orderId){o.qty+=f.qty;o.notional+=f.qty*f.price;o.fee+=f.fee}else orders.push({id:f.orderId,side:f.side,time:f.time,qty:f.qty,notional:f.qty*f.price,fee:f.fee})}
     const trips=[];let cur=null;
     for(const o of orders){
-      if(o.side==='BUY'){if(!cur)cur={id:o.id,start:o.time,bq:0,bn:0,sq:0,sn:0,fee:0};cur.bq+=o.qty;cur.bn+=o.notional;cur.fee+=o.fee}
-      else if(o.side==='SELL'&&cur){cur.sq+=o.qty;cur.sn+=o.notional;cur.fee+=o.fee;cur.end=o.time;if(cur.sq>=cur.bq*0.99){trips.push(cur);cur=null}}
+      if(o.side==='BUY'){if(!cur)cur={id:o.id,start:o.time,bq:0,bn:0,sq:0,sn:0,bfee:0,sfee:0};cur.bq+=o.qty;cur.bn+=o.notional;cur.bfee+=o.fee}
+      else if(o.side==='SELL'&&cur){
+        // Only the part of a sell that closes this trip belongs to it; the rest sold coins bought before the window.
+        const need=Math.max(0,cur.bq-cur.sq),part=o.qty>need?need/o.qty:1;
+        cur.sq+=o.qty*part;cur.sn+=o.notional*part;cur.sfee+=o.fee*part;cur.end=o.time;if(cur.sq>=cur.bq*0.99){trips.push(cur);cur=null}}
     }
-    const shape=t=>({id:t.id,start:t.start,end:t.end||null,qty:t.bq,entry:t.bn/t.bq,exit:t.sq?t.sn/t.sq:null,sizeUSD:t.bn,fees:t.fee,pnl:t.sq?t.sn-t.bn*Math.min(1,t.sq/t.bq)-t.fee:null,open:!t.end||t.sq<t.bq*0.99});
+    const shape=t=>({id:t.id,start:t.start,end:t.end||null,qty:t.bq,entry:t.bn/t.bq,exit:t.sq?t.sn/t.sq:null,sizeUSD:t.bn,fees:t.bfee+t.sfee,pnl:t.sq?t.sn-t.bn*Math.min(1,t.sq/t.bq)-t.bfee-t.sfee:null,open:!t.end||t.sq<t.bq*0.99});
     return {closed:trips.map(shape),open:cur?shape(cur):null};
   }
-  let PENDING=null,PENDING_LEN=0;
-  async function importFills(){
-    const out=$('fillsOut'),product=sym($('jSym').value)||$('rAsset').value;
-    if(!/^[A-Z0-9]{1,15}-USDC?$/.test(product)){out.innerHTML='<div class="verdict fail"><b>Symbol</b>Use a pair like BTC-USD.</div>';return}
-    if(!onLauncher){out.innerHTML='<div class="verdict fail"><b>Launcher required</b>Open the app with START-WINDOWS.bat to read fills.</div>';return}
-    out.innerHTML='<div class="note">Reading '+esc(product)+' fills (last 120 days)…</div>';
-    try{const {fills}=await getJSON('/account/fills?product='+encodeURIComponent(product),true),{closed,open}=buildTrips(fills),logged=new Set(LS.get(K.logged)||[]);
-      if(!closed.length&&!open){out.innerHTML='<div class="note">No '+esc(product)+' buys in the last 120 days.</div>';return}
-      out.innerHTML='<table style="margin-top:10px"><thead><tr><th>Bought</th><th>Sold</th><th class="n">Size</th><th class="n">Entry</th><th class="n">Exit</th><th class="n">Fees</th><th class="n">P&amp;L</th><th></th></tr></thead><tbody>'
-        +closed.slice().reverse().map(t=>'<tr><td>'+esc(String(t.start).slice(0,10))+'</td><td>'+esc(String(t.end).slice(0,10))+'</td><td class="n">'+money(t.sizeUSD)+'</td><td class="n">'+money(t.entry)+'</td><td class="n">'+money(t.exit)+'</td><td class="n">'+money(t.fees)+'</td><td class="n">'+money(t.pnl)+'</td><td>'+(logged.has(t.id)?'Logged':'<button class="act sec" type="button" data-trip="'+esc(t.id)+'">Use</button>')+'</td></tr>').join('')
-        +(open?'<tr><td>'+esc(String(open.start).slice(0,10))+'</td><td>open</td><td class="n">'+money(open.sizeUSD)+'</td><td class="n">'+money(open.entry)+'</td><td class="n">—</td><td class="n">'+money(open.fees)+'</td><td class="n">—</td><td>Still open</td></tr>':'')+'</tbody></table>'
-        +'<p class="hint">Round trips = buys until the position is sold back (within 1%). Size, entry and exit are volume-weighted fills; fees are Coinbase commissions. Selling coins bought before this window is ignored.</p>';
-      out.querySelectorAll('button[data-trip]').forEach(b=>b.addEventListener('click',()=>{
-        const t=closed.find(x=>x.id===b.dataset.trip),plan=(LS.get(K.plans)||{})[product];
-        $('jSym').value=product;['jSize','jAct','jExit','jFee'].forEach(id=>USER.delete(id));
-        setAuto('jSize',round(t.sizeUSD,2),'Coinbase fills');setAuto('jAct',round(t.entry,6),'Coinbase fills (VWAP)');setAuto('jExit',round(t.exit,6),'Coinbase fills (VWAP)');setAuto('jFee',round(t.fees,2),'Coinbase commissions');
-        const usable=plan&&Date.parse(plan.at)<=Date.parse(t.start)+3600e3;USER.delete('jExp');
-        if(usable)setAuto('jExp',plan.entry,'Capital plan entry, '+plan.at.slice(0,10));else{$('jExp').value='';$('jExp').classList.remove('autofilled')}
-        PENDING=t.id;PENDING_LEN=typeof TRADES!=='undefined'?TRADES.length:0;$('fillsOut').insertAdjacentHTML('afterbegin','<div class="note">'+(usable?'Loaded. Check the numbers, then Add trade.':'Loaded. No Capital plan was run before this trade: type the price you expected in Expected entry, then Add trade.')+'</div>');
-        (usable?$('addTrade'):$('jExp')).focus();
-      }));
+  let PENDING=null,PENDING_LEN=null,TRIPS=[];
+  const baseOf=p=>String(p||'').split('-')[0];
+  async function importFills(auto){
+    const out=$('fillsOut');if(!out)return;
+    if(!onLauncher){if(auto!==true)out.innerHTML='<div class="verdict fail"><b>Launcher required</b>Open the app with START-WINDOWS.bat to read your trades.</div>';return}
+    if(!ACCOUNT||!ACCOUNT.configured||ACCOUNT.ok===false)await accountStatus();
+    if(!ACCOUNT.configured||ACCOUNT.ok===false){if(auto!==true)out.innerHTML='<div class="verdict weak"><b>Account not connected</b>'+esc(ACCOUNT.error||'Add a View-only key (private/README.txt) to import trades.')+'</div>';return}
+    out.innerHTML='<div class="note">Reading your Coinbase trades (last 120 days)…</div>';
+    try{
+      const {fills}=await getJSON('/account/fills?product=ALL&days=120',true),byAsset={};
+      const logged=new Set([...(LS.get(K.logged)||[]),...(typeof TRADES!=='undefined'?TRADES:[]).map(t=>t&&t.trip).filter(Boolean)]);   // survives a restore even without the list
+      fills.filter(f=>baseOf(f.product)).forEach(f=>{(byAsset[baseOf(f.product)]=byAsset[baseOf(f.product)]||[]).push(f)});   // USD and USDC books are one market
+      TRIPS=[];const open=[];
+      Object.entries(byAsset).forEach(([asset,list])=>{const r=buildTrips(list);r.closed.forEach(t=>TRIPS.push({...t,product:asset+'-USD'}));if(r.open)open.push({...r.open,product:asset+'-USD'})});
+      TRIPS.sort((x,y)=>String(y.end).localeCompare(String(x.end)));
+      const todo=TRIPS.filter(t=>!logged.has(t.id));
+      const planCell=t=>{const p=planBefore(t.product,t.start);return p?money(p.entry):'<span class="kill">none</span>'};
+      const btns=t=>planBefore(t.product,t.start)
+        ?['Yes','Partly','No'].map(f=>'<button class="act sec" type="button" data-trip="'+esc(t.id)+'" data-follow="'+f+'" style="width:auto;padding:3px 8px">'+(f==='Yes'?'Followed':f==='Partly'?'Partly':'Didn\'t')+'</button>').join(' ')
+        :'<button class="act sec" type="button" data-trip="'+esc(t.id)+'" data-follow="No" style="width:auto;padding:3px 8px" title="No Capital plan was run before this trade, so it is logged as not following a plan">Log (no plan)</button>';
+      out.innerHTML=(todo.length?'<div class="note" style="margin-top:10px"><strong>'+todo.length+' trade'+(todo.length>1?'s':'')+' to log</strong> · one tap each: did you follow the plan?</div>':'<div class="note" style="margin-top:10px">All Coinbase round trips from the last 120 days are logged.</div>')
+        +(todo.length?'<table style="margin-top:6px"><thead><tr><th>Coin</th><th>Sold</th><th class="n">Size</th><th class="n">Entry</th><th class="n">Exit</th><th class="n">Fees</th><th class="n">P&amp;L</th><th class="n">Planned</th><th></th></tr></thead><tbody>'
+          +todo.map(t=>'<tr><td>'+esc(baseOf(t.product))+'</td><td>'+esc(String(t.end).slice(0,10))+'</td><td class="n">'+money(t.sizeUSD)+'</td><td class="n">'+money(t.entry)+'</td><td class="n">'+money(t.exit)+'</td><td class="n">'+money(t.fees)+'</td><td class="n">'+money(t.pnl)+'</td><td class="n">'+planCell(t)+'</td><td style="white-space:nowrap">'+btns(t)+'</td></tr>').join('')+'</tbody></table>':'')
+        +(open.length?'<p class="hint">Still open: '+open.map(o=>esc(baseOf(o.product))+' '+money(o.sizeUSD)).join(', ')+'.</p>':'')
+        +'<p class="hint">A round trip is buys until the coin is sold back (within 1%). Entry and exit are volume-weighted; fees are Coinbase commissions. "Planned" is the last Capital plan made before the first buy.</p>';
+      out.querySelectorAll('button[data-trip]').forEach(b=>b.addEventListener('click',()=>logTrip(b.dataset.trip,b.dataset.follow)));
     }catch(e){out.innerHTML='<div class="verdict fail"><b>Import failed</b>'+esc(e.message)+'</div>'}
   }
+  function logTrip(id,follow){
+    const t=TRIPS.find(x=>x.id===id);if(!t||typeof TRADES==='undefined')return;const plan=planBefore(t.product,t.start);
+    $('jSym').value=t.product;$('jSize').value=String(round(t.sizeUSD,2));$('jAct').value=String(round(t.entry,8));$('jExit').value=String(round(t.exit,8));$('jFee').value=String(round(t.fees,2));
+    $('jExp').value=String(plan?plan.entry:round(t.entry,8));if($('jDir'))$('jDir').value='Long';$('jFollow').value=follow;
+    if(!plan&&!$('jNote').value)$('jNote').value='No Capital plan before this trade';   // a note you typed for this trade is kept (the form is cleared after every log)
+    PENDING=t.id;PENDING_END=t.end;PENDING_TRIP=t.id;PENDING_LEN=TRADES.length;$('addTrade').click();PENDING_TRIP=null;
+  }
+  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
   if($('importFills')){
-    $('importFills').addEventListener('click',importFills);
-    // The Journal pushes the trade synchronously before saving, so a longer TRADES list means it was accepted.
-    // The Journal handler pushes the trade synchronously before any storage await, so a length change means it was accepted.
-    let lenAtUse=null;
-    $('fillsOut').addEventListener('click',e=>{if(e.target&&e.target.dataset&&e.target.dataset.trip)lenAtUse=typeof TRADES!=='undefined'?TRADES.length:null},true);
+    $('importFills').addEventListener('click',()=>importFills(false));
+    // The Journal handler pushes the trade synchronously before any storage await, so a longer list means it was accepted.
     $('addTrade').addEventListener('click',()=>{
-      if(!PENDING||lenAtUse===null||typeof TRADES==='undefined'||TRADES.length<=lenAtUse)return;
-      const s=new Set(LS.get(K.logged)||[]);s.add(PENDING);LS.set(K.logged,[...s]);PENDING=null;lenAtUse=null;importFills();
+      if(!PENDING||PENDING_LEN===null||typeof TRADES==='undefined'||TRADES.length<=PENDING_LEN){PENDING=null;PENDING_LEN=null;return}
+      const s=new Set(LS.get(K.logged)||[]);s.add(PENDING);LS.set(K.logged,[...s]);PENDING=null;PENDING_LEN=null;
+      ['jSym','jSize','jNote'].forEach(id=>$(id)&&($(id).value=''));if($('jFee'))$('jFee').value='0';
+      if($('jClosed'))$('jClosed').value=today();importFills(true);
     });
   }
+  if($('jClosed'))$('jClosed').value=today();
 
   /* ---- Sizing and Budget from what the app already knows ---- */
   function fillSizing(){
@@ -1844,10 +1969,203 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
     const gran=B[1].t-B[0].t;if(gran>0)setAuto('bY',round(B.length*gran/31557600,2),'length of the loaded data');
   }
 
+  /* ---- Trade ticket: the exact order to place, rounded to what Coinbase accepts ---- */
+  const floorTo=(x,inc)=>Math.floor(x/inc+1e-9)*inc,ceilTo=(x,inc)=>Math.ceil(x/inc-1e-9)*inc;
+  const decimals=inc=>Math.max(0,Math.min(12,Math.round(-Math.log10(inc))));
+  const PRODUCTS={};
+  async function productRules(asset){
+    if(PRODUCTS[asset])return PRODUCTS[asset];
+    if(!onLauncher)return null;
+    try{const d=await getJSON('/coinbase-public/market/products/'+asset);const r={baseInc:+d.base_increment,quoteInc:+d.quote_increment,minBase:+d.base_min_size||0,minQuote:+d.quote_min_size||0};
+      if(!(r.baseInc>0&&r.quoteInc>0))return null;return PRODUCTS[asset]=r}catch(e){return null}
+  }
+  function ticketMath(plan,rules,type,gapPct,makerFee){
+    const c=plan.inputs,res=plan.result,bInc=rules?rules.baseInc:1e-8,qInc=rules?rules.quoteInc:0.01;
+    const limitBuy=type==='limit'&&LAST_TICK&&LAST_TICK.asset===$('rAsset').value;
+    const entryPx=limitBuy?floorTo(LAST_TICK.bid,qInc):c.entry*(1+c.entrySlip);
+    const feeIn=limitBuy&&Number.isFinite(makerFee)?makerFee:c.entryFee;
+    const stop=ceilTo(c.stop,qInc),limit=floorTo(stop*(1-gapPct/100),qInc);
+    const cpu=entryPx*(1+feeIn),lossPerUnit=cpu-limit*(1-c.exitFee);
+    let qty=0;if(!res.halt&&stop<entryPx&&lossPerUnit>0)qty=floorTo(Math.max(0,Math.min(res.riskBudget/lossPerUnit,c.cash/cpu,c.equity*c.maxPosition/cpu)),bInc);
+    const notional=qty*entryPx,min=rules&&(qty<rules.minBase||notional<rules.minQuote);
+    return {type:limitBuy?'limit':'market',entryPx,feeIn,stop,limit,qty,cost:qty*cpu,riskAtLimit:qty*lossPerUnit,budget:res.riskBudget,notional,belowMin:!!min,bInc,qInc,rules};
+  }
+  async function renderTicket(){
+    const out=$('ticketOut');if(!out)return;
+    // Only ever show a ticket for the calculation on screen and the coin it was calculated for.
+    if(typeof LAST_RISK==='undefined'||!LAST_RISK||!LAST_RISK.result||!TICKET||TICKET.risk!==LAST_RISK||TICKET.asset!==$('rAsset').value){out.innerHTML='';return}
+    const cool=coolingOff();
+    if(cool){out.innerHTML='<div class="verdict fail"><b>Cooling-off until '+esc(new Date(cool.until).toLocaleString())+'</b>'+cool.losses+' losing trades closed in the last 24 hours. No new trades are sized until then. The rule is fixed on purpose: the next trade after two quick losses is the one most likely to break the plan.</div>';return}
+    const want=TICKET,asset=$('rAsset').value,rules=await productRules(asset);
+    if(TICKET!==want||!want||want.risk!==LAST_RISK||want.asset!==$('rAsset').value||FILLING){out.innerHTML='';return}   // superseded while loading rules
+    const type=(document.getElementById('tkType')||{}).value||'market',g0=+((document.getElementById('tkGap')||{}).value??0.2),gap=Number.isFinite(g0)&&g0>=0&&g0<=20?g0:0.2;
+    const maker=SNAP&&Number.isFinite(SNAP.fees.maker)?SNAP.fees.maker:null,T=ticketMath(LAST_RISK,rules,type,gap,maker);
+    const mk=ticketMath(LAST_RISK,rules,'market',gap,maker),lm=LAST_TICK&&Number.isFinite(maker)?ticketMath(LAST_RISK,rules,'limit',gap,maker):null;
+    const fq=x=>x.toFixed(decimals(T.bInc)),fp=x=>x.toFixed(decimals(T.qInc));
+    const row=(label,val,copy)=>'<tr><td>'+label+'</td><td class="n"><strong>'+esc(val)+'</strong></td><td>'+(copy?'<button class="act sec" type="button" data-copy="'+esc(copy)+'" style="width:auto;padding:3px 10px">Copy</button>':'')+'</td></tr>';
+    out.innerHTML='<div class="note" style="margin-top:12px"><strong>Trade ticket · '+esc(asset)+'</strong>'
+      +'<div class="row r4" style="margin:8px 0"><div><label for="tkType">Buy with</label><select id="tkType"><option value="market"'+(T.type==='market'?' selected':'')+'>Market order (taker fee)</option><option value="limit"'+(T.type==='limit'?' selected':'')+(LAST_TICK?'':' disabled')+'>Limit at bid (maker fee, may not fill)</option></select></div>'
+      +'<div><label for="tkGap">Stop-limit gap %</label><input type="number" id="tkGap" step="0.05" min="0" value="'+gap+'"></div></div>'
+      +(T.qty<=0?'<div class="verdict fail"><b>No trade</b>The plan allows no position now.</div>':T.belowMin?'<div class="verdict fail"><b>Below Coinbase minimum</b>'+fq(T.qty)+' '+esc(asset.split('-')[0])+' ($'+T.notional.toFixed(2)+') is under the minimum order ('+esc(rules.minBase)+' / $'+esc(rules.minQuote)+'). Skip this trade.</div>'
+      :'<table>'+row('1. Buy '+esc(asset.split('-')[0])+' quantity',fq(T.qty),fq(T.qty))
+        +row(T.type==='limit'?'   Limit price':'   Order type',T.type==='limit'?fp(T.entryPx):'Market',T.type==='limit'?fp(T.entryPx):null)
+        +row('2. Then sell stop-limit: stop price',fp(T.stop),fp(T.stop))+row('   Limit price',fp(T.limit),fp(T.limit))+row('   Quantity',fq(T.qty),fq(T.qty))+'</table>'
+        +'<p class="hint" style="margin-top:6px">Cost ≈ $'+T.cost.toFixed(2)+' incl. '+(T.feeIn*100).toFixed(2)+'% fee. Loss if the stop-limit fills at its limit: $'+T.riskAtLimit.toFixed(2)+' (budget $'+T.budget.toFixed(2)+'). Quantity is rounded down to Coinbase\'s '+esc(T.bInc)+' step'+(rules?'':' (rules not loaded; using 0.00000001)')+'; prices to '+esc(T.qInc)+'. A price that gaps below the limit leaves the stop-limit unfilled.</p>')
+      +(lm&&lm.qty>0&&mk.qty>0?'<p class="hint">Fee drag: a limit entry at the '+(maker*100).toFixed(2)+'% maker fee allows '+fq(lm.qty)+' vs '+fq(mk.qty)+' for the same risk ('+((lm.qty/mk.qty-1)*100).toFixed(1)+'% more), if it fills.</p>':'')+'</div>';
+    out.querySelectorAll('button[data-copy]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='Copied'}catch(e){b.textContent=b.dataset.copy}}));
+    ['tkType','tkGap'].forEach(id=>$(id)&&$(id).addEventListener('change',renderTicket));
+  }
+
+  /* ---- Cooling-off: two losing trades closed within 24 hours stop new sizing for 24 hours ---- */
+  function coolingOff(now=Date.now()){
+    const T=typeof TRADES!=='undefined'&&Array.isArray(TRADES)?TRADES:[];
+    const losses=T.filter(t=>t.pnl<0&&t.closedAt&&now-ts(t.closedAt)<86400e3&&ts(t.closedAt)<=now).map(t=>ts(t.closedAt)).sort((a,b)=>b-a);
+    return losses.length>=2?{losses:losses.length,until:new Date(losses[1]+86400e3).toISOString()}:null;
+  }
+  let PENDING_TRIP=null;
+  function pendingTrip(){const v=PENDING_TRIP;PENDING_TRIP=null;return v}
+  function pendingClose(){
+    const v=PENDING_END;PENDING_END=null;if(v)return v;
+    const d=$('jClosed')&&$('jClosed').value;if(!d||d===today())return null;   // today: the Journal stamps "now"
+    const t=new Date(d+'T23:59:59');return Number.isFinite(t.getTime())?t.toISOString():null;   // an older trade counts at the end of its day
+  }
+
+  /* ---- Daily equity log ---- */
+  function logEquity(){
+    if(!SNAP||typeof experimentRisk!=='function'||typeof PROTOCOL==='undefined')return;
+    const eq=experimentEquity(),peak=Math.max(INITIAL,LS.get(K.hwm)?.value??-Infinity);if(!(eq>0))return;
+    let stage='—';try{stage=experimentRisk(eq,Math.max(peak,eq),PROTOCOL.riskPolicy).stage}catch(e){}
+    const log=(LS.get(K.elog)||[]).filter(x=>x&&x.date),date=localDate(SNAP.asOf),rec={date,equity:round(eq,2),peak:round(Math.max(peak,eq),2),cash:round(SNAP.cash,2),open:round(SNAP.openStopRisk+SNAP.unprotectedUSD,2),stage,at:SNAP.asOf};
+    const i=log.findIndex(x=>x.date===date);if(i>=0){rec.firstAt=log[i].firstAt||log[i].at;log[i]=rec}else{rec.firstAt=rec.at;log.push(rec)}log.sort((a,b)=>a.date.localeCompare(b.date));LS.set(K.elog,log.slice(-1500));renderEquityLog();
+  }
+  function renderEquityLog(){
+    const out=$('equityLogOut'),log=(LS.get(K.elog)||[]).filter(x=>x&&Number.isFinite(x.equity)).map(x=>({...x,peak:Number.isFinite(x.peak)?x.peak:Math.max(INITIAL,x.equity)}));if(!out)return;
+    if(!log.length){out.innerHTML='';return}
+    const W=640,H=180,P=34,vals=log.flatMap(x=>[x.equity,x.peak,Math.max(4000,x.peak-1000)]),lo=Math.min(3900,...vals),hi=Math.max(5100,...vals)*1.005;
+    const X=i=>P+(log.length<2?0:(W-P-8)*i/(log.length-1)),Y=v=>8+(H-24)*(1-(v-lo)/(hi-lo));
+    const line=(f,cls,dash)=>'<polyline fill="none" stroke="'+cls+'" stroke-width="2"'+(dash?' stroke-dasharray="4 3"':'')+' points="'+log.map((x,i)=>X(i).toFixed(1)+','+Y(f(x)).toFixed(1)).join(' ')+'"/>';
+    const hline=(v,c,label)=>'<line x1="'+P+'" x2="'+(W-8)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+c+'" stroke-dasharray="2 4"/><text x="'+(P+4)+'" y="'+(Y(v)-3)+'" font-size="10" fill="'+c+'">'+label+'</text>';
+    out.innerHTML='<div class="note" style="margin-top:12px"><strong>Equity log</strong> · one entry per day, recorded when Capital plan reads your account'
+      +'<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Experiment equity by day against the limits">'
+      +hline(4500,'var(--pend)','$4,500 review')+hline(4250,'var(--kill)','$4,250 no new risk')
+      +line(x=>Math.max(4000,x.peak-1000),'var(--kill)',true)+line(x=>x.peak,'var(--muted)',true)+line(x=>x.equity,'var(--silver)',false)
+      +'<text x="4" y="'+(Y(hi)+10)+'" font-size="10" fill="var(--muted)">$'+Math.round(hi)+'</text><text x="4" y="'+(H-10)+'" font-size="10" fill="var(--muted)">$'+Math.round(lo)+'</text></svg></div>'
+      +'<table style="margin-top:6px"><thead><tr><th>Date</th><th class="n">Equity</th><th class="n">High-water</th><th class="n">Hard floor</th><th>Stage</th></tr></thead><tbody>'
+      +log.slice(-7).reverse().map(x=>'<tr><td>'+esc(x.date)+'</td><td class="n">'+money(x.equity)+'</td><td class="n">'+money(x.peak)+'</td><td class="n">'+money(Math.max(4000,x.peak-1000))+'</td><td>'+esc(x.stage)+'</td></tr>').join('')+'</tbody></table>'
+      +'<p class="hint">Solid: experiment equity. Dashed grey: high-water mark. Dashed red: hard floor = max($4,000, high-water − $1,000). Saved in the desk backup file.</p></div>';
+  }
+
+  /* ---- Journal review: fee drag and plan adherence ---- */
+  function renderReview(){
+    const out=$('jReview');if(!out)return;const T=(typeof TRADES!=='undefined'?TRADES:[]).filter(t=>Number.isFinite(t.fee)&&Number.isFinite(t.size)&&t.size>0);
+    if(!T.length){out.innerHTML='';return}
+    const fees=T.reduce((a,t)=>a+t.fee,0),net=T.reduce((a,t)=>a+t.pnl,0),gross=net+fees;
+    const turnover=T.reduce((a,t)=>a+t.size+(Number.isFinite(t.act)&&Number.isFinite(t.exit)&&t.act>0?t.size/t.act*t.exit:t.size),0);
+    const eq=LS.get(K.equity)?.value,tk=SNAP&&SNAP.fees.taker,mk=SNAP&&SNAP.fees.maker;
+    const groups=['Yes','Partly','No'].map(g=>{const x=T.filter(t=>t.follow===g);return {g,n:x.length,pnl:x.reduce((a,t)=>a+t.pnl,0)}}),unk=T.filter(t=>!t.follow).length;
+    out.innerHTML='<div class="note" style="margin-top:12px"><strong>Review</strong> · '+T.length+' trade'+(T.length>1?'s':'')+' with recorded size and fees'
+      +'<table style="margin-top:6px"><tbody>'
+      +'<tr><td>Gross P&amp;L before fees</td><td class="n">'+money(gross)+'</td></tr><tr><td>Fees paid</td><td class="n">'+money(fees)+'</td></tr><tr><td><strong>Net P&amp;L</strong></td><td class="n"><strong>'+money(net)+'</strong></td></tr>'
+      +'<tr><td>Fees as % of traded value (both legs)</td><td class="n">'+(fees/turnover*100).toFixed(3)+'%</td></tr>'
+      +(gross>0?'<tr><td>Share of gross profit paid in fees</td><td class="n">'+(fees/gross*100).toFixed(1)+'%</td></tr>':'')
+      +(Number.isFinite(tk)&&Number.isFinite(mk)?'<tr><td>Saved if every leg had filled at the maker fee</td><td class="n">'+money(turnover*(tk-mk))+'</td></tr>':'')
+      +'</tbody></table><table style="margin-top:8px"><thead><tr><th>Followed the plan?</th><th class="n">Trades</th><th class="n">Net P&amp;L</th><th class="n">Per trade</th></tr></thead><tbody>'
+      +groups.map(x=>'<tr><td>'+x.g+'</td><td class="n">'+x.n+'</td><td class="n">'+money(x.pnl)+'</td><td class="n">'+(x.n?money(x.pnl/x.n):'—')+'</td></tr>').join('')+'</tbody></table>'
+      +(unk?'<p class="hint">'+unk+' trade'+(unk>1?'s':'')+' logged without an answer to "Followed the plan?".</p>':'')
+      +'<p class="hint">With few trades these groups are anecdotes, not evidence. The point is to see whether losses come from the rule or from departures from it.</p></div>';
+  }
+
+  /* ---- Deposits and withdrawals detected from Coinbase history (suggestion, never auto-applied) ---- */
+  function defaultSince(){const f=firstRead();return f?String(f).slice(0,10):new Date(Date.now()-90*86400e3).toISOString().slice(0,10)}
+  let XFER_RUNNING=false,XFER_AGAIN=false;
+  async function maybeCheckTransfers(){
+    // Every account read re-checks Coinbase transfer history. No time throttle (a deposit made seconds after the last
+    // read must still be caught); overlapping reads are coalesced into one follow-up check instead.
+    if(XFER_RUNNING){XFER_AGAIN=true;return}
+    XFER_RUNNING=true;try{do{XFER_AGAIN=false;await checkTransfers()}while(XFER_AGAIN)}finally{XFER_RUNNING=false}
+  }
+  // Money that arrived before Fable first read the account is the starting balance, not a deposit to net out.
+  // Without this, funding the account on day one would be offered as a $5,000 "deposit" and zero the experiment.
+  const firstRead=()=>{const l=LS.get(K.elog)||[];return l.length?(l[0].firstAt||l[0].at):null};
+  const afterStart=rows=>{const f=ts(firstRead());return Number.isFinite(f)?rows.filter(x=>ts(x.at)>f):rows};
+  async function checkTransfers(){
+    // If Coinbase history disagrees with Net deposits, offer the correction (never applied without a click).
+    try{const r=await getJSON('/account/transfers?since='+encodeURIComponent(defaultSince()),true),rows=afterStart(r.rows),net=rows.reduce((a,x)=>a+x.amountUSD,0);
+      const dis=LS.get(K.xferDismiss);
+      if(rows.length&&Math.abs(net-netDeposits())>0.01&&!(dis&&Math.abs(dis.net-net)<0.01)){TRANSFER_HINT={since:defaultSince(),net,n:rows.length};renderAccount()}}catch(e){}
+  }
+  async function detectTransfers(){
+    const out=$('acctTransfers'),since=$('acctSince').value;out.innerHTML='<div class="hint">Reading Coinbase history since '+esc(since)+'…</div>';
+    try{const r=await getJSON('/account/transfers?since='+encodeURIComponent(since),true),kept=afterStart(r.rows),early=r.rows.length-kept.length;
+      r.net=kept.reduce((a,x)=>a+x.amountUSD,0);
+      const rows=kept.map(x=>'<tr><td>'+esc(String(x.at).slice(0,10))+'</td><td>'+esc(x.type.replace('_',' '))+'</td><td>'+esc(x.currency)+'</td><td class="n">'+money(x.amountUSD)+'</td></tr>').join('');
+      const sk=Object.entries(r.skipped||{}).map(([k,v])=>v+' '+k.replace('_',' ')).join(', ');
+      out.innerHTML='<table style="margin:6px 0"><thead><tr><th>Date</th><th>Type</th><th>Asset</th><th class="n">USD</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4">No deposits, withdrawals or transfers found.</td></tr>')+'</tbody></table>'
+        +'<div>Net since '+esc(since)+': <strong>'+money(r.net)+'</strong> '+(rows?'<button class="act sec" type="button" id="acctUseDetected" style="width:auto">Use '+esc(money(r.net))+'</button>':'')+'</div>'
+        +(early?'<div class="hint">'+early+' transfer'+(early>1?'s':'')+' before Fable first read your account ('+esc(String(firstRead()).slice(0,16).replace('T',' '))+' UTC) are your starting balance and are not counted.</div>':'')
+        +'<div class="hint">Check each line against Coinbase. This history may include accounts outside the key\'s portfolio; crypto sent in or out is valued in USD at the time.'+(sk?' Not counted: '+esc(sk)+'.':'')+'</div>';
+      const use=$('acctUseDetected');if(use)use.addEventListener('click',()=>{$('acctDeposits').value=String(round(r.net,2));$('acctDeposits').dispatchEvent(new Event('change'))});
+    }catch(e){out.innerHTML='<div class="verdict weak"><b>Could not read transfer history</b>'+esc(e.message)+'. Enter deposits by hand.</div>'}
+  }
+
+  /* ---- Tax CSV (Form 8949 layout, FIFO) ---- */
+  function localDate(v){const t=new Date(ts(v));return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')}   // a Dec 31 evening sale stays in its tax year
+  function fifoRows(fills,year){
+    const lots={},rows=[];
+    for(const f of fills){
+      const asset=String(f.product||'').split('-')[0];if(!asset)continue;const q=lots[asset]||(lots[asset]=[]);
+      if(f.side==='BUY'){q.push({qty:f.qty,costPer:(f.qty*f.price+f.fee)/f.qty,at:f.time});continue}
+      if(f.side!=='SELL')continue;
+      let left=f.qty;const procPer=(f.qty*f.price-f.fee)/f.qty;
+      while(left>1e-12){
+        const lot=q[0];
+        if(!lot){rows.push({asset,qty:left,acquired:'',sold:f.time,proceeds:left*procPer,basis:null,note:'No purchase on this account covers this sale (transferred in, or bought before the history). Basis needed from your records.'});break}
+        const take=Math.min(left,lot.qty);
+        rows.push({asset,qty:take,acquired:lot.at,sold:f.time,proceeds:take*procPer,basis:take*lot.costPer,note:''});
+        lot.qty-=take;left-=take;if(lot.qty<=1e-12)q.shift();
+      }
+    }
+    return rows.filter(r=>localDate(r.sold).slice(0,4)===String(year)).map(r=>{
+      const held=r.acquired?(ts(r.sold)-ts(r.acquired))/86400e3:null;
+      return {...r,gain:r.basis===null?null:r.proceeds-r.basis,term:held===null?'Unknown':held>365?'Long-term':'Short-term'};
+    });
+  }
+  async function taxCsv(){
+    const out=$('taxOut'),year=$('taxYear').value;
+    if(!onLauncher){out.innerHTML='<div class="verdict fail"><b>Launcher required</b>Open the app with START-WINDOWS.bat.</div>';return}
+    out.innerHTML='<div class="note">Reading every fill on the account…</div>';
+    try{const r=await getJSON('/account/fills?product=ALL',true),rows=fifoRows(r.fills,year);
+      const d=x=>x?localDate(x):'VARIOUS',n=x=>x===null?'':x.toFixed(2);
+      const csv=['Description,Date acquired,Date sold,Proceeds,Cost basis,Gain or loss,Term,Note'].concat(rows.map(x=>[x.qty.toFixed(8)+' '+x.asset,d(x.acquired),d(x.sold),n(x.proceeds),n(x.basis),n(x.gain),x.term,'"'+x.note.replace(/"/g,'""')+'"'].join(','))).join('\n');
+      const st=rows.filter(x=>x.term==='Short-term').reduce((a,x)=>a+x.gain,0),lt=rows.filter(x=>x.term==='Long-term').reduce((a,x)=>a+x.gain,0),unk=rows.filter(x=>x.basis===null).length;
+      if(rows.length&&typeof saveFile==='function')await saveFile('fable-5k-form8949-'+year+'.csv',csv,'text/csv');
+      out.innerHTML='<div class="note"><strong>'+rows.length+' sale line'+(rows.length===1?'':'s')+' in '+esc(year)+'</strong> · short-term '+money(st)+' · long-term '+money(lt)+(unk?' · <span class="kill">'+unk+' without cost basis</span>':'')
+        +(r.truncated?'<br><span class="kill">History truncated at 15,000 fills; totals incomplete.</span>':'')
+        +'<p class="hint">FIFO lots per coin, fees added to cost and subtracted from proceeds. Coinbase\'s 1099-DA may use a different lot method or basis; reconcile with it and your CPA. Not tax advice.</p></div>';
+    }catch(e){out.innerHTML='<div class="verdict fail"><b>Tax export failed</b>'+esc(e.message)+'</div>'}
+  }
+  if($('taxYear')){const y=new Date().getUTCFullYear();$('taxYear').innerHTML=[y,y-1,y-2,y-3].map(x=>'<option>'+x+'</option>').join('');$('taxCsv').addEventListener('click',taxCsv)}
+
+  /* ---- Backup: desk settings travel with the backup file ---- */
+  function exportExtras(){return {loggedTrips:LS.get(K.logged)||[],equityLog:LS.get(K.elog)||[],hwm:LS.get(K.hwm),netDeposits:LS.get(K.deposits),experimentOnly:!!LS.get(K.expOnly),plans:LS.get(K.plans)||{},costs:LS.get(K.costs)||{}}}
+  function importExtras(x){
+    if(!x||typeof x!=='object')return;
+    const log=new Map((LS.get(K.elog)||[]).map(r=>[r.date,r]));(Array.isArray(x.equityLog)?x.equityLog:[]).forEach(r=>{if(r&&typeof r.date==='string'&&Number.isFinite(r.equity)&&!log.has(r.date))log.set(r.date,r)});
+    LS.set(K.elog,[...log.values()].sort((a,b)=>a.date.localeCompare(b.date)));
+    const h=LS.get(K.hwm)?.value,hi=x.hwm&&Number.isFinite(x.hwm.value)?x.hwm.value:null;if(hi!==null&&!(h>=hi))LS.set(K.hwm,x.hwm);   // never lower a recorded peak
+    if(!LS.get(K.deposits)&&x.netDeposits&&Number.isFinite(+x.netDeposits.value))LS.set(K.deposits,x.netDeposits);
+    if(x.experimentOnly)LS.set(K.expOnly,true);
+    if(Array.isArray(x.loggedTrips))LS.set(K.logged,[...new Set([...(LS.get(K.logged)||[]),...x.loggedTrips.filter(v=>typeof v==='string')])]);
+    if(!Object.keys(LS.get(K.costs)||{}).length&&x.costs)LS.set(K.costs,x.costs);
+    const p=LS.get(K.plans)||{};Object.entries(x.plans||{}).forEach(([a,v])=>{if(!p[a])p[a]=v});LS.set(K.plans,p);
+    renderEquityLog();renderReview();
+  }
+
   /* ---- triggers ---- */
   function onTab(name){
     if(name==='control'&&isDesk&&onLauncher&&Date.now()-LAST_FILL>60000)fillPlan();
-    if(name==='jrn')prefillJournal();
+    if(name==='jrn'&&isDesk){prefillJournal();renderReview();if(onLauncher)importFills(true)}   // live trades belong in the desk journal only
+    if(name==='control'){renderEquityLog();renderTicket()}
     if(name==='siz')fillSizing();
     if(name==='bud')fillBudget();
     if(name==='lab'||name==='exec')applyCosts();
@@ -1859,6 +2177,420 @@ workspaceTabs.forEach((button,i)=>button.addEventListener('keydown',e=>{
   }
   applyCosts();
   const active=document.querySelector('nav button[aria-selected="true"]');if(active)setTimeout(()=>onTab(active.dataset.p),0);
-  window.fableAuto={fillPlan,importFills,buildTrips,linkFrom,applyCosts,fillSizing,fillBudget,prefillJournal,userEdit:id=>USER.add(id),state:()=>({SNAP,ACCOUNT,USER:[...USER]})};
+  window.fableAuto={pendingTrip,today,logTrip,checkTransfers,renderTicket,ticketMath,coolingOff,pendingClose,logEquity,renderEquityLog,renderReview,detectTransfers,fifoRows,exportExtras,importExtras,fillPlan,importFills,buildTrips,linkFrom,applyCosts,fillSizing,fillBudget,prefillJournal,userEdit:id=>USER.add(id),state:()=>({SNAP,ACCOUNT,USER:[...USER]})};
+})();
+</script><script>/* ============ Crypta — the Fable 5k helper ============
+   Runs inside both tools (floating button, bottom right) and as her own installable window at /crypta.
+   - Guide mode (no key): answers from the built-in guide plus live explanations of your numbers.
+   - AI mode (Anthropic key in private/): Claude answers through the launcher, which holds the key, fixes the
+     prompt and tools, and enforces a monthly spending cap. The page never sees the key.
+   - Tools she can use: switch tab, point at a field, refresh Capital plan, open trades to log. Nothing that
+     trades, moves money or changes the study.
+   - Anything that looks like an API key or private key is refused before it leaves this page. */
+(function(){
+  if(window.__crypta)return;window.__crypta=true;
+  const GUIDE=[{"title":"What Fable 5k is","text":"Fable 5k is a research and discipline workspace for a $5,000 crypto experiment on Coinbase. It never places orders and cannot move money. It tells you how big a trade may be, records what happened, and stops you when the experiment's loss limits are reached. There are two tools: the Daily desk (daily routine, sizing, journal) and the Pooled strategy lab (testing rule ideas across coins). Keep live trades in the desk journal only."},{"title":"Starting the app","text":"Double-click START-WINDOWS.bat and leave the black window open. It must print \"Live data: OK\" twice. With a Coinbase View-only key it also prints \"Account: OK View-only key accepted\". Closing that window stops live data; pages then say \"Launcher not reachable\". Double-clicking the launcher again just reopens the running app at the same address, so your saved data stays visible."},{"title":"Daily routine","text":"After 00:05 UTC: open the Daily desk, press Scan daily markets, download the scan. Before any real trade, open Capital plan: it fills itself and calculates. Place exactly the order on the trade ticket in Coinbase, including the stop-limit. After a trade closes, open the Journal and tap one button to log it. Export the backup file and confirm it saved."},{"title":"Capital plan","text":"Capital plan sizes a trade so a stop-out loses at most the risk budget. It fills itself: live mid price, stop at the 30-day low, slippage from half the live spread (minimum 1 basis point), and, with a View-only key, equity, cash, open risk, high-water mark and your Coinbase fee tier. Any number you type is kept; clear a field to hand it back to autofill. Change Asset to plan another coin. Autofilled fields have a green left edge; hover to see the source."},{"title":"Risk budget and limits","text":"Per-trade risk is 0.5% of equity ($25 at $5,000). Total open risk across positions is capped at 1% of equity. A single position is capped at 25% of equity. Stages: within limits; review at $4,500 (per-trade risk halved); no new risk at $4,250 (size $0); hard pause at the higher of $4,000 or $1,000 below the high-water mark. These limits come from the locked protocol and cannot be raised in the app."},{"title":"Trade ticket","text":"The ticket under the Capital plan result is the exact order to place: quantity rounded down to Coinbase's step, stop and stop-limit prices rounded to its tick, with Copy buttons. It shows the loss if the stop-limit fills at its limit, which never exceeds the risk budget. Stop-limit gap % sets how far below the stop the limit sits (default 0.2%). A limit entry at the maker fee allows a larger size for the same risk but may not fill. If price gaps below the limit, the stop-limit does not fill and the position is unprotected."},{"title":"Open risk","text":"Open risk counts each position down to its Coinbase stop orders: quantity × (price − the lower of stop and limit + that price × fee). A position with no stop order, or whose stop-limit the price has already fallen through, counts at full value. Place a stop in Coinbase to free the room."},{"title":"Cooling-off","text":"Two losing trades closed within 24 hours stop new sizing until the older loss is 24 hours old. The rule is fixed and has no override. Old trades logged by hand use their Closed on date, so logging last week's losses does not trigger it."},{"title":"Journal: log trades in one tap","text":"Opening the Journal lists every unlogged Coinbase round trip from the last 120 days, all coins. Tap Followed, Partly or Didn't to log it with size, entry, exit, fees, close time and the planned price. Trades with no plan before them get Log (no plan). The review shows gross P&L, fees, net P&L, fees as a share of profit, the saving at maker fees, and results split by whether you followed the plan. With few trades those splits are anecdotes, not evidence."},{"title":"Deposits and withdrawals","text":"Money you add is not profit. Every account read re-checks Coinbase transfer history and offers Use when it disagrees with Net deposits; Keep my figure silences it until Coinbase's number changes. Capital plan uses experiment equity = Coinbase total − net deposits. Money that arrived before Fable first read the account is the starting balance. The high-water mark shifts with each correction."},{"title":"Equity history and backup","text":"Each day Capital plan reads the account it records equity, high-water mark and stage, charted against $4,500, $4,250 and the hard floor. The desk backup file carries the journal, register, equity log, high-water mark, net deposits, plan history and logged trades. Clearing browser data without a backup loses them. Import never lowers a recorded high-water mark."},{"title":"Tax CSV","text":"The Journal's Tax CSV builds Form 8949-style lines for a year from every Coinbase fill: FIFO lots per coin (USD and USDC books combined), fees added to cost and taken from proceeds, holding period, sales without a matching purchase flagged. It is not tax advice; Coinbase's 1099-DA may use a different method. Reconcile with your CPA."},{"title":"Connecting Coinbase","text":"Create a Secret API key in the Coinbase Developer Platform with View permission only, ECDSA signature algorithm, scoped to the portfolio that holds the experiment money. Download its JSON file and save it in the private folder. The launcher refuses keys that can trade or transfer. Never paste a key into a chat, including this one. A Client API key does not work."},{"title":"Connecting Crypta's AI","text":"Without a brain Crypta answers from this built-in guide. There are two brains: a free local model through Ollama (see \"Crypta's free local brain\") or Claude. For full answers, create an Anthropic API key at console.anthropic.com. A Claude Pro subscription does not include API credits; the API is paid for separately there. Save the key as a text file in the private folder (for example private/anthropic-key.txt); no restart needed. The key never reaches the page. Set a monthly spending cap in Crypta's settings; Crypta refuses requests past it."},{"title":"Live market strip","text":"The strip at the top shows BTC, ETH and SOL last price, 24-hour change and range, 24-hour volume and bid/ask spread, refreshed every 30 seconds. It is context only; nothing in the study, scanner or sizing uses it. If Coinbase's Exchange host is unreachable, prices come from Coinbase Advanced and the launcher says \"via Advanced fallback\"."},{"title":"Daily scan and the locked study","text":"Scan daily markets reads every Coinbase USD pair and completed daily candles for BTC, ETH and SOL, and records the two frozen BTC hypotheses: H1, the 20-day moving average crossing above the 120-day; H2, a close above the 60-day high with an exit on a close below the 30-day low. They were frozen before any data was seen and are paper only. The desk records what they say; it does not tell you to trade them."},{"title":"Strategy lab and trial budget","text":"The lab tests rule ideas across coins. Every run spends a trial; the budget tab estimates how many configurations the data can support before a winner is likely luck. Passing needs a Deflated Sharpe Ratio of at least 0.95 against buy-and-hold. So far moving-average cross scored 0.908, breakout 0.820 and RSI 0.024 on BTC: all failed. Locking a test before running it keeps the result honest; changing the rule or data after locking voids the lock."},{"title":"Troubleshooting: Live data FAIL, Account FAIL, empty register","text":"\"Live data: FAIL\" names the cause: SSL certificates (on macOS run Install Certificates.command), DNS or offline, a VPN or region block (HTTP 403), rate limit, or a block page. \"Account: FAIL\" with HTTP 401 means the key was rejected: check it is not deleted, the PC clock is automatic, and it uses ECDSA. If the saved register looks empty, check the address is 127.0.0.1:8765 in the same browser. Run the launcher with --check to re-test connections."},{"title":"Crypta's free local brain","text":"Crypta can run on a free model on your own PC through Ollama. Install Ollama from ollama.com/download and start it. In Crypta's settings (⚙) the Local model box then offers one-click downloads: Qwen3 8B (about 5 GB, best, needs about 16 GB of RAM) or Qwen3 4B (about 2.5 GB, for 8 GB of RAM). When the download finishes she switches to it automatically; Brain = Automatic uses Claude if an Anthropic key is present, otherwise the local model, otherwise the guide. Local answers are free and never leave your PC, but they are slower and less sharp than Claude, especially on long multi-step questions."},{"title":"Crypta on your taskbar","text":"Open Crypta's own window with the ⧉ button in her chat, or go to 127.0.0.1:8765/crypta. In Edge or Chrome choose Install (the install icon in the address bar, or Crypta's settings → Install on taskbar), then right-click her taskbar icon and pick Pin to taskbar. Her window works next to the Daily desk: she sees the desk you used last and can switch its tabs. If the launcher is not running she still opens and says so."},{"title":"What Crypta will not do","text":"Crypta explains the app and your numbers, and can move between tabs or point at a field. She can read any tab, the Journal, the register, the account snapshot, the daily scan and live market data, but only reads. She does not predict prices, pick trades, or help work around the loss limits, cooling-off or study locks. She cannot place orders or see your keys."}];
+  const SPRITE="<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"96\" height=\"96\" shape-rendering=\"crispEdges\"><rect x=\"8\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"9\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"10\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"11\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"12\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"13\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"14\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"15\" y=\"1\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"6\" y=\"2\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"7\" y=\"2\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"8\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"9\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"10\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"11\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"12\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"13\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"14\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"15\" y=\"2\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"16\" y=\"2\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"17\" y=\"2\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"6\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"9\" y=\"3\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"10\" y=\"3\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"11\" y=\"3\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"12\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"13\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"14\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"15\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"16\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"3\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"3\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"4\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"8\" y=\"4\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"9\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"10\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"11\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"12\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"13\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"14\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"15\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"16\" y=\"4\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"4\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"18\" y=\"4\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"19\" y=\"4\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"5\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"5\" width=\"1\" height=\"1\" fill=\"#4a67b8\"/><rect x=\"7\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"9\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"10\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"11\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"12\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"13\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"14\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"15\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"16\" y=\"5\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"5\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"18\" y=\"5\" width=\"1\" height=\"1\" fill=\"#b8871c\"/><rect x=\"19\" y=\"5\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"20\" y=\"5\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"6\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"9\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"10\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"11\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"12\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"13\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"14\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"15\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"16\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"6\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"6\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"19\" y=\"6\" width=\"1\" height=\"1\" fill=\"#b8871c\"/><rect x=\"20\" y=\"6\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"7\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"7\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"7\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"20\" y=\"7\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"8\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"8\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"8\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"17\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"8\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"8\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"9\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"9\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"9\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"8\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"17\" y=\"9\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"9\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"9\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"9\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"10\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"10\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"8\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"9\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"10\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"15\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"16\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"17\" y=\"10\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"10\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"10\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"10\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"11\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"11\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"11\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"11\" width=\"1\" height=\"1\" fill=\"#ffffff\"/><rect x=\"8\" y=\"11\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"9\" y=\"11\" width=\"1\" height=\"1\" fill=\"#b48ae0\"/><rect x=\"10\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"11\" width=\"1\" height=\"1\" fill=\"#ffffff\"/><rect x=\"15\" y=\"11\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"16\" y=\"11\" width=\"1\" height=\"1\" fill=\"#b48ae0\"/><rect x=\"17\" y=\"11\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"11\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"11\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"11\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"12\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"12\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"12\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"12\" width=\"1\" height=\"1\" fill=\"#ffffff\"/><rect x=\"8\" y=\"12\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"9\" y=\"12\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"10\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"12\" width=\"1\" height=\"1\" fill=\"#ffffff\"/><rect x=\"15\" y=\"12\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"16\" y=\"12\" width=\"1\" height=\"1\" fill=\"#6b3fa0\"/><rect x=\"17\" y=\"12\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"12\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"12\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"12\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"13\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"13\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"13\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"8\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"17\" y=\"13\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"13\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"13\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"13\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"14\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"14\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"14\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"7\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f3a3a3\"/><rect x=\"8\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f3a3a3\"/><rect x=\"9\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f3a3a3\"/><rect x=\"16\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f3a3a3\"/><rect x=\"17\" y=\"14\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"18\" y=\"14\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"14\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"14\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"15\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"8\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"15\" width=\"1\" height=\"1\" fill=\"#b0566b\"/><rect x=\"12\" y=\"15\" width=\"1\" height=\"1\" fill=\"#b0566b\"/><rect x=\"13\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"15\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"17\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"15\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"15\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"16\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"5\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"9\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"10\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"15\" y=\"16\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"16\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"16\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"20\" y=\"16\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"17\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"6\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"7\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"8\" y=\"17\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"9\" y=\"17\" width=\"1\" height=\"1\" fill=\"#dca386\"/><rect x=\"10\" y=\"17\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"17\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"17\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"17\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"17\" width=\"1\" height=\"1\" fill=\"#dca386\"/><rect x=\"15\" y=\"17\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"16\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"17\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"18\" y=\"17\" width=\"1\" height=\"1\" fill=\"#2b3a67\"/><rect x=\"19\" y=\"17\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"6\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"7\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"8\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"9\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"10\" y=\"18\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"11\" y=\"18\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"12\" y=\"18\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"13\" y=\"18\" width=\"1\" height=\"1\" fill=\"#f4cdb0\"/><rect x=\"14\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"15\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"16\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"17\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"18\" y=\"18\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"6\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"7\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"8\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"9\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"10\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"11\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"12\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"13\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"14\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"15\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"16\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"17\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"18\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"19\" y=\"19\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"5\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"6\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"7\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"8\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"9\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"10\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"11\" y=\"20\" width=\"1\" height=\"1\" fill=\"#e9f6f6\"/><rect x=\"12\" y=\"20\" width=\"1\" height=\"1\" fill=\"#e9f6f6\"/><rect x=\"13\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"14\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"15\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"16\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"17\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"18\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"19\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"20\" y=\"20\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"2\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"4\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"5\" y=\"21\" width=\"1\" height=\"1\" fill=\"#15696b\"/><rect x=\"6\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"7\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"8\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"9\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"10\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"11\" y=\"21\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"12\" y=\"21\" width=\"1\" height=\"1\" fill=\"#f0c040\"/><rect x=\"13\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"14\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"15\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"16\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"17\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"18\" y=\"21\" width=\"1\" height=\"1\" fill=\"#15696b\"/><rect x=\"19\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"20\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"21\" y=\"21\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"2\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"4\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"5\" y=\"22\" width=\"1\" height=\"1\" fill=\"#15696b\"/><rect x=\"6\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"7\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"8\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"9\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"10\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"11\" y=\"22\" width=\"1\" height=\"1\" fill=\"#b8871c\"/><rect x=\"12\" y=\"22\" width=\"1\" height=\"1\" fill=\"#b8871c\"/><rect x=\"13\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"14\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"15\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"16\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"17\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"18\" y=\"22\" width=\"1\" height=\"1\" fill=\"#15696b\"/><rect x=\"19\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"20\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1f8a8a\"/><rect x=\"21\" y=\"22\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"2\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"3\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"4\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"5\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"6\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"7\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"8\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"9\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"10\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"11\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"12\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"13\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"14\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"15\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"16\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"17\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"18\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"19\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"20\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/><rect x=\"21\" y=\"23\" width=\"1\" height=\"1\" fill=\"#1b1530\"/></svg>";
+  const STANDALONE=!!document.getElementById('cryptaStandalone');
+  const onLauncher=location.protocol==='http:'&&(location.hostname==='127.0.0.1'||location.hostname==='localhost');
+  const $=id=>document.getElementById(id);
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+  const PAGE_ID=Math.random().toString(36).slice(2);
+  const settings=()=>Object.assign({model:null,share:true,brain:'auto',localModel:null},LS.get('crypta:settings',{}));
+  // Which brain answers: Claude (API key, paid), a local model through Ollama (free, on this PC), or the built-in guide.
+  const LOCAL_PREF=['qwen3:8b','qwen3:4b','llama3.1:8b'];
+  function localModel(){const inst=((STATUS||{}).local||{}).installed||[],s=settings();return inst.includes(s.localModel)?s.localModel:(LOCAL_PREF.find(m=>inst.includes(m))||inst[0]||null)}
+  function brain(){const st=STATUS||{},s=settings(),localOk=!!(st.local&&st.local.running&&localModel());
+    if(s.brain==='claude')return st.configured?'claude':'guide';if(s.brain==='local')return localOk?'local':'guide';if(s.brain==='guide')return 'guide';
+    return st.configured?'claude':localOk?'local':'guide'}
+  const CH=typeof BroadcastChannel==='function'?new BroadcastChannel('fable-crypta'):null;
+
+  /* ---------------- what the open tool looks like right now ---------------- */
+  const FIELDS=['rAsset','rEquity','rPeak','rCash','rOpen','rRisk','rPortfolio','rMax','rDD','rGap','rEntry','rStop','rEF','rXF','rES','rXS','cost','jSym','jSize','jExp','jAct','jExit','jFee','kC','kW','kN','bY'];
+  const clip=(s,n)=>{s=String(s||'').replace(/\s+/g,' ').trim();return s.length>n?s.slice(0,n)+'…':s};
+  function labelFor(id){const l=document.querySelector('label[for="'+id+'"]');return l?clip(l.textContent,60):id}
+  function activeTab(){const b=document.querySelector('nav button[aria-selected="true"]')||document.querySelector('nav button[data-p].on');return b?{id:b.dataset.p,label:clip(b.textContent,40)}:null}
+  function snapshot(){
+    if(STANDALONE)return null;
+    const s={page:$('planRisk')?'Daily desk':$('refreshMarkets')?'Strategy lab':'Start page',tab:activeTab(),takenAt:new Date().toISOString(),fields:{}};
+    FIELDS.forEach(id=>{const el=$(id);if(el&&el.offsetParent!==null||el&&activeTab()&&el.closest('#p-'+activeTab().id))s.fields[id]={label:labelFor(id),value:el.value,autofilled:el.classList.contains('autofilled')}});
+    try{if(typeof LAST_RISK!=='undefined'&&LAST_RISK&&LAST_RISK.result){const r=LAST_RISK.result,e=LAST_RISK.experiment;
+      s.plan={stage:e.stage,lossFrom5000:e.loss,hardFloor:e.hardFloor,riskBudget:r.riskBudget,headroom:r.headroom,qty:r.qty,cost:r.debit,modeledStopLoss:r.stopLoss,entryFill:r.entryFill,stopFill:r.stopFill,lossPerUnit:r.lossPerUnit,coolingOff:LAST_RISK.cooling||null,halted:r.halt}}}catch(e){}
+    const t=$('ticketOut');if(t&&t.textContent.trim())s.ticket=clip(t.textContent,700);
+    const a=$('autoStatus');if(a)s.autofillStatus=clip(a.textContent,400);
+    try{const st=window.fableAuto&&window.fableAuto.state();if(st&&st.SNAP){const P=st.SNAP;
+      s.account={equity:P.equity,cash:P.cash,fees:P.fees,openStopRisk:P.openStopRisk,unprotectedUSD:P.unprotectedUSD,positions:(P.positions||[]).map(p=>({asset:p.asset,valueUSD:Math.round(p.valueUSD*100)/100,stopOrders:(p.stops||[]).length,countedRisk:Math.round((p.stopRiskUSD+p.unprotectedUSD)*100)/100}))};
+      const nd=LS.get('fable-desk:net-deposits',null);if(nd)s.account.netDeposits=+nd.value}
+      if(st&&st.ACCOUNT)s.accountConnected=!!(st.ACCOUNT.configured&&st.ACCOUNT.ok!==false);}catch(e){}
+    try{if(typeof TRADES!=='undefined'&&Array.isArray(TRADES)){s.journal={trades:TRADES.length,netPnl:Math.round(TRADES.reduce((x,t)=>x+t.pnl,0)*100)/100,recent:TRADES.slice(-5).map(t=>({date:t.d,symbol:t.sym,pnl:Math.round(t.pnl*100)/100,followedPlan:t.follow||null}))}}}catch(e){}
+    const cool=window.fableAuto&&window.fableAuto.coolingOff&&window.fableAuto.coolingOff();if(cool)s.coolingOff=cool;
+    ['scanStatus','fillsOut','jReview','liveGrid','liveStatus','marketOut','dataInfo'].forEach(id=>{const el=$(id);if(el&&el.textContent.trim())s[id]=clip(el.textContent,500)});
+    const warn=[...document.querySelectorAll('.verdict.fail,.verdict.weak')].filter(x=>x.offsetParent!==null).slice(0,3).map(x=>clip(x.textContent,300));if(warn.length)s.warningsOnScreen=warn;
+    s.buttons=[...document.querySelectorAll('button[id]')].filter(b=>b.offsetParent!==null&&!b.closest('#cryptaRoot')).slice(0,40).map(b=>b.id+': '+clip(b.textContent,40));
+    let j=JSON.stringify(s);if(j.length>11000){delete s.buttons;delete s.liveGrid;j=JSON.stringify(s)}
+    return s;
+  }
+
+  /* ---------------- tools, run in the tool page ---------------- */
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  function goTab(tab){const b=document.querySelector('nav button[data-p="'+tab+'"]');if(!b)throw Error('This tool has no '+tab+' tab. Open the Daily desk for that.');b.click();return 'Opened the '+clip(b.textContent,30)+' tab.'}
+  async function runTool(name,input){
+    if(name==='go_to_tab')return goTab(String(input&&input.tab||''));
+    if(name==='point_at'){
+      const id=String(input&&input.element||'');if(!/^[A-Za-z][A-Za-z0-9]{1,30}$/.test(id))throw Error('Bad element id.');
+      const el=$(id);if(!el||el.closest('#cryptaRoot'))throw Error('There is no '+id+' on this page.');
+      const panel=el.closest('section.panel[id^="p-"]');if(panel&&!panel.classList.contains('on'))goTab(panel.id.slice(2));
+      const det=el.closest('details');if(det)det.open=true;
+      await sleep(150);el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('crypta-glow');setTimeout(()=>el.classList.remove('crypta-glow'),4500);
+      return 'Pointed at '+(labelFor(id)||id)+'.';
+    }
+    if(name==='refresh_capital_plan'){
+      if(!$('autoFill'))throw Error('Capital plan is in the Daily desk.');goTab('control');$('autoFill').click();
+      for(let i=0;i<120&&($('autoFill').disabled||/Reading live data/.test(($('autoStatus')||{}).textContent||''));i++)await sleep(250);
+      await sleep(400);const s=snapshot();return JSON.stringify({status:s.autofillStatus,plan:s.plan||null,ticket:s.ticket||null});
+    }
+    if(name==='open_trades_to_log'){
+      if(!$('importFills')||!window.fableAuto)throw Error('The Journal import is in the Daily desk.');goTab('jrn');await window.fableAuto.importFills(false);
+      return clip($('fillsOut').textContent,600)||'Nothing listed.';
+    }
+    if(name==='read_screen')return readScreen(input&&input.tab);
+    if(name==='read_journal')return readJournal(input&&input.limit);
+    if(name==='read_register')return readRegister(input&&input.limit);
+    if(name==='read_account')return readAccount();
+    if(name==='read_scan')return readScan();
+    if(name==='read_market')return readMarket(String(input&&input.product||'BTC-USD'));
+    throw Error('Unknown tool '+name);
+  }
+  // Everything below only reads. Each result is plain JSON or text, trimmed so one call stays small.
+  const cap=(o,n=9000)=>{const j=typeof o==='string'?o:JSON.stringify(o);return j.length>n?j.slice(0,n)+' …(trimmed)':j};
+  function panelText(panel){
+    // Visible text of a tab, with every input written as "Label: value" so numbers are readable in place.
+    const clone=panel.cloneNode(true);clone.querySelectorAll('script,style,svg,canvas,#cryptaRoot').forEach(x=>x.remove());
+    clone.querySelectorAll('input,select,textarea').forEach(el=>{const src=panel.querySelector('#'+CSS.escape(el.id||'__none'));const v=src?(src.type==='checkbox'?(src.checked?'on':'off'):src.value):el.value;
+      const span=document.createElement('span');span.textContent=' ['+(el.id?labelFor(el.id)+': ':'')+(v===''?'(empty)':v)+'] ';el.replaceWith(span)});
+    clone.querySelectorAll('label[for]').forEach(l=>l.remove());
+    clone.querySelectorAll('tr').forEach(tr=>tr.append(document.createTextNode('\n')));
+    clone.querySelectorAll('p,div,h1,h2,h3,h4,li,section,table,details,summary').forEach(x=>x.append(document.createTextNode('\n')));
+    return clone.textContent.replace(/[ \t]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
+  }
+  function readScreen(tab){
+    let panel=null;
+    if(tab){const b=document.querySelector('nav button[data-p="'+tab+'"]');if(!b)throw Error('No '+tab+' tab here.');panel=$('p-'+tab)}
+    else panel=document.querySelector('section.panel.on')||document.querySelector('main')||document.body;
+    if(!panel)throw Error('Nothing to read.');
+    const head=[...document.querySelectorAll('#liveStrip,.warn,header')].filter(x=>x.offsetParent!==null).map(x=>panelText(x)).join('\n');
+    return cap((tab?'Tab '+tab:'Current tab '+((activeTab()||{}).label||''))+':\n'+panelText(panel)+'\n\nTop of page:\n'+head,12000);
+  }
+  function readJournal(limit){
+    const T=typeof TRADES!=='undefined'&&Array.isArray(TRADES)?TRADES:[];const n=Math.max(1,Math.min(200,+limit||50));
+    const withFees=T.filter(t=>Number.isFinite(t.fee));
+    return cap({trades:T.length,netPnl:+T.reduce((a,t)=>a+t.pnl,0).toFixed(2),wins:T.filter(t=>t.pnl>0).length,losses:T.filter(t=>t.pnl<0).length,feesRecorded:+withFees.reduce((a,t)=>a+t.fee,0).toFixed(2),
+      byFollowedPlan:['Yes','Partly','No',null].map(f=>({followed:f,trades:T.filter(t=>(t.follow||null)===f).length,netPnl:+T.filter(t=>(t.follow||null)===f).reduce((a,t)=>a+t.pnl,0).toFixed(2)})),
+      coolingOff:window.fableAuto&&window.fableAuto.coolingOff?window.fableAuto.coolingOff():null,
+      recent:T.slice(-n).map(t=>({logged:t.d,closedAt:t.closedAt||null,symbol:t.sym,trial:t.rule||null,sizeUSD:t.size,expectedEntry:t.exp,entry:t.act,exit:t.exit,feesUSD:t.fee,slippagePct:+(+t.slip).toFixed(4),pnl:+(+t.pnl).toFixed(2),returnPct:Number.isFinite(t.ret)?+(t.ret*100).toFixed(3):null,followedPlan:t.follow||null,note:t.note||null}))});
+  }
+  function readRegister(limit){
+    const H=typeof HYP!=='undefined'&&Array.isArray(HYP)?HYP:[];const n=Math.max(1,Math.min(100,+limit||30));
+    return cap({entries:H.length,configurationsSpent:H.reduce((a,h)=>a+(+h.spent||0),0),budget:typeof BUDGET!=='undefined'?BUDGET:null,
+      recent:H.slice(-n).map(h=>({id:h.id,date:h.t,strategy:h.st,params:h.p,configurationsSpent:h.spent,why:h.why,trades:h.n,sharpe:h.sr,pbo:h.pbo,returnPct:h.ret,data:h.data,verdict:h.verdict||h.v||null,dsr:h.dsr??null}))},10000);
+  }
+  function readAccount(){
+    const st=window.fableAuto&&window.fableAuto.state?window.fableAuto.state():{};const g=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+    const log=g('fable-desk:equity-log')||[];
+    return cap({connected:!!(st.ACCOUNT&&st.ACCOUNT.configured&&st.ACCOUNT.ok!==false),accountError:st.ACCOUNT&&st.ACCOUNT.error||null,snapshot:st.SNAP||null,
+      netDeposits:(g('fable-desk:net-deposits')||{}).value??0,highWaterMark:(g('fable-desk:hwm')||{}).value??null,equityLog:log.slice(-30),
+      costs:g('fable-shared:costs'),plansByCoin:Object.fromEntries(Object.entries(g('fable-desk:plans')||{}).map(([k,v])=>[k,(Array.isArray(v)?v:[v]).slice(-5)]))},10000);
+  }
+  function readScan(){
+    if(typeof LAST_SCAN==='undefined'||!LAST_SCAN)return 'No daily scan has run in this session. The scan status on screen: '+clip(($('scanStatus')||{}).textContent,300);
+    const r=LAST_SCAN.result||{};
+    return cap({observedAt:LAST_SCAN.observedAt,status:clip(($('scanStatus')||{}).textContent,300),signals:clip(($('scanSignals')||{}).textContent,1500),
+      details:(r.details||[]).map(d=>({product:d.product,bars:d.bars,lastClose:d.lastClose??d.close??null,hypotheses:d.hypotheses||d.signals||null})),errors:r.errors||[],topMarkets:clip(($('scanMarketsTable')||{}).textContent,1500)},9000);
+  }
+  async function readMarket(product){
+    if(!/^[A-Z0-9]{1,15}-(USD|USDC)$/.test(product))throw Error('Use a pair like BTC-USD.');
+    const get=async u=>{const r=await fetch(u,{headers:{Accept:'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return r.json()};
+    const base=onLauncher?'/coinbase-exchange/products/':'https://api.exchange.coinbase.com/products/';
+    const [t,st]=await Promise.all([get(base+product+'/ticker'),get(base+product+'/stats')]);
+    let bars=null;try{if(typeof fetchCandles==='function'){const b=await fetchCandles(product,86400,30,()=>{});bars={days:b.length,from:b[0]&&b[0].d,to:b.at(-1)&&b.at(-1).d,low30:Math.min(...b.map(x=>x.l)),high30:Math.max(...b.map(x=>x.h)),lastClose:b.at(-1)&&b.at(-1).c}}}catch(e){}
+    return cap({product,bid:+t.bid,ask:+t.ask,last:+t.price,open24h:+st.open,high24h:+st.high||null,low24h:+st.low||null,volume24h:+st.volume,completedDaily30:bars,note:'Live public data. Context only: the study and sizing use completed daily closes.'});
+  }
+
+  /* ---------------- bridge between Crypta's own window and the open tools ---------------- */
+  let focusAt=document.hasFocus()?Date.now():0;const peers={};let pending={};
+  window.addEventListener('focus',()=>{focusAt=Date.now();publish()});
+  function publish(){if(CH&&!STANDALONE)CH.postMessage({type:'state',page:PAGE_ID,focusAt,state:snapshot()})}
+  if(CH){
+    CH.onmessage=async e=>{const m=e.data||{};
+      if(m.type==='state'&&STANDALONE){peers[m.page]={focusAt:m.focusAt,state:m.state,seen:Date.now()};renderStatusLine()}
+      if(m.type==='hello'&&!STANDALONE)publish();
+      if(m.type==='cmd'&&!STANDALONE&&m.target===PAGE_ID){let result,error;try{result=await runTool(m.name,m.input)}catch(x){error=x.message}CH.postMessage({type:'cmd-result',id:m.id,result,error});publish()}
+      if(m.type==='cmd-result'&&STANDALONE&&pending[m.id]){pending[m.id](m);delete pending[m.id]}
+    };
+    if(STANDALONE)CH.postMessage({type:'hello'});else{setInterval(publish,3000);setTimeout(publish,800)}
+  }
+  function bestPeer(){const live=Object.entries(peers).filter(([k,v])=>Date.now()-v.seen<10000).sort((a,b)=>b[1].focusAt-a[1].focusAt);return live[0]||null}
+  function currentState(){if(!STANDALONE)return snapshot();const p=bestPeer();return p?p[1].state:null}
+  async function tool(name,input){
+    if(!STANDALONE)return runTool(name,input);
+    const p=bestPeer();if(!p)throw Error('No Fable tool is open. Open the Daily desk from the start page and ask again.');
+    const id=Math.random().toString(36).slice(2);
+    return new Promise((res,rej)=>{pending[id]=m=>m.error?rej(Error(m.error)):res(m.result);CH.postMessage({type:'cmd',id,target:p[0],name,input});
+      setTimeout(()=>{if(pending[id]){delete pending[id];rej(Error('The Fable tool did not answer.'))}},35000)});
+  }
+
+  /* ---------------- guide search (works with no key and no network) ---------------- */
+  const STOP=new Set('a an and are as at be but by can do does for from how i if in is it its me my of on or so that the this to what when where which who why will with you your'.split(' '));
+  // Light stemming so "connect", "connecting" and "connected" meet; titles weigh most.
+  const stem=w=>w.length>5?w.replace(/(ing|ed|es|s)$/,''):w.length>3?w.replace(/s$/,''):w;
+  const words=s=>String(s).toLowerCase().replace(/[^a-z0-9$%.\s-]/g,' ').split(/\s+/).map(w=>w.replace(/^[.-]+|[.-]+$/g,'')).filter(w=>w&&!STOP.has(w)).map(stem);
+  const DOCS=GUIDE.map(g=>({...g,t:words(g.title),w:words(g.text)}));
+  const DF={};DOCS.forEach(d=>new Set([...d.t,...d.w]).forEach(w=>DF[w]=(DF[w]||0)+1));
+  const AVG=DOCS.reduce((a,d)=>a+d.w.length,0)/Math.max(1,DOCS.length);
+  function search(q,k=3){
+    const qw=words(q);if(!qw.length)return [];
+    return DOCS.map(d=>{let sc=0;qw.forEach(w=>{const idf=Math.log(1+(DOCS.length-(DF[w]||0)+0.5)/((DF[w]||0)+0.5));
+        const f=d.w.filter(x=>x===w||x.startsWith(w)&&w.length>3).length,tf=f*2.2/(f+1.2*(0.25+0.75*d.w.length/AVG));sc+=idf*(tf+(d.t.some(x=>x===w||x.startsWith(w)&&w.length>3)?4:0))});return {d,sc}})
+      .filter(x=>x.sc>0.5).sort((a,b)=>b.sc-a.sc).slice(0,k).map(x=>({title:x.d.title,text:x.d.text}));
+  }
+  const money=n=>Number.isFinite(+n)?'$'+(+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  function explainSize(s){
+    if(!s||!s.plan){
+      const need=['rEquity','rPeak','rCash','rOpen','rEntry','rStop','rEF','rXF','rES','rXS'].filter(id=>s&&s.fields&&s.fields[id]&&s.fields[id].value==='').map(id=>s.fields[id].label);
+      if(need.length)return "Capital plan hasn't calculated yet because these are empty: **"+need.join(', ')+"**. "+(need.some(x=>/fee/i.test(x))?'Type your Coinbase fee once (it is remembered), or connect a View-only Coinbase key so fees, equity and cash fill themselves. ':'')+'Then press **Calculate**.';
+      return 'Open **Capital plan** and let it calculate first; then I can tell you exactly what is limiting the size.';
+    }
+    const p=s.plan,out=[];
+    if(p.coolingOff)out.push('**Cooling-off is on** until '+new Date(p.coolingOff.until).toLocaleString()+' — two losing trades closed within 24 hours. It lifts by itself.');
+    if(p.stage==='HALT')out.push('**Hard pause**: equity is at or below the hard floor ('+money(p.hardFloor)+'). No new trades.');
+    else if(p.stage==='NO_NEW_RISK')out.push('**No new risk**: the loss from $5,000 is '+money(p.lossFrom5000)+' (the limit is $750).');
+    else if(p.stage==='REVIEW')out.push('**Review stage**: per-trade risk is halved because the loss from $5,000 is '+money(p.lossFrom5000)+'.');
+    if(!p.coolingOff&&p.stage!=='HALT'&&p.stage!=='NO_NEW_RISK'&&p.headroom<=0.005)out.push('**No room left under the 1% open-risk cap**: existing positions already use it. Positions without a stop order count at full value — placing a stop in Coinbase frees room.');
+    if(!out.length&&p.qty>0)out.push('Nothing is blocking you: the plan allows '+p.qty.toPrecision(6)+' units, costing about '+money(p.cost)+', with a modeled stop-out loss of '+money(p.modeledStopLoss)+' against a budget of '+money(p.riskBudget)+'.');
+    if(!out.length)out.push('The size came out at zero, but not from a limit I can see. Check cash and the stop: the stop must be below the entry.');
+    return out.join('\n\n');
+  }
+  function nextStep(s){
+    if(!s)return 'Open the Daily desk from the start page and I can walk you through it.';
+    const tips=[];
+    if(s.coolingOff)tips.push('Cooling-off is active: no new trades until '+new Date(s.coolingOff.until).toLocaleString()+'. A good time to review the Journal.');
+    if(s.fillsOut&&/to log/.test(s.fillsOut))tips.push('You have Coinbase trades to log: open the **Journal** and tap one button per trade.');
+    if(s.accountConnected===false)tips.push('Coinbase is not connected, so equity, cash and fees stay manual. See "Connecting Coinbase".');
+    tips.push('Daily routine: after 00:05 UTC press **Scan daily markets**; before any trade open **Capital plan** and place exactly the ticket; after a trade closes, log it in the **Journal**; export the backup.');
+    return tips.join('\n\n');
+  }
+  function planMath(s){
+    if(!s||!s.plan)return explainSize(s);const p=s.plan,f=k=>s.fields&&s.fields[k]?s.fields[k].value:'?';
+    return '**Capital plan — '+p.stage.replace(/_/g,' ').toLowerCase()+'**\n\n'
+      +'- Risk budget: '+money(p.riskBudget)+' (0.5% of equity'+(p.stage==='REVIEW'?', halved in review':'')+', capped by room under the 1% total: '+money(p.headroom)+')\n'
+      +'- Entry fill '+money(p.entryFill)+', stop fill '+money(p.stopFill)+' → loss per unit '+money(p.lossPerUnit)+' including both fees\n'
+      +'- Size = budget ÷ loss per unit = '+money(p.riskBudget)+' ÷ '+money(p.lossPerUnit)+' = **'+(+p.qty).toPrecision(6)+'** units, costing about '+money(p.cost)+'\n'
+      +'- If the stop fills, you lose about '+money(p.modeledStopLoss)+'. Stop '+f('rStop')+', entry '+f('rEntry')+'.'
+      +(p.coolingOff?'\n\nCooling-off is on, so the size is forced to zero.':'');
+  }
+  function stageAnswer(s){
+    const e=s&&s.fields&&+((s.fields.rEquity||{}).value),pk=s&&s.fields&&+((s.fields.rPeak||{}).value);
+    if(!Number.isFinite(e)||!e)return 'Open **Capital plan** so I can read your equity, then ask again.';
+    const floor=Math.max(4000,(pk||5000)-1000);
+    return 'Equity '+money(e)+' against the $5,000 start ('+(e>=5000?'up ':'down ')+money(Math.abs(e-5000))+').\n\n'
+      +'- Review at $4,500: '+(e>4500?money(e-4500)+' away':'**reached**')+'\n- No new risk at $4,250: '+(e>4250?money(e-4250)+' away':'**reached**')+'\n- Hard pause at '+money(floor)+' (the higher of $4,000 and high-water '+money(pk||5000)+' − $1,000): '+(e>floor?money(e-floor)+' away':'**reached**');
+  }
+  function journalAnswer(s){
+    const J=s&&s.journal;if(!J||!J.trades)return 'No trades are logged yet. After a Coinbase round trip closes, open the **Journal** and tap one button to log it.';
+    return J.trades+' trade'+(J.trades>1?'s':'')+' logged, net P&L **'+money(J.netPnl)+'**.\n\n'+J.recent.map(t=>'- '+t.date+' '+t.symbol+': '+money(t.pnl)+(t.followedPlan?' (followed plan: '+t.followedPlan+')':'')).join('\n')
+      +'\n\nThe Journal tab has the full review: fees, fee share of profit, and results split by whether you followed the plan.';
+  }
+  function openRiskAnswer(s){
+    const A=s&&s.account;if(!A)return 'Open risk comes from your Coinbase positions and stop orders. Connect a View-only key (see "Connecting Coinbase") or type it in Capital plan.';
+    if(!A.positions.length)return 'No open positions, so open risk is $0 and the full 1% of equity is available.';
+    return 'Open risk **'+money(A.openStopRisk+A.unprotectedUSD)+'**:\n\n'+A.positions.map(p=>'- '+p.asset+' '+money(p.valueUSD)+': '+(p.stopOrders?p.stopOrders+' stop order'+(p.stopOrders>1?'s':'')+', counted risk ':'**no stop order**, counted at full value ')+money(p.countedRisk)).join('\n')
+      +'\n\nThe cap is 1% of equity for all positions together.';
+  }
+  function guideAnswer(q,s){
+    const lq=q.toLowerCase();
+    if(/explain (my|the|this) (capital )?plan|how (is|was) (my|the) size|walk me through (my|the) plan/.test(lq))return planMath(s);
+    if(/stage|how close|limit[s]? (am i|left)|how much (room|can i lose)|drawdown|hard (floor|pause)/.test(lq)&&!/what are the/.test(lq))return stageAnswer(s);
+    if(/how am i doing|my (trades|journal|results|p&l|pnl)|win rate/.test(lq))return journalAnswer(s);
+    if(/(my|current) open risk|how much risk (do i have|is open)|what is at risk/.test(lq))return openRiskAnswer(s);
+    if(/(why|how come).*(size|quantity|qty|position|ticket).*(0|zero|nothing|no trade)|(size|position|quantity).*(zero|\$0|0\b)|can'?t (buy|trade)|no trade/.test(lq))return explainSize(s);
+    if(/what (should|do) i do|next step|where (do|should) i start|today/.test(lq))return nextStep(s);
+    const hits=search(q,2);
+    if(!hits.length)return "I couldn't find that in my guide. Try asking about Capital plan, the trade ticket, open risk, cooling-off, the Journal, deposits, the tax CSV, or connecting Coinbase. With an Anthropic key in the private folder I can answer anything about the app.";
+    return '**'+hits[0].title+'**\n\n'+hits[0].text+(hits[1]?'\n\n**'+hits[1].title+'**\n\n'+hits[1].text.split('. ').slice(0,2).join('. ')+(hits[1].text.split('. ').length>2?'.':''):'');
+  }
+
+  /* ---------------- secrets never leave the page ---------------- */
+  function looksSecret(t){return /sk-ant-[A-Za-z0-9_-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY|organizations\/[0-9a-f-]{8,}\/apiKeys\/|"privateKey"\s*:|\b[A-Za-z0-9+\/]{60,}={0,2}(?![A-Za-z0-9+\/=])/.test(t)}
+
+  /* ---------------- messages ---------------- */
+  let CHAT=LS.get('crypta:chat',[]).filter(m=>m&&(m.role==='user'||m.role==='assistant')&&typeof m.text==='string').slice(-40);
+  const save=()=>LS.set('crypta:chat',CHAT.slice(-40));
+  function inline(h){
+    return h.replace(/`([^`\n]{1,120})`/g,'<code>$1</code>').replace(/\*\*([^*\n]{1,300})\*\*/g,'<strong>$1</strong>').replace(/(^|[\s(])_([^_\n]{1,300})_(?=$|[\s.,)])/g,'$1<em>$2</em>')
+      .replace(/\[([^\]\n]{1,120})\]\((https?:\/\/[^\s)]{1,300})\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+  function md(t){
+    // Escape first, then add a small, closed set of formatting. Links only for http(s).
+    const lines=esc(t).split('\n'),out=[];let list=null,i=0;
+    const close=()=>{if(list){out.push('</'+list+'>');list=null}};
+    while(i<lines.length){const l=lines[i];
+      if(/^```/.test(l.trim())){close();const buf=[];i++;while(i<lines.length&&!/^```/.test(lines[i].trim()))buf.push(lines[i++]);i++;out.push('<pre><code>'+buf.join('\n')+'</code></pre>');continue}
+      if(/^\s*\|.*\|\s*$/.test(l)&&i+1<lines.length&&/^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])){close();const row=x=>x.trim().replace(/^\||\|$/g,'').split('|').map(c=>inline(c.trim()));
+        let h='<div class="crypta-table"><table><thead><tr>'+row(l).map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';i+=2;
+        while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i]))h+='<tr>'+row(lines[i++]).map(c=>'<td>'+c+'</td>').join('')+'</tr>';out.push(h+'</tbody></table></div>');continue}
+      const hd=l.match(/^(#{1,4})\s+(.*)$/);if(hd){close();out.push('<p class="crypta-h"><strong>'+inline(hd[2])+'</strong></p>');i++;continue}
+      const m=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
+      if(m){const want=/^\s*\d/.test(l)?'ol':'ul';if(list!==want){close();list=want;out.push('<'+list+'>')}out.push('<li>'+inline(m[1])+'</li>')}
+      else{close();if(l.trim())out.push('<p>'+inline(l)+'</p>')}
+      i++}
+    close();return out.join('');
+  }
+
+  /* ---------------- UI ---------------- */
+  const root=document.createElement('div');root.id='cryptaRoot';root.className=STANDALONE?'crypta-standalone':'';
+  root.innerHTML=(STANDALONE?'':'<button type="button" id="cryptaFab" class="crypta-fab" aria-label="Ask Crypta" title="Ask Crypta">'+SPRITE+'</button>')
+    +'<section id="cryptaPanel" class="crypta-panel" role="dialog" aria-label="Crypta" '+(STANDALONE?'':'hidden')+'>'
+    +'<header class="crypta-head"><span class="crypta-ava">'+SPRITE+'</span><div><strong>Crypta</strong><span id="cryptaMode" class="crypta-mode">…</span></div>'
+    +'<span class="crypta-sp"></span><button type="button" id="cryptaNew" title="New chat" aria-label="New chat">＋</button><button type="button" id="cryptaSettingsBtn" title="Settings" aria-label="Settings">⚙</button>'
+    +(STANDALONE?'':(onLauncher?'<button type="button" id="cryptaPop" title="Open in her own window" aria-label="Open in her own window">⧉</button>':'')+'<button type="button" id="cryptaClose" title="Close" aria-label="Close">✕</button>')+'</header>'
+    +'<div id="cryptaSettings" class="crypta-settings" hidden></div>'
+    +'<div id="cryptaStatusLine" class="crypta-statusline" '+(STANDALONE?'':'hidden')+'></div>'
+    +'<div id="cryptaLog" class="crypta-log" aria-live="polite"></div>'
+    +'<div id="cryptaChips" class="crypta-chips"></div>'
+    +'<form id="cryptaForm" class="crypta-form" autocomplete="off"><textarea id="cryptaInput" rows="1" placeholder="Ask anything about the app or your numbers… (Alt+C)" aria-label="Message Crypta"></textarea>'
+    +'<button type="submit" id="cryptaSend" aria-label="Send">➤</button></form></section>';
+  (STANDALONE?$('cryptaStandalone'):document.body).appendChild(root);
+  const log=$('cryptaLog');
+  function bubble(role,text,extra){const d=document.createElement('div');d.className='crypta-msg '+role+(extra?' '+extra:'');
+    d.innerHTML=(role==='assistant'?'<span class="crypta-mini">'+SPRITE+'</span>':'')+'<div class="crypta-body"><div class="crypta-tools"></div><div class="crypta-text">'+(role==='assistant'?md(text):esc(text).replace(/\n/g,'<br>'))+'</div>'
+      +(role==='assistant'&&extra!=='hello'?'<div class="crypta-actions"><button type="button" data-a="copy" title="Copy">Copy</button><button type="button" data-a="retry" title="Ask again">Retry</button></div>':'')+'</div>';
+    d.querySelectorAll('.crypta-actions button').forEach(b=>b.addEventListener('click',async()=>{
+      if(b.dataset.a==='copy'){try{await navigator.clipboard.writeText(d.querySelector('.crypta-text').innerText);b.textContent='Copied'}catch(e){b.textContent='Select and copy'}setTimeout(()=>b.textContent='Copy',1500)}
+      else retry()}));
+    log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+  const TOOL_LABEL={go_to_tab:'Switched tab',point_at:'Pointed at a field',refresh_capital_plan:'Refreshed Capital plan',open_trades_to_log:'Opened trades to log',read_screen:'Read the screen',read_journal:'Read the Journal',read_register:'Read the Register',read_account:'Read the account',read_scan:'Read the daily scan',read_market:'Read live market data'};
+  function toolChip(el,name,ok){const c=document.createElement('span');c.className='crypta-chip-tool'+(ok?'':' bad');c.textContent=(ok?'✓ ':'✗ ')+(TOOL_LABEL[name]||name);el.querySelector('.crypta-tools').appendChild(c)}
+  function renderLog(){log.innerHTML='';if(!CHAT.length)bubble('assistant',"Hi, I'm **Crypta**. I know this app inside out and can see the numbers on your screen. Ask me anything, or tap a suggestion.",'hello');CHAT.forEach(m=>bubble(m.role,m.text));chips()}
+  const CHIPS={control:['Explain my Capital plan','Why is my trade size $0?','How close am I to the limits?'],jrn:['How am I doing?','Log my Coinbase trades','What does the review mean?'],
+    scan:['What did today\'s scan say?','What is H2?','What should I do today?'],lab:['What is a trial?','Why did the rules fail?','How do I lock a test?'],bud:['What is the trial budget?'],siz:['Explain Kelly sizing here'],
+    hyp:['What is in my register?','How do backups work?'],exec:['What does the execution audit do?'],research:['What is the locked study?'],doc:['Summarise the method']};
+  function chips(){
+    const s=currentState(),tab=s&&s.tab&&s.tab.id,list=(CHAT.length?[]:['What should I do today?']).concat(CHIPS[tab]||['What should I do today?','How do I connect Coinbase?','What can you do?']).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3);
+    const c=$('cryptaChips');c.innerHTML=list.map(q=>'<button type="button">'+esc(q)+'</button>').join('');c.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>send(b.textContent)))}
+  let STATUS=null;
+  async function refreshStatus(){
+    if(!onLauncher){STATUS={configured:false,offline:true};return}
+    try{const r=await fetch('/crypta/status',{headers:{'X-Fable-Local':'1'},credentials:'omit'});STATUS=r.ok?await r.json():{configured:false}}catch(e){STATUS={configured:false,offline:true}}
+    const s=settings();if(STATUS.models&&!STATUS.models[s.model])LS.set('crypta:settings',{...s,model:STATUS.defaultModel});
+    const b=brain(),m=$('cryptaMode');
+    m.textContent=b==='claude'?'AI · '+(STATUS.models[settings().model]||'').split(' (')[0]:b==='local'?'Local AI · '+localModel()+' · free':STATUS.offline?'Guide mode · launcher not running':'Guide mode';m.className='crypta-mode '+(b==='guide'?'guide':'ai');
+  }
+  function renderStatusLine(){const el=$('cryptaStatusLine');if(!el||!STANDALONE)return;const p=bestPeer();
+    el.textContent=p?'Seeing: '+(p[1].state&&p[1].state.page||'Fable')+(p[1].state&&p[1].state.tab?' · '+p[1].state.tab.label:''):'No Fable tool open — I can still answer questions from my guide.'}
+  function renderSettings(){
+    const st=STATUS||{},s=settings(),el=$('cryptaSettings'),loc=st.local||{running:false,installed:[],recommended:[]};
+    const opt=(v,l,sel)=>'<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(l)+'</option>';
+    el.innerHTML='<label>Brain<select id="cryptaBrain">'+opt('auto','Automatic (Claude if a key is set, else local, else guide)',s.brain==='auto')+opt('claude','Claude (Anthropic API key, paid)',s.brain==='claude')+opt('local','Local model on this PC (free, via Ollama)',s.brain==='local')+opt('guide','Built-in guide only',s.brain==='guide')+'</select></label>'
+      +'<div class="crypta-box"><strong>Local model (free)</strong> · '+(loc.running?(loc.installed.length?'Ollama running':'Ollama running, no model yet'):'Ollama not found')
+        +(loc.running&&loc.installed.length?'<label>Model<select id="cryptaLocalModel">'+loc.installed.map(m=>opt(m,m,m===localModel())).join('')+'</select></label>':'')
+        +(loc.running?'<div class="crypta-dl">'+loc.recommended.filter(r=>!loc.installed.includes(r.model)).map(r=>'<button type="button" data-pull="'+esc(r.model)+'">Download '+esc(r.label)+'</button>').join('')+'</div><div id="cryptaPull" class="crypta-note"></div>'
+          :'<p class="crypta-note">Install Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer">ollama.com/download</a> (free), start it, then press Refresh. Then download a model here with one click. Answers are slower and less sharp than Claude, but free and private: nothing leaves your PC.</p>')
+        +'<button type="button" id="cryptaRefresh">Refresh</button></div>'
+      +'<div class="crypta-box"><strong>Claude</strong> · '+(st.configured?'key found':'no key')
+        +(st.configured?'<label>Model<select id="cryptaModel">'+Object.entries(st.models||{}).map(([k,v])=>opt(k,v,k===s.model)).join('')+'</select></label>'
+          +'<label>Monthly spending cap ($)<input type="number" id="cryptaCap" min="0" max="500" step="1" value="'+esc(st.capUSD??5)+'"></label>'
+          +'<p class="crypta-note">This month: <strong>'+money(st.spentUSD)+'</strong> of '+money(st.capUSD)+' over '+st.requests+' request'+(st.requests===1?'':'s')+'. A typical question costs about '+(st.perQuestionUSD&&st.perQuestionUSD[s.model]?'$'+st.perQuestionUSD[s.model].toFixed(3):'a cent')+'. Estimates from list prices; your Anthropic console is the bill.</p>'
+          :'<p class="crypta-note">Paid, and not included in a Claude Pro plan. To use it, save an Anthropic API key as a text file in the <code>private</code> folder.</p>')+'</div>'
+      +'<label class="crypta-row"><input type="checkbox" id="cryptaShare" '+(s.share?'checked':'')+'> Let Crypta see the numbers on screen'+(brain()==='claude'?' (sent to Anthropic with your question; never your keys)':'')+'</label>'
+      +'<div class="crypta-row"><button type="button" id="cryptaClear">Clear chat</button>'+(STANDALONE&&window.__cryptaInstall?'<button type="button" id="cryptaInstall">Install on taskbar</button>':'')+'</div>';
+    const upd=p=>{LS.set('crypta:settings',{...settings(),...p});refreshStatus().then(renderSettings)};
+    $('cryptaBrain').addEventListener('change',e=>upd({brain:e.target.value}));
+    $('cryptaLocalModel')&&$('cryptaLocalModel').addEventListener('change',e=>upd({localModel:e.target.value}));
+    $('cryptaModel')&&$('cryptaModel').addEventListener('change',e=>upd({model:e.target.value}));
+    $('cryptaRefresh').addEventListener('click',()=>refreshStatus().then(renderSettings));
+    $('cryptaShare').addEventListener('change',e=>LS.set('crypta:settings',{...settings(),share:e.target.checked}));
+    $('cryptaCap')&&$('cryptaCap').addEventListener('change',async e=>{try{const r=await fetch('/crypta/settings',{method:'POST',headers:{'Content-Type':'application/json','X-Fable-Local':'1'},body:JSON.stringify({capUSD:+e.target.value})});STATUS={...STATUS,...await r.json()}}catch(x){}renderSettings()});
+    el.querySelectorAll('button[data-pull]').forEach(b=>b.addEventListener('click',()=>pullModel(b.dataset.pull)));
+    $('cryptaClear').addEventListener('click',()=>{CHAT=[];save();renderLog()});
+    $('cryptaInstall')&&$('cryptaInstall').addEventListener('click',async()=>{const p=window.__cryptaInstall;window.__cryptaInstall=null;p.prompt();await p.userChoice.catch(()=>{});renderSettings()});
+  }
+  async function pullModel(model){
+    const out=$('cryptaPull');out.textContent='Starting download of '+model+'…';$('cryptaSettings').querySelectorAll('button[data-pull]').forEach(b=>b.disabled=true);
+    try{const r=await fetch('/crypta/local/pull',{method:'POST',headers:{'Content-Type':'application/json','X-Fable-Local':'1'},body:JSON.stringify({model})});
+      if(!r.ok){let m='HTTP '+r.status;try{m=(await r.json()).error||m}catch(e){}throw Error(m)}
+      const rd=r.body.getReader(),dec=new TextDecoder();let buf='',last='';
+      for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+        while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line)continue;let ev;try{ev=JSON.parse(line)}catch(e){continue}
+          if(ev.error)throw Error(ev.error);last=ev.status||last;
+          out.textContent=ev.total?model+': '+(ev.completed/1e9).toFixed(2)+' of '+(ev.total/1e9).toFixed(2)+' GB ('+Math.floor(100*ev.completed/ev.total)+'%)':model+': '+last}}
+      if(!/success/i.test(last))throw Error('download ended early ('+last+')');
+      LS.set('crypta:settings',{...settings(),localModel:model});await refreshStatus();renderSettings();$('cryptaPull')&&($('cryptaPull').textContent=model+' is ready. I will use it for answers.');
+    }catch(e){out.textContent='Download failed: '+e.message;$('cryptaSettings').querySelectorAll('button[data-pull]').forEach(b=>b.disabled=false)}
+  }
+
+  /* ---------------- talking ---------------- */
+  let BUSY=false,ABORT=null;
+  async function send(text){
+    text=String(text||'').trim();if(!text||BUSY)return;
+    if(looksSecret(text)){bubble('user','[message not sent: it contained what looks like a key]');bubble('assistant',"That looks like an **API key or private key**, so I didn't send it anywhere or save it. Treat it as exposed: delete that key where you created it and make a new one. Keys only ever go in as **files in the private folder**, never typed into a chat — including this one.");return}
+    CHAT.push({role:'user',text});save();bubble('user',text);$('cryptaInput').value='';
+    const state=currentState();
+    if(!STATUS)await refreshStatus();
+    if(brain()==='guide'){const a=/what can you do|who are you|help$/i.test(text)?"I'm Crypta. I explain this app and your numbers: your Capital plan and its math, how close you are to each limit, your open risk, how your trades are going, and any feature. I can switch tabs and point at fields for you."+(STATUS.offline?'':"\n\nRight now I'm in **guide mode**. For free-form answers where I read anything in the app, give me a brain in settings (⚙): a free local model through Ollama, or Claude with an Anthropic API key."):guideAnswer(text,state);CHAT.push({role:'assistant',text:a});save();bubble('assistant',a);chips();return}
+    BUSY=true;$('cryptaSend').textContent='■';$('cryptaSend').setAttribute('aria-label','Stop');
+    const out=bubble('assistant','','streaming'),box=out.querySelector('.crypta-text');let shown='';
+    const history=CHAT.slice(-20).map(m=>({role:m.role,content:m.text}));while(history.length&&history[0].role!=='user')history.shift();
+    try{
+      for(let round=0;round<5;round++){
+        ABORT=new AbortController();
+        const r=await fetch('/crypta/chat',{method:'POST',signal:ABORT.signal,headers:{'Content-Type':'application/json','X-Fable-Local':'1'},credentials:'omit',
+          body:JSON.stringify({provider:brain()==='local'?'local':'anthropic',model:brain()==='local'?localModel():settings().model,messages:history,state:settings().share?currentState():null,guide:search(text+' '+(state&&state.tab?state.tab.label:''),3)})});
+        if(!r.ok){let m='HTTP '+r.status;try{m=(await r.json()).error||m}catch(e){}throw Error(m)}
+        const blocks=[];let cur=null,stop=null,buf='';const rd=r.body.getReader(),dec=new TextDecoder();
+        for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+          while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line.startsWith('data:'))continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(e){continue}
+            if(ev.type==='content_block_start'){cur={...ev.content_block};if(cur.type==='text')cur.text=cur.text||'';if(cur.type==='tool_use')cur.json='';blocks.push(cur)}
+            else if(ev.type==='content_block_delta'&&cur){if(ev.delta.type==='text_delta'){cur.text+=ev.delta.text;shown+=ev.delta.text;box.innerHTML=md(shown);log.scrollTop=log.scrollHeight}else if(ev.delta.type==='input_json_delta')cur.json+=ev.delta.partial_json}
+            else if(ev.type==='content_block_stop'){if(cur&&cur.type==='tool_use'){try{cur.input=cur.json?JSON.parse(cur.json):{}}catch(e){cur.input={}}delete cur.json}cur=null}
+            else if(ev.type==='message_delta')stop=ev.delta&&ev.delta.stop_reason;
+            else if(ev.type==='error')throw Error((ev.error&&ev.error.message)||'Anthropic error');}}
+        const uses=blocks.filter(b=>b.type==='tool_use');
+        if(stop!=='tool_use'||!uses.length)break;
+        history.push({role:'assistant',content:blocks.map(b=>b.type==='text'?{type:'text',text:b.text}:{type:'tool_use',id:b.id,name:b.name,input:b.input}).filter(b=>b.type!=='text'||b.text)});
+        const results=[];
+        for(const u of uses){let res,err=false;try{res=await tool(u.name,u.input)}catch(e){res=e.message;err=true}
+          toolChip(out,u.name,!err);if(shown&&!shown.endsWith('\n'))shown+='\n\n';
+          results.push({type:'tool_result',tool_use_id:u.id,content:String(res).slice(0,12000),is_error:err})}
+        history.push({role:'user',content:results});
+      }
+      if(!shown.trim())shown='(no answer)';
+      CHAT.push({role:'assistant',text:shown.trim()});save();chips();
+    }catch(e){
+      const aborted=e.name==='AbortError',fallback=aborted?'':'\n\nFrom my guide instead:\n\n'+guideAnswer(text,state);
+      shown+=(shown?'\n\n':'')+(aborted?'_Stopped._':'**I couldn\'t reach '+(brain()==='local'?'the local model':'Claude')+':** '+(e.message==='Failed to fetch'?'Launcher not reachable — is the black window still open?':e.message)+fallback);
+      box.innerHTML=md(shown);CHAT.push({role:'assistant',text:shown});save();
+    }finally{BUSY=false;ABORT=null;out.classList.remove('streaming');$('cryptaSend').textContent='➤';$('cryptaSend').setAttribute('aria-label','Send');refreshStatus()}
+  }
+  function retry(){if(BUSY)return;const i=CHAT.map(m=>m.role).lastIndexOf('user');if(i<0)return;const q=CHAT[i].text;CHAT=CHAT.slice(0,i);save();renderLog();send(q)}
+  $('cryptaNew').addEventListener('click',()=>{if(BUSY)return;CHAT=[];save();renderLog()});
+  $('cryptaForm').addEventListener('submit',e=>{e.preventDefault();if(BUSY&&ABORT){ABORT.abort();return}send($('cryptaInput').value)});
+  $('cryptaInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('cryptaForm').requestSubmit()}});
+  $('cryptaSettingsBtn').addEventListener('click',()=>{const s=$('cryptaSettings');s.hidden=!s.hidden;if(!s.hidden)renderSettings()});
+  if(!STANDALONE){
+    const open=v=>{$('cryptaPanel').hidden=!v;$('cryptaFab').classList.toggle('open',v);LS.set('crypta:open',!!v);if(v){$('cryptaInput').focus();refreshStatus();chips()}};
+    // Alt+C opens and closes her from anywhere in the tool; the panel keeps its size and comes back open after a reload.
+    document.addEventListener('keydown',e=>{if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(e.key==='c'||e.key==='C')){e.preventDefault();open($('cryptaPanel').hidden)}});
+    const sz=LS.get('crypta:size',null);if(sz&&sz.w>=320&&sz.h>=380){$('cryptaPanel').style.width=sz.w+'px';$('cryptaPanel').style.height=sz.h+'px'}
+    if(typeof ResizeObserver==='function')new ResizeObserver(()=>{const p=$('cryptaPanel');if(!p.hidden&&p.offsetWidth)LS.set('crypta:size',{w:p.offsetWidth,h:p.offsetHeight})}).observe($('cryptaPanel'));
+    document.querySelectorAll('nav button[data-p]').forEach(b=>b.addEventListener('click',()=>setTimeout(chips,50)));
+    if(LS.get('crypta:open',false))setTimeout(()=>open(true),300);
+    $('cryptaFab').addEventListener('click',()=>open($('cryptaPanel').hidden));$('cryptaClose').addEventListener('click',()=>open(false));
+    // Her own window lives at the launcher's /crypta, so the button only exists there. A blocked popup gets a pointer instead.
+    if($('cryptaPop'))$('cryptaPop').addEventListener('click',()=>{const w=window.open('/crypta','crypta','width=420,height=700');if(w)open(false);else bubble('assistant','Your browser blocked the window. Open **127.0.0.1:'+location.port+'/crypta** in a new tab, then choose Install to put me on the taskbar.')});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('cryptaPanel').hidden)open(false)});
+  }else{window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__cryptaInstall=e});renderStatusLine();setInterval(renderStatusLine,3000)}
+  if(STANDALONE)refreshStatus();renderLog();   // inside the tools she stays silent (no requests) until opened
+  window.crypta={planMath,stageAnswer,journalAnswer,openRiskAnswer,readScreen,readJournal,readAccount,send,search,guideAnswer,explainSize,looksSecret,snapshot,runTool,md,status:()=>STATUS,chat:()=>CHAT};
 })();
 </script></body></html>

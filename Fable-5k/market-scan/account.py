@@ -8,7 +8,8 @@
 """
 import base64,hashlib,hmac,json,os,secrets,time
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import urlencode,quote
+from datetime import datetime
 from urllib.request import Request,urlopen
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -148,21 +149,61 @@ def build_jwt(key,method,path,now=None):
     return signing.decode()+'.'+_b64u(sig)
 
 # ---------------------------------------------------------------- key file
+SKIP_NAMES={'readme.txt','readme.md','readme'}
+def _is_anthropic_key(p):
+    try:return p.stat().st_size<=4096 and 'sk-ant-' in p.read_text(encoding='utf-8-sig',errors='ignore')
+    except Exception:return False
+MAX_KEY_FILE=64*1024
+def _key_kind(path):
+    """'json' = full Coinbase key file, 'raw' = only the secret text, None = not a key."""
+    try:
+        if path.stat().st_size>MAX_KEY_FILE:return None
+        text=path.read_text(encoding='utf-8-sig',errors='ignore').strip()
+    except Exception:return None
+    if not text:return None
+    try:
+        data=json.loads(text)
+        if isinstance(data,dict) and (data.get('name') or data.get('id') or data.get('keyName') or data.get('apiKeyName')) and (data.get('privateKey') or data.get('privateKeySecret') or data.get('secret')):return 'json'
+        return None
+    except ValueError:pass
+    if 'BEGIN EC PRIVATE KEY' in text or 'BEGIN PRIVATE KEY' in text:return 'raw'
+    try:
+        if len(base64.b64decode(text,validate=True)) in (32,64):return 'raw'
+    except Exception:pass
+    return None
+def _candidates():
+    if not KEY_DIR.is_dir():return []
+    files=[p for p in KEY_DIR.iterdir() if p.is_file() and p.name.lower() not in SKIP_NAMES and not p.name.lower().startswith('readme.') and not p.name.startswith('.')
+           and not p.name.lower().startswith('crypta-usage') and not _is_anthropic_key(p)]   # Crypta's files live here too
+    # .json names first, then everything else; alphabetical within each group.
+    return sorted(files,key=lambda p:(p.suffix.lower()!='.json',p.name.lower()))
 def find_key_file():
-    if not KEY_DIR.is_dir():return None
-    files=sorted(p for p in KEY_DIR.glob('*.json') if p.is_file())
-    return files[0] if files else None
+    """The first file whose CONTENT is a Coinbase key file wins, whatever its name or extension
+    (phone saves often land as .txt, get " 2" appended, or have no extension). If no full key
+    file exists, a file holding only the secret text is returned so load_key() can explain."""
+    files=_candidates();kinds=[(p,_key_kind(p)) for p in files]
+    for p,k in kinds:
+        if k=='json':return p
+    for p,k in kinds:
+        if k=='raw':return p
+    return None
+def key_files_summary():
+    return [p.name for p in _candidates()]
 def load_key():
     path=find_key_file()
-    if not path:return None
-    try:data=json.loads(path.read_text(encoding='utf-8-sig'))
-    except Exception:raise AccountError(400,'The key file in private/ is not valid JSON. Re-download it from Coinbase.')
+    if not path:
+        others=key_files_summary()
+        if others:raise AccountError(400,'private/ has '+', '.join(others)+' but none of them is a Coinbase key file. Use the Download button on the Coinbase key page and put that file in private/.')
+        return None
+    if _key_kind(path)=='raw':
+        raise AccountError(400,'private/'+path.name+' has only the private key text, not the full file Coinbase downloads. '
+                               'Use the Download button on the Coinbase key page (the file has both a "name" and a "privateKey" field) and replace this file with it.')
+    data=json.loads(path.read_text(encoding='utf-8-sig'))
     kid=data.get('name') or data.get('id') or data.get('keyName') or data.get('apiKeyName')
     secret=data.get('privateKey') or data.get('privateKeySecret') or data.get('secret')
-    if not kid or not secret:raise AccountError(400,'The key file needs a key name/id and a privateKey.')
-    try:alg,material=parse_private_key(secret)
-    except Exception:raise AccountError(400,'The private key in private/ could not be read (expected Ed25519 or ECDSA P-256).')
-    return {'kid':str(kid),'alg':alg,'secret':material,'file':path.name}
+    try:alg,material=parse_private_key(str(secret))
+    except Exception:raise AccountError(400,'The private key in private/'+path.name+' could not be read (expected Ed25519 or ECDSA P-256). Re-download the key file from Coinbase.')
+    return {'kid':str(kid).strip(),'alg':alg,'secret':material,'file':path.name}
 
 # ---------------------------------------------------------------- client
 def _num(v):
@@ -173,7 +214,8 @@ class Account:
     def __init__(self,key,opener=urlopen,ssl_ctx=None):
         self.key=key;self.opener=opener;self.ssl_ctx=ssl_ctx
     def get(self,route,query=None):
-        path=PREFIX+route
+        return self.get_path(PREFIX+route,query)
+    def get_path(self,path,query=None):
         req=Request(ACCOUNT_BASE+path+('?'+urlencode(query,doseq=True) if query else ''),headers={
             'Authorization':'Bearer '+build_jwt(self.key,'GET',path),'Accept':'application/json','User-Agent':'FableResearch/12 read-only'})
         kw={'timeout':12}
@@ -182,7 +224,9 @@ class Account:
             with self.opener(req,**kw) as r:raw=r.read(8*1024*1024)
         except Exception as e:
             code=getattr(e,'code',None)
-            if code==401:raise AccountError(401,'Coinbase rejected the key (HTTP 401). Check the key file, that the key is not deleted, and that your PC clock is set automatically.')
+            if code==401:
+                hint=(' This key uses Ed25519; Coinbase documents ECDSA as required for Advanced Trade account access. Create a new key and choose ECDSA under Advanced Settings.' if self.key['alg']=='EdDSA' else '')
+                raise AccountError(401,'Coinbase rejected the key (HTTP 401). Check the key is not deleted and your PC clock is set automatically.'+hint)
             if code==403:raise AccountError(403,'Coinbase refused the key (HTTP 403). The key may lack View permission or have an IP allowlist that excludes this network.')
             raise
         try:return json.loads(raw)
@@ -215,17 +259,34 @@ class Account:
                 if not isinstance(cfg,dict):continue
                 stop=_num(cfg.get('stop_price') if cfg.get('stop_price') is not None else cfg.get('stop_trigger_price'))
                 size=_num(cfg.get('base_size'))
-                if stop and size:stops.setdefault(o.get('product_id'),[]).append({'stop':stop,'qty':size,'limit':_num(cfg.get('limit_price')),'orderId':o.get('order_id')})
+                if stop and size:
+                    limit=_num(cfg.get('limit_price'));base=str(o.get('product_id','')).split('-')[0].upper()
+                    # A stop-limit sells at its limit or better, so the modeled fill is the lower of stop and limit.
+                    stops.setdefault(base,[]).append({'stop':stop,'qty':size,'limit':limit,'fill':min(stop,limit) if limit else stop,'orderId':o.get('order_id'),'product':o.get('product_id')})
+        taker=_num(fee.get('taker_fee_rate'));maker=_num(fee.get('maker_fee_rate'));exit_fee=taker if taker is not None else 0.0
         positions=[];cash=0.0
         for sp in bd.get('spot_positions') or []:
             asset=str(sp.get('asset','')).upper();value=_num(sp.get('total_balance_fiat')) or 0.0;qty=_num(sp.get('total_balance_crypto')) or 0.0
             if sp.get('is_cash') or asset in ('USD','USDC'):
                 cash+=_num(sp.get('available_to_trade_fiat')) or 0.0;continue
             if value<1:continue
-            product=asset+'-USD';price=value/qty if qty>0 else None;st=stops.get(product,[])
-            covered=min(qty,sum(s['qty'] for s in st));risk=sum(max(0.0,(price or 0)-s['stop'])*s['qty'] for s in st)
+            product=asset+'-USD'
+            if not qty>0:
+                # Quantity missing or zero while value is not: never let that read as zero risk.
+                positions.append({'asset':asset,'product':product,'qty':None,'valueUSD':value,'price':None,'stops':stops.get(asset,[]),'coveredQty':0.0,'unprotectedUSD':value,'stopRiskUSD':0.0,'quantityUnknown':True});continue
+            price=value/qty;st=sorted(stops.get(asset,[]),key=lambda s:-s['fill'])
+            # Count at most the quantity actually held (stale oversized stop orders must not add risk),
+            # loss to each order's modeled fill, plus the taker fee on that fill.
+            left=qty;risk=0.0
+            for s_ in st:
+                # A stop-limit whose limit is already above the market was triggered (or gapped through) and cannot fill
+                # until price recovers: it protects nothing now, so that quantity stays unprotected.
+                if price is not None and price<s_['fill']:continue
+                q=min(left,s_['qty']);left-=q
+                if q<=0:break
+                risk+=q*(max(0.0,(price or 0)-s_['fill'])+s_['fill']*exit_fee)
+            covered=qty-max(0.0,left)
             positions.append({'asset':asset,'product':product,'qty':qty,'valueUSD':value,'price':price,'stops':st,'coveredQty':covered,'unprotectedUSD':max(0.0,qty-covered)*(price or 0),'stopRiskUSD':risk})
-        taker=_num(fee.get('taker_fee_rate'));maker=_num(fee.get('maker_fee_rate'))
         return {'asOf':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'portfolioType':perms.get('portfolio_type'),'equity':equity,'cash':cash,
                 'fees':{'taker':taker,'maker':maker,'tier':fee.get('pricing_tier')},'positions':positions,
                 'openStopRisk':sum(p['stopRiskUSD'] for p in positions),'unprotectedUSD':sum(p['unprotectedUSD'] for p in positions)}
@@ -237,11 +298,69 @@ class Account:
             page=self.get('/orders/historical/fills',q);got=page.get('fills') or [];out+=got
             cursor=page.get('cursor')
             if not got or not cursor:break
-        res=[]
-        for f in out:
-            price=_num(f.get('price'));size=_num(f.get('size'))
-            if not price or not size:continue
-            qty=size/price if f.get('size_in_quote') else size
-            res.append({'tradeId':f.get('trade_id'),'orderId':f.get('order_id'),'time':f.get('trade_time'),'side':str(f.get('side','')).upper(),'price':price,'qty':qty,'fee':_num(f.get('commission')) or 0.0,'product':f.get('product_id')})
-        res.sort(key=lambda f:(str(f['time']),str(f['tradeId'])))
-        return {'product':product,'fills':res}
+        return {'product':product,'fills':normalize_fills(out)}
+    def fills_all(self,max_pages=60,days=None):
+        """Every fill on the account (tax export), or the last `days` days (Journal). Stops at max_pages×250 and says so."""
+        out=[];cursor=None;truncated=True
+        start=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime(time.time()-days*86400)) if days else None
+        for _ in range(max_pages):
+            q={'limit':250}
+            if start:q['start_sequence_timestamp']=start
+            if cursor:q['cursor']=cursor
+            page=self.get('/orders/historical/fills',q);got=page.get('fills') or [];out+=got;cursor=page.get('cursor')
+            if not got or not cursor:truncated=False;break
+        return {'product':'ALL','fills':normalize_fills(out),'truncated':truncated}
+    def transfers(self,since):
+        """Money moved into or out of Coinbase since `since` (YYYY-MM-DD), from the Coinbase App (v2) history.
+        Suggestion only: the page shows every line and never applies it without a click."""
+        since_t=datetime.fromisoformat(since+'T00:00:00+00:00').timestamp();accounts=[];q={'limit':100}
+        def when(v):
+            # v2 mixes '...Z' and '...-07:00' offsets: compare instants, never strings.
+            try:return datetime.fromisoformat(str(v).replace('Z','+00:00')).timestamp()
+            except Exception:return None
+        for _ in range(10):
+            page=self.get_path('/v2/accounts',q);accounts+=page.get('data') or []
+            nxt=(page.get('pagination') or {}).get('next_starting_after')
+            if not nxt:break
+            q={'limit':100,'starting_after':nxt}
+        rows=[];skipped={}
+        for a in accounts:
+            u=when(a.get('updated_at'))
+            if u is not None and u<since_t:continue
+            cur=a.get('currency');code=(cur.get('code') if isinstance(cur,dict) else cur) or '?';q={'limit':100};done=False
+            for _ in range(5):
+                page=self.get_path('/v2/accounts/'+quote(str(a.get('id')),safe='')+'/transactions',q)
+                for t in page.get('data') or []:
+                    c=when(t.get('created_at'))
+                    if c is None or c<since_t:done=True;continue
+                    if t.get('status') not in (None,'completed'):continue
+                    typ=t.get('type');usd=_num((t.get('native_amount') or {}).get('amount'))
+                    if typ in ('fiat_deposit','fiat_withdrawal','send') and usd is not None:
+                        rows.append({'type':typ,'currency':code,'amountUSD':usd,'at':t.get('created_at')})
+                    elif typ in ('exchange_deposit','exchange_withdrawal','pro_deposit','pro_withdrawal','transfer'):
+                        skipped[typ]=skipped.get(typ,0)+1
+                nxt=(page.get('pagination') or {}).get('next_starting_after')
+                if done or not nxt:break
+                q={'limit':100,'starting_after':nxt}
+        rows.sort(key=lambda r:str(r['at']))
+        return {'since':since,'net':sum(r['amountUSD'] for r in rows),'rows':rows,'skipped':skipped}
+
+def normalize_fills(out):
+    """Coinbase fills -> sorted, de-duplicated {tradeId, orderId, time, side, price, qty, fee, product}."""
+    res=[];seen=set()
+    for f in out:
+        key=(f.get('trade_id'),f.get('order_id'),f.get('entry_id'))
+        if key in seen:continue   # a repeated page must never double a fill
+        seen.add(key)
+        price=_num(f.get('price'));size=_num(f.get('size'))
+        if not price or not size:continue
+        qty=size
+        if f.get('size_in_quote'):
+            # Coinbase's docs don't pin the unit of `size` for quote-sized orders. Use the commission to tell:
+            # a real fee is 0.001%-3% of notional. Default to quote units when the fee can't decide.
+            fee=_num(f.get('commission')) or 0.0
+            ok=lambda notional:notional>0 and 0.00001<=fee/notional<=0.03
+            qty=size if (fee>0 and ok(size*price) and not ok(size)) else size/price
+        res.append({'tradeId':f.get('trade_id'),'orderId':f.get('order_id'),'time':f.get('trade_time'),'side':str(f.get('side','')).upper(),'price':price,'qty':qty,'fee':_num(f.get('commission')) or 0.0,'product':f.get('product_id')})
+    res.sort(key=lambda f:(str(f['time']),str(f['tradeId'])))
+    return res

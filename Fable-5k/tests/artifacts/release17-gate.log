@@ -1,0 +1,485 @@
+BUILD CHECK: shipped file matches a fresh build
+FINAL different datasets and costs survive import
+FINAL different trade returns survive import
+FINAL full-content import remains idempotent
+FINAL backup contains all recovered records
+FINAL signature ignores metadata and key order
+FINAL valid OHLC accepted
+FINAL rejects missing OHLC
+FINAL rejects invalid price
+FINAL rejects duplicate date
+FINAL rejects uneven interval
+FINAL saving a budget preserves saved datasets
+FINAL deep links select the requested tab
+FINAL passing result cannot be read as a live order
+FINAL no script errors
+
+== shipped app == fresh build from src/
+  PASS build check passes
+  PASS no uncaught errors
+
+== extract shipped core
+  PASS core.js extracted
+  PASS no uncaught errors
+
+== core math, data, lookahead
+  PASS DSR matches paper example 0.9004
+  PASS MinBTL 5y -> 45 configs
+  PASS MinBTL 3y -> 13 configs
+  PASS zero-variance Sharpe is 0
+  PASS 3,402 bundled bars 2015-01-01 -> 2024-04-24
+  PASS bundled data passes integrity checks
+  PASS no lookahead in 1,200 truncation checks
+  PASS judge: 12 trades is judged
+  PASS judge: 9 trades is few-trades
+  PASS judge: lone first trial undeflated
+  PASS judge: sweep floor of 2 effective trials
+  PASS judge: over budget cannot pass
+  PASS judge: MDS 0.815
+  PASS judge: MIN_TRADES is 10
+  PASS no uncaught errors
+
+== independent Python engine (fixed exits)
+  PASS MA PBO identical
+  PASS RSI PBO identical
+  PASS breakout PBO identical
+  PASS only difference is the known exact float tie
+  PASS that tie is exact (fast == slow)
+  PASS no uncaught errors
+  PASS no PBO mismatch
+
+== independent Python DSR pipeline (signal exits)
+  PASS 8 quantities match
+  PASS no uncaught errors
+  PASS no DIFF
+
+== paper formulas (scipy)
+  PASS DSR 0.9004
+  PASS DSR N=46 0.9505
+  PASS MinBTL(45)=5.00y
+  PASS sample SD +4.45% at n=12
+  PASS no uncaught errors
+
+== pooling: structure
+  PASS pool of one asset == that asset
+  PASS pool of identical copies == the asset
+  PASS pooled length = union of dates
+  PASS single-member pool refused
+  PASS mixed candle sizes refused
+  PASS no uncaught errors
+
+== pooling: independent Python rebuild
+  PASS 8 quantities match
+  PASS no uncaught errors
+  PASS no DIFF
+
+== pooling: simulation smoke test (null + planted edge)
+  PASS null: pooled false passes <= 2 of 60
+  PASS no uncaught errors
+
+== pooling: UI flow
+  PASS toggle refused while pool empty
+  PASS same dataset twice refused
+  PASS pool lists both assets
+  PASS pooled verdict rendered
+  PASS winner labelled as pooled
+  PASS register records the pool
+  PASS pooled trials count against BTC single tests
+  PASS synthetic + dated pool refused
+  PASS synthetic pool is practice
+  PASS no stray alerts
+  PASS no uncaught errors
+
+== hostile backup import
+  PASS no injected elements, no handlers fired
+  PASS well-typed hostile entry still imported (as inert text)
+  PASS no uncaught errors
+
+== position sizing: single vs pooled
+  PASS single-asset position is full 2%
+  PASS single-asset line does not mention a split
+  PASS 3-asset pool splits risk per asset
+  PASS pool line explains the split
+  PASS total risk stays 2% of account
+  PASS no uncaught errors
+
+== coin registry drives the app
+  PASS registry non-empty
+  PASS ids are PAIR-USD
+  PASS coinName resolves known
+  PASS coinName falls back for unknown
+  PASS isKnownCoin
+  PASS assetKey groups a coin's sources
+  PASS no uncaught errors
+
+== data persistence across a reload
+  PASS coin dropdown filled from COINS
+  PASS pool built in first session
+  PASS datasets written to storage
+  PASS fresh session shows restored message
+  PASS pool restored and active
+  PASS single dataset written to storage
+  PASS single dataset restored in fresh session
+  PASS no uncaught errors
+
+== trial accounting follows the coin, not the tag
+  PASS bundled BTC counts its sweeps
+  PASS Coinbase-refreshed BTC inherits them
+  PASS other candle sizes of BTC inherit them
+  PASS a pool containing BTC inherits them (+ ETH/SOL trials)
+  PASS pooled ETH+SOL trials count against ETH
+  PASS unrelated CSV untouched
+  PASS asset keys
+  PASS no uncaught errors
+
+== next-action instructions
+  PASS state matches the ENGINE on every bar (0 mismatches)
+  PASS MA trigger close produces a clean cross
+  PASS MA trigger close is the price, not the MA level
+  PASS already-satisfied flat rule is not armed (no false entry)
+  PASS bracket states stop-first + gap risk
+  PASS signal mode has no fixed target
+  PASS fixed mode shows the target
+  PASS expiry date shown when in a position
+  PASS no uncaught errors
+
+== action panel: rejection banner and historical paper-only model
+  PASS empty before any run
+  PASS failed rule shows did-not-survive banner
+  PASS failed rule still shows the levels
+  PASS passed rule shows historical model label
+  PASS passed rule links to fee-aware capital planner
+  PASS no uncaught errors
+
+== cloud storage (mock, two tabs)
+  PASS self-test banner shown
+  PASS both tabs' trials kept (16)
+  PASS clear empties register
+  PASS no uncaught errors
+
+== storage fallback
+  PASS falls back to browser storage
+  PASS no uncaught errors
+
+== backup import merge
+  PASS no trials lost (225)
+  PASS re-import adds nothing
+  PASS no uncaught errors
+
+== pre-registered test + validation
+  PASS first lone trial judged undeflated
+  PASS second lone trial refused
+  PASS power line printed
+  PASS negative stop rejected
+  PASS no uncaught errors
+
+== research controls
+  PASS hypothesis lock persists
+  PASS trial links to prior lock
+  PASS history repair spends seven configs
+  PASS one-click daily pool loads
+  PASS no unexpected alerts
+  PASS no uncaught errors
+
+== release safety regressions
+  PASS lock includes exact data snapshot
+  PASS same-tag changed prices rejected
+  PASS double click spends one trial
+  PASS lock consumed before another run
+  PASS invalid lock settings rejected
+  PASS manual backup works with local storage
+  PASS lock snapshots survive idempotent import
+  PASS null import rejected safely
+  PASS zero fill rejected
+  PASS failed download is not called exported
+  PASS fractional repair count rejected
+  PASS completed candles and exact count
+  PASS malformed candles rejected
+  PASS rate limit stops after three attempts
+  PASS stalled request times out
+  PASS daily refresh commits all three assets
+  PASS partial failure retains all prior data
+  PASS BTC removable without losing ETH SOL
+  PASS no page errors or unexpected alerts
+  PASS no uncaught errors
+
+== screener scoring
+  PASS all-Unknown cannot clear
+  PASS clean token scores 100
+  PASS unknown LP lock blocks clear
+  PASS active mint is Critical
+  PASS no uncaught errors
+
+== screener live lookup (documented RPC shapes)
+  PASS renounced + 20% parsed
+  PASS active mint flagged
+  PASS active freeze flagged
+  PASS 1e18 supply precision
+  PASS missing account handled
+  PASS non-mint handled
+  PASS holder-call failure degrades gracefully
+  PASS network note on network errors
+  PASS bad address rejected
+  PASS no uncaught errors
+  PASS no network note on non-network errors
+
+== every HTML loads, every button clicks
+  PASS Edge Lab clean
+  PASS screener clean
+  PASS landing clean
+  PASS demo clean
+  PASS no uncaught errors
+
+== UI crawl
+  PASS only the deliberate bad-input alert
+  PASS quoted thousands parsed
+  PASS practice runs not counted
+  PASS no uncaught errors
+
+============================================================
+ALL CHECKS PASSED (168) — quick mode, end-to-end BTC sweeps skipped
+core.js extracted
+Exact shipped v7 research code extracted
+PASS SHA256 matches platform implementation across ASCII, Unicode and block boundaries
+PASS frozen protocol checksum and future window
+PASS closed daily candles only; duplicate conflicts, gaps and staleness fail closed
+PASS strict products: USD spot only, duplicates removed, unavailable not zero
+PASS locked rules reproduce causal legacy signals on a fixed synthetic anchor
+PASS dollar risk boundaries including high-water pause
+PASS range overlap ignores label and venue; touching exclusive ends do not overlap
+PASS bounded retries and no credentials
+PASS one scan paginates, preserves fixed BTC anchor and isolates context assets
+PASS partial candle failure cannot masquerade as complete
+PASS repeated product pages stop instead of infinite pagination
+PASS listing stops when Coinbase ignores the limit or flags the last page
+12 v7 market/research assertion groups passed. No live data.
+PASS v7 UI: no auto network, one-click scan, isolated data, durable exposure, reload, legacy import, evidence preservation, checksum rejection, loss pause, stale-result clearing.
+PASS entry follows signal, never captures its close-to-open gap
+PASS fees on actual entry and exit notional; all cash reconciles
+PASS entry fee consumes the allocation; no hidden borrowing
+PASS open position is marked down before sample-end liquidation
+PASS same-bar stop/target ambiguity chooses stop including entry bar
+PASS gap through stop fills at open, not stop price
+PASS max hold exits at the specified future open
+PASS no same-bar reentry following a stop
+PASS cash remains flat without entry signals
+PASS no lookahead: future prices cannot alter earlier fills
+PASS invalid input rejected, never NaN performance
+PASS risk sizing exact formula and caps; stress increases loss
+PASS portfolio limit and cash limit independently bind
+PASS position cap binds with an extremely close stop
+PASS drawdown pause overrides sizing
+PASS invalid risk or impossible state rejected
+PASS strict CSV rejects silent value substitution and missing columns
+PASS strict CSV rejects duplicate, gaps and invalid dates
+PASS millisecond/unix CSV and quoted prices preserve exact OHLC
+19 assertion-based execution/input/risk checks passed. Synthetic data only.
+PASS v6 UI: calculator, synthetic audit, persistence, full-entry import, escaping, invalid data and journal guards
+test_allowlist (__main__.ServerTests.test_allowlist) ... ok
+test_loopback_http_and_no_credentials_or_orders (__main__.ServerTests.test_loopback_http_and_no_credentials_or_orders) ... Fable local server: "GET / HTTP/1.1" 200 -
+Fable local server: "GET /START-HERE.html HTTP/1.1" 200 -
+Fable local server: "GET /edge-lab/edge-lab-v7.html HTTP/1.1" 200 -
+Fable local server: "GET /edge-lab/strategy-lab.html HTTP/1.1" 200 -
+Fable local server: "GET /src/core.js HTTP/1.1" 400 -
+Fable local server: "GET /../src/core.js HTTP/1.1" 400 -
+Fable local server: "GET /market-scan/server.py HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-public/market/products?limit=100&offset=0&product_type=SPOT HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/orders HTTP/1.1" 400 -
+Fable local server: "POST /coinbase-public/orders HTTP/1.1" 405 -
+Fable local server: "GET / HTTP/1.1" 403 -
+Fable local server: "GET / HTTP/1.1" 403 -
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.510s
+
+OK
+test_health_reports_fallback_as_ok (__main__.ExchangeFallback.test_health_reports_fallback_as_ok) ... Fable local server: "GET /health HTTP/1.1" 200 -
+ok
+test_ticker_stats_candles_survive_exchange_outage (__main__.ExchangeFallback.test_ticker_stats_candles_survive_exchange_outage) ... Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/stats HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/candles?granularity=86400&start=2025-09-20T00:00:00Z&end=2025-09-22T23:59:59Z HTTP/1.1" 200 -
+ok
+test_messages_are_specific (__main__.FailureReasons.test_messages_are_specific) ... ok
+test_port_fallback (__main__.FailureReasons.test_port_fallback) ... WARNING: port 43557 is used by another program, so Fable is using 43558.
+         Your saved register, journal and settings belong to the 43557 address and will look EMPTY here.
+         Close the program using port 43557 and restart Fable to see them.
+ok
+test_browser_routes_pass_through (__main__.LiveProxy.test_browser_routes_pass_through) ... Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/ETH-USD/stats HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/DOGE-USD/candles?granularity=86400&start=2026-01-01T00:00:00.000Z&end=2026-10-27T23:59:59.000Z HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/market/products/SOL-USD HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/market/products/LINK-USD/candles?start=1728000000&end=1728086399&granularity=ONE_DAY&limit=200 HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/market/products?limit=100&offset=0&product_type=SPOT HTTP/1.1" 200 -
+ok
+test_cache_prevents_rate_limit_bursts (__main__.LiveProxy.test_cache_prevents_rate_limit_bursts) ... Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 200 -
+ok
+test_health (__main__.LiveProxy.test_health) ... Fable local server: "GET /health HTTP/1.1" 200 -
+Fable local server: "GET /health HTTP/1.1" 200 -
+ok
+test_nonjson_upstream_is_named (__main__.LiveProxy.test_nonjson_upstream_is_named) ... Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 502 -
+ok
+test_rejections_never_reach_upstream (__main__.LiveProxy.test_rejections_never_reach_upstream) ... Fable local server: "GET /coinbase-exchange/orders HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/accounts HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/book HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/btc-usd/ticker HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/candles?granularity=60&start=2026-01-01T00:00:00Z&end=2026-01-01T01:00:00Z HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/candles?granularity=86400&start=2020-01-01T00:00:00Z&end=2026-01-01T00:00:00Z HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/candles?granularity=86400&start=nope&end=2026-01-01T00:00:00Z HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/products/BTC-USD/ticker?x=1 HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-public/market/products/BTC-USD/ticker HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-exchange/../../etc/passwd HTTP/1.1" 400 -
+Fable local server: "POST /coinbase-exchange/products/BTC-USD/ticker HTTP/1.1" 405 -
+ok
+test_upstream_404_is_passed_with_reason (__main__.LiveProxy.test_upstream_404_is_passed_with_reason) ... Fable local server: "GET /coinbase-exchange/products/NOPE-USD/nothing HTTP/1.1" 400 -
+ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 3.061s
+
+OK
+LIVE edge-lab/edge-lab-v7.html launcher auto-refresh renders price, 24h change, spread, volume
+LIVE edge-lab/edge-lab-v7.html routePublic maps only Coinbase public origins
+LIVE edge-lab/edge-lab-v7.html fetchCandles uses launcher, completed bars only (400)
+LIVE edge-lab/edge-lab-v7.html specific failure reason surfaces in strip and fetch
+LIVE edge-lab/edge-lab-v7.html launcher-down message
+LIVE edge-lab/edge-lab-v7.html no auto-requests off-launcher
+LIVE edge-lab/strategy-lab.html launcher auto-refresh renders price, 24h change, spread, volume
+LIVE edge-lab/strategy-lab.html routePublic maps only Coinbase public origins
+LIVE edge-lab/strategy-lab.html fetchCandles uses launcher, completed bars only (400)
+LIVE edge-lab/strategy-lab.html specific failure reason surfaces in strip and fetch
+LIVE edge-lab/strategy-lab.html launcher-down message
+LIVE edge-lab/strategy-lab.html no auto-requests off-launcher
+LIVE STRIP TESTS PASSED (12)
+test_bad_keys_rejected (__main__.Crypto.test_bad_keys_rejected) ... ok
+test_parse_and_sign_all_formats (__main__.Crypto.test_parse_and_sign_all_formats) ... ok
+test_pure_python_signatures_verify (__main__.Crypto.test_pure_python_signatures_verify) ... ok
+test_a_real_json_file_wins_over_a_misnamed_one (__main__.Detection.test_a_real_json_file_wins_over_a_misnamed_one) ... ok
+test_misnamed_and_duplicate_downloads_are_found (__main__.Detection.test_misnamed_and_duplicate_downloads_are_found) ... ok
+test_raw_key_text_alone_gets_a_specific_message (__main__.Detection.test_raw_key_text_alone_gets_a_specific_message) ... ok
+test_readme_and_unrelated_files_ignored (__main__.Detection.test_readme_and_unrelated_files_ignored) ... ok
+test_bare_ed25519_secret_explained (__main__.DetectionMore.test_bare_ed25519_secret_explained) ... ok
+test_ed25519_401_suggests_ecdsa (__main__.DetectionMore.test_ed25519_401_suggests_ecdsa) ... ok
+test_non_key_json_does_not_hide_the_real_key (__main__.DetectionMore.test_non_key_json_does_not_hide_the_real_key) ... ok
+test_only_unrelated_files_explained (__main__.DetectionMore.test_only_unrelated_files_explained) ... ok
+test_oversized_files_ignored (__main__.DetectionMore.test_oversized_files_ignored) ... ok
+test_missing_quantity_is_never_zero_risk (__main__.RiskAndUnits.test_missing_quantity_is_never_zero_risk) ... ok
+test_oversized_and_usdc_stop_orders (__main__.RiskAndUnits.test_oversized_and_usdc_stop_orders) ... ok
+test_partial_stop_coverage (__main__.RiskAndUnits.test_partial_stop_coverage) ... ok
+test_quote_sized_fill_units (__main__.RiskAndUnits.test_quote_sized_fill_units) ... ok
+test_transfers_net_and_skip (__main__.RiskAndUnits.test_transfers_net_and_skip) ... ok
+test_eddsa_key_works (__main__.Routes.test_eddsa_key_works) ... ok
+test_fills (__main__.Routes.test_fills) ... ok
+test_header_and_origin_required (__main__.Routes.test_header_and_origin_required) ... ok
+test_key_material_never_leaves_launcher (__main__.Routes.test_key_material_never_leaves_launcher) ... ok
+test_no_key (__main__.Routes.test_no_key) ... ok
+test_rejected_key_message (__main__.Routes.test_rejected_key_message) ... ok
+test_snapshot_numbers (__main__.Routes.test_snapshot_numbers) ... ok
+test_trade_or_transfer_keys_refused (__main__.Routes.test_trade_or_transfer_keys_refused) ... ok
+test_web_pages_do_not_contain_key_routes_without_header (__main__.Routes.test_web_pages_do_not_contain_key_routes_without_header) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.611s
+
+OK
+AUTO Capital plan fills itself and calculates (entry, stop, slippage, equity, cash, open risk, HWM, fees)
+AUTO fees flow to Execution and Test cost (1.2+1.2+0.02 = 2.42%); live spread stays in Capital plan
+AUTO account calls carry the local header; public calls do not
+AUTO account panel shows fee tier and flags the unprotected ETH position
+AUTO net deposits: equity 5,123.45 − 1,000 = 4,123.45; high-water mark shifted, plan recalculated
+AUTO removing the deposit restores the exact peak (4,123.45 + 1,000 = 5,123.45)
+AUTO failed price fetch clears the old autofilled entry instead of reusing it
+AUTO asset switched mid-fill: BTC price and stop discarded; ETH entry 2,500.50 filled, stop left blank because ETH is below the mocked 30-day low
+AUTO typed values are never overwritten
+AUTO editing one fee updates its twin and the round-trip cost
+AUTO a fee you entered is not replaced by the Coinbase tier on refresh
+AUTO Journal prefilled from the last plan
+AUTO round trip imported: VWAP entry/exit, summed fees; stale plan not used as expected price
+AUTO added trade marked Logged, cannot be imported twice
+AUTO Sizing counts wins/trades from Journal, capital from equity
+AUTO Budget years = loaded bars (3402) × 1 day
+AUTO lab Test cost = 0.6+1.2+0.05 = 1.85% from shared costs
+AUTO an active lab lock freezes the Test cost
+AUTO cost updates again once no lock is active (0.1+0.1+0.02)
+AUTO without a key: price/stop/slippage fill, account fields untouched
+AUTO large balance asks once; confirming it is experiment money silences it for good
+AUTO no automatic requests off-launcher
+AUTO trip builder: pre-window sells ignored, scale-ins averaged, 1% dust tolerance
+AUTO tax FIFO: 808.00 / 1,185.60 long-term, 253.00 / 296.40 short-term, ETH sale without purchase flagged for basis
+AUTO cooling-off: 1 loss does not lock; a win does not reset; 2 losses in 24h lock until the older one is 24h old
+AUTOFILL TESTS PASSED (25)
+test_foreign_program_on_port_warns (__main__.SecondLaunch.test_foreign_program_on_port_warns) ... /usr/lib/python3.12/unittest/case.py:589: ResourceWarning: unclosed <socket.socket fd=3, family=2, type=1, proto=0, laddr=('127.0.0.1', 42099)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.12/unittest/case.py:589: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_reuses_running_fable (__main__.SecondLaunch.test_reuses_running_fable) ... /usr/lib/python3.12/unittest/case.py:589: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='utf-8'>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.612s
+
+OK
+Fable 5k: http://127.0.0.1:41277/ - leave this window open; Ctrl+C to stop.
+Live data: OK   Coinbase Advanced (daily scan) (2 ms)
+Live data: OK   Coinbase Exchange (candles, live stats) (1 ms)
+Account:   OK   View-only key accepted (ES256)
+E2E launcher serves START-HERE
+E2E live strip through real proxy
+E2E daily scan through real proxy: BTC-USD 202, ETH-USD 200, SOL-USD 200 bars; Observed 2026-09-24T13:45:40.052Z · Scan complete. 3 USD spo
+E2E Capital plan filled from real launcher + JWT-verified account, and calculated
+E2E desk Fetch pulls candles through the proxy
+E2E Journal import reads real fills route
+E2E lab Refresh market pool: BTC/ETH/SOL 1,800 bars each via proxy
+E2E no uncaught script errors on either page
+E2E PAGE CHECKS PASSED (8)
+
+E2E LAUNCHER PASSED (cp437 console, misnamed key file, JWT-verified account, pages served by launcher)
+Fable 5k: http://127.0.0.1:43165/ - leave this window open; Ctrl+C to stop.
+Live data: OK   Coinbase Advanced (daily scan) (2 ms)
+Live data: OK   Coinbase Exchange (candles, live stats) via Advanced fallback (1 ms)
+Account:   OK   View-only key accepted (ES256)
+E2E launcher serves START-HERE
+E2E live strip through real proxy
+E2E daily scan through real proxy: BTC-USD 202, ETH-USD 200, SOL-USD 200 bars; Observed 2026-09-24T13:45:54.312Z · Scan complete. 3 USD spo
+E2E Capital plan filled from real launcher + JWT-verified account, and calculated
+E2E desk Fetch pulls candles through the proxy
+E2E Journal import reads real fills route
+E2E lab Refresh market pool: BTC/ETH/SOL 1,800 bars each via proxy
+E2E no uncaught script errors on either page
+E2E PAGE CHECKS PASSED (8)
+
+E2E LAUNCHER PASSED WITH api.exchange.coinbase.com DOWN (cp437 console, misnamed key file, JWT-verified account, pages served by launcher)
+SIM daily scan completes
+SIM ticket: buy 0.00396948 BTC, stop 55,200.00, limit 55,089.60; loss at limit $25.00 ≤ $25.00; limit entry at maker fee allows 0.00421480 (+6.2%)
+SIM plan 1: WITHIN_LIMITS, risk budget $25.00, qty 0.00403588 BTC, cost $245.09, modeled stop loss $25.00 — matches independent math
+SIM after buying 0.00396948 BTC at $60,001 + 1.2% fee: equity $4997.14, cash $4758.97, open risk $22.12 (0.00396948×(60,000.50−55,089.60 + 55,089.60×1.2%)) all match Coinbase; open risk ≤ ticket's stated loss $25.00 because entry fee and spread are already sunk
+SIM plan 2 respects the 1% portfolio cap: headroom $27.85, budget $24.99, open 22.12 + new 24.99 ≤ $49.97
+SIM after selling at $62,999: equity $5006.04 (realized +$6.04), open risk $0, high-water mark $5006.04
+SIM journal P&L $6.04 = Coinbase equity change $6.04 (within 1¢); slippage vs plan 0.00083%
+SIM review: gross $11.90 − fees $5.86 = net $6.04; fees 49.2% of gross profit; 1 trade under "followed the plan"
+SIM two losses within 24h: cooling-off, size $0, unlocks 2026-09-25T13:46:12.915Z
+SIM 25 hours later the lock lifts by itself
+SIM Sizing picked up 3 trades, 1 win, capital from equity
+SIM equity $4,480 (loss $520): REVIEW stage, per-trade risk halved to $11.20
+SIM equity $4,240 (loss $760): NO NEW RISK, position size $0
+SIM equity $4005.04 ≤ hard floor max($4,000, $5006.04−$1,000) = $4006.04: HALT, size $0
+SIM deposit detected from Coinbase history ($1,000 fiat deposit; $5 pro transfer listed but not counted) and applied with one click
+SIM $1,000 deposit netted: equity $6006.04 − $1,000 = $5006.04, peak unchanged, cash capped, plan valid
+SIM netting survives the next refresh
+SIM unprotected ETH ($250.05) counted in full: headroom $0, new size $0
+SIM ETH stop placed: open risk $13.92, BTC plan allowed again (qty 0.00271026)
+SIM equity log (1 entry/day, chart) and high-water mark survive export → wipe → import
+SIM tax CSV: 1 sale line, 0.00396948 BTC, proceeds $247.07, basis $241.03, gain $6.04 = account change; ETH still held, not listed
+SIM no uncaught page errors during the whole session
+SIM STEPS PASSED (22)
+
+TRADING SIMULATION PASSED
+COMPLETE WORKSPACE GATE PASSED

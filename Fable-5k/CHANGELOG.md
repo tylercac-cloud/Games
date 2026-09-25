@@ -6,6 +6,42 @@ Read README.md and RELEASE-REVIEW.md first. The historical content below is pres
 
 # Edge Lab — Audit History
 
+## Release 23 — free local brain for Crypta (2026-09-24)
+- Ollama support with one-click model download; brain selector; same tools and stream as Claude.
+
+## Release 22 — Crypta upgrade (2026-09-24)
+- Read-only tools to see any part of the app; cached full guide; Sonnet 5 default; number-aware guide answers; Alt+C, resize, tab-aware suggestions, copy/retry/new chat.
+
+## Release 21 — Crypta (2026-09-24)
+- In-app helper and installable taskbar window; guide mode without a key; AI mode via the launcher with fixed prompt/tools and a spending cap; secret guard; 3 new test suites.
+
+## Release 20.1 — verification pass (2026-09-24)
+- No application changes. Added real-browser click-everything test to the gate; extra random-session and property seeds; fallback-mode random session.
+
+## Release 20 — real-browser and randomised testing (2026-09-24)
+- 10 fixes (deposit detection, gapped stop-limits, transfer time zones, ticket staleness x2, backup of logged trips, local log dates, chart guard, dismissable prompt, desk-only journal automation). Property tests and a real-Chromium random session added to the gate.
+
+## Release 19 — bug hunt (2026-09-24)
+- Day-one funding excluded from deposits; trip proceeds prorated; local tax dates; timestamp normalisation; form cleared after one-tap; gap validation.
+
+## Release 18 — less typing (2026-09-24)
+- One-tap Journal logging for all coins; automatic deposit re-check; Closed-on date. Fixed: ticket/coin mismatch, false cooling-off from old trades, inflated log line after netting, single deposit check, single-coin import.
+
+## Release 17 — ticket, equity log, review, cooling-off, deposits, tax CSV (2026-09-24)
+- Six features, stored in the desk backup; simulated session extended to 22 steps.
+
+## Release 16 — simulated trading pass (2026-09-24)
+- Journal matches the plan made before the trade; account data uncached; 1 s price cache; cash capped at netted equity; missing quantity never zero risk. New stateful Coinbase simulator and trading-session test.
+
+## Release 15 — second bug sweep (2026-09-23)
+- Stale autofill values cleared on failure; asset-switch race fixed; late key pickup; stop-limit risk to limit + fee; USDC stops; quote-sized fills; fill de-dup; Exchange->Advanced fallback; proxy-safe loopback probe.
+
+## Release 14 — bug sweep (2026-09-23)
+- Fixed: autofill vs lab locks, manual fee overwrite, second-launch empty-register, key detection by content, Ed25519 401 guidance, Python/console robustness, stale expected price, whole-account warning. Added real-launcher end-to-end test.
+
+## Release 13 — key-file detection (2026-09-22)
+- Key lookup no longer requires a `.json` extension; detects by content so a misnamed/duplicated phone download still works, with a specific message for raw-text-only files.
+
 ## Release 12 — autofill and View-only account (2026-09-22)
 - Linked inputs, self-filling Capital plan, Journal import from Coinbase fills, Sizing/Budget autofill. View-only key support (ES256/Ed25519) in the launcher; trade/transfer keys refused. New suites: account (12), autofill (15).
 

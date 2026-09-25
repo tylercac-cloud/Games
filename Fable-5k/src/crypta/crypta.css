@@ -1,0 +1,49 @@
+#cryptaRoot{--c-bg:var(--card,#fbfaf7);--c-ink:var(--ink,#1c1a22);--c-mut:var(--muted,#6b6873);--c-line:var(--line,#dedad2);--c-acc:#1f8a8a;--c-acc2:#6b3fa0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--c-ink)}
+.crypta-fab{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;border:2px solid var(--c-acc);background:var(--c-bg);padding:6px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:2147483000;transition:transform .15s}
+.crypta-fab:hover{transform:translateY(-2px)}.crypta-fab.open{border-color:var(--c-acc2)}.crypta-fab svg{width:100%;height:100%;image-rendering:pixelated}
+.crypta-panel{position:fixed;right:18px;bottom:90px;width:min(400px,calc(100vw - 36px));height:min(620px,calc(100vh - 120px));display:flex;flex-direction:column;background:var(--c-bg);border:1px solid var(--c-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.25);z-index:2147483000;overflow:hidden}
+.crypta-panel[hidden]{display:none}
+.crypta-standalone .crypta-panel{position:static;width:100%;height:100vh;height:100dvh;border:0;border-radius:0;box-shadow:none}
+.crypta-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--c-line);background:linear-gradient(90deg,rgba(31,138,138,.10),rgba(107,63,160,.08))}
+.crypta-head strong{display:block;font-size:15px;letter-spacing:.02em}
+.crypta-ava{width:38px;height:38px;border-radius:10px;background:#f4efe6;border:1px solid var(--c-line);padding:3px;flex:none}.crypta-ava svg{width:100%;height:100%}
+.crypta-mode{display:block;font-size:11.5px;color:var(--c-mut)}.crypta-mode.ai{color:var(--c-acc)}
+.crypta-sp{flex:1}.crypta-head button{background:transparent;border:1px solid transparent;border-radius:8px;color:var(--c-ink);font-size:15px;width:32px;height:32px;cursor:pointer}
+.crypta-head button:hover{border-color:var(--c-line)}
+.crypta-statusline{font-size:12px;color:var(--c-mut);padding:6px 12px;border-bottom:1px solid var(--c-line)}
+.crypta-settings{padding:10px 12px;border-bottom:1px solid var(--c-line);display:grid;gap:8px;font-size:13px;max-height:45%;overflow:auto}
+.crypta-settings label{display:grid;gap:4px}.crypta-settings .crypta-row{display:flex;gap:8px;align-items:center}
+.crypta-settings select,.crypta-settings input[type=number]{font:inherit;padding:5px 8px;border:1px solid var(--c-line);border-radius:7px;background:transparent;color:inherit}
+.crypta-settings button,.crypta-chips button{font:inherit;font-size:12.5px;padding:5px 10px;border:1px solid var(--c-line);border-radius:999px;background:transparent;color:inherit;cursor:pointer}
+.crypta-note{margin:0;color:var(--c-mut);font-size:12.5px}
+.crypta-log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.crypta-msg{display:flex;gap:8px;max-width:92%}.crypta-msg.user{align-self:flex-end}
+.crypta-msg .crypta-text{padding:8px 11px;border-radius:12px;border:1px solid var(--c-line);overflow-wrap:anywhere}
+.crypta-msg.user .crypta-text{background:rgba(31,138,138,.12);border-color:rgba(31,138,138,.35)}
+.crypta-msg .crypta-text p{margin:0 0 6px}.crypta-msg .crypta-text p:last-child{margin:0}.crypta-msg .crypta-text ul,.crypta-msg .crypta-text ol{margin:4px 0 6px 18px;padding:0}
+.crypta-msg .crypta-text code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:rgba(0,0,0,.06);padding:0 4px;border-radius:4px}
+.crypta-mini{width:26px;height:26px;flex:none;margin-top:2px}.crypta-mini svg{width:100%;height:100%}
+.crypta-msg.streaming .crypta-text:empty::after,.crypta-msg.streaming .crypta-text::after{content:'▍';animation:cryptaBlink 1s steps(2) infinite;color:var(--c-acc)}
+@keyframes cryptaBlink{50%{opacity:0}}
+.crypta-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}.crypta-chips:empty{display:none}
+.crypta-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--c-line)}
+.crypta-form textarea{flex:1;resize:none;font:inherit;padding:8px 10px;border:1px solid var(--c-line);border-radius:10px;background:transparent;color:inherit;max-height:120px}
+.crypta-form button{width:42px;border:0;border-radius:10px;background:var(--c-acc);color:#fff;font-size:16px;cursor:pointer}
+.crypta-glow{outline:3px solid #f0c040!important;outline-offset:3px;box-shadow:0 0 0 8px rgba(240,192,64,.25)!important;transition:outline-color .3s}
+@media (prefers-color-scheme:dark){#cryptaRoot:not(.crypta-light){--c-bg:var(--card,#1d1b24);--c-ink:var(--ink,#ece9f2);--c-line:var(--line,#35313f)}.crypta-ava{background:#2a2633}}
+@media (prefers-reduced-motion:reduce){.crypta-fab{transition:none}.crypta-msg.streaming .crypta-text::after{animation:none}}
+.crypta-panel:not([hidden]){resize:both;min-width:320px;min-height:380px;max-width:calc(100vw - 24px);max-height:calc(100vh - 100px)}
+.crypta-standalone .crypta-panel{resize:none;max-width:none;max-height:none}
+.crypta-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+.crypta-tools{display:flex;flex-wrap:wrap;gap:4px}.crypta-tools:empty{display:none}
+.crypta-chip-tool{font-size:11.5px;padding:2px 8px;border-radius:999px;background:rgba(31,138,138,.12);color:var(--c-acc);border:1px solid rgba(31,138,138,.3)}
+.crypta-chip-tool.bad{background:rgba(200,60,60,.1);color:#c04040;border-color:rgba(200,60,60,.3)}
+.crypta-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s}.crypta-msg:hover .crypta-actions,.crypta-msg:focus-within .crypta-actions{opacity:1}
+.crypta-actions button{font:inherit;font-size:11.5px;padding:1px 8px;border:1px solid var(--c-line);border-radius:999px;background:transparent;color:var(--c-mut);cursor:pointer}
+.crypta-msg .crypta-text pre{margin:4px 0;padding:8px;background:rgba(0,0,0,.06);border-radius:8px;overflow:auto;font-size:12.5px}
+.crypta-table{overflow-x:auto;margin:4px 0}.crypta-table table{border-collapse:collapse;font-size:12.5px}.crypta-table th,.crypta-table td{border:1px solid var(--c-line);padding:3px 7px;text-align:left}
+.crypta-msg .crypta-text a{color:var(--c-acc)}.crypta-h{margin-top:6px!important}
+.crypta-msg.assistant{max-width:96%}
+.crypta-box{border:1px solid var(--c-line);border-radius:10px;padding:8px 10px;display:grid;gap:6px}
+.crypta-dl{display:grid;gap:4px}.crypta-dl button{text-align:left;border-radius:8px}
+.crypta-settings a{color:var(--c-acc)}

@@ -18,8 +18,13 @@ const dc=R('src/desk/core.js'),du=R('src/desk/ui.js'),ds=R('src/desk/shell.html'
 once(dc,'/*@@BTCPACK@@*/','desk core');once(du,'/*@@CORE@@*/','desk UI');once(ds,'/*@@UI@@*/','desk shell');
 const desk=ds.replace('/*@@UI@@*/',()=>du.replace('/*@@CORE@@*/',()=>dc.replace('/*@@BTCPACK@@*/',()=>JSON.stringify(pack))));
 // Function replacers: a string replacement would expand `$'`, `$&` etc. inside the injected code.
-const themed=s=>s.replace('</head>',()=>'<style>'+R('src/workspace.css')+'</style></head>').replace('</body>',()=>'<script>'+R('src/workspace.js')+'</script><script>'+R('src/autofill.js')+'</script></body>');
-const outputs={'edge-lab/strategy-lab.html':themed(out),'edge-lab/edge-lab-v7.html':themed(desk),'START-HERE.html':R('src/start.html')};
+// Crypta: guide.md becomes her searchable knowledge; her sprite is inlined; same script in the tools and her own window.
+const guide=R('src/crypta/guide.md').split(/^## /m).filter(x=>x.trim()).map(x=>{const i=x.indexOf('\n');return {title:x.slice(0,i).trim(),text:x.slice(i+1).trim().replace(/\s+\n/g,'\n')}});
+const cryptaJs=R('src/crypta/crypta.js').replace('/*@@CRYPTA_GUIDE@@*/[]',()=>JSON.stringify(guide)).replace("/*@@CRYPTA_SVG@@*/''",()=>JSON.stringify(R('src/crypta/sprite.svg').trim()));
+once(R('src/crypta/crypta.js'),'/*@@CRYPTA_GUIDE@@*/','crypta.js');
+const themed=s=>s.replace('</head>',()=>'<style>'+R('src/workspace.css')+R('src/crypta/crypta.css')+'</style></head>').replace('</body>',()=>'<script>'+R('src/workspace.js')+'</script><script>'+R('src/autofill.js')+'</script><script>'+cryptaJs+'</script></body>');
+const cryptaPage=R('src/crypta/page.html').replace('/*@@CRYPTA_CSS@@*/',()=>R('src/crypta/crypta.css')).replace('/*@@CRYPTA_JS@@*/',()=>cryptaJs);
+const outputs={'edge-lab/strategy-lab.html':themed(out),'edge-lab/edge-lab-v7.html':themed(desk),'START-HERE.html':R('src/start.html'),'edge-lab/crypta.html':cryptaPage,'edge-lab/crypta-sw.js':R('src/crypta/sw.js'),'edge-lab/crypta.webmanifest':R('src/crypta/manifest.json')};
 if(process.argv.includes('--check')){const same=Object.entries(outputs).every(([name,body])=>fs.existsSync(path.join(__dirname,name))&&R(name)===body);
   console.log(same?'BUILD CHECK: shipped file matches a fresh build':'BUILD CHECK: shipped file DIFFERS from source — run node build.js');process.exit(same?0:1)}
 for(const [name,body] of Object.entries(outputs)){fs.writeFileSync(path.join(__dirname,name),body);console.log('built',name,body.length,'chars')}
