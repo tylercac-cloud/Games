@@ -15,6 +15,34 @@ auto-update from GitHub Releases.
 Owner profile: finance-minded, wants real numbers, stated assumptions, and dislikes over-building.
 Keep replies terse. Ask before adding features; the owner has already trimmed stats once (see below).
 
+## Current state (read first)
+
+- Latest release: **v2.2.1** at https://github.com/tylercac-cloud/Games/releases/tag/v2.2.1
+  (installer `Blackjack-Buddy-Setup-2.2.1.exe`, `.blockmap`, `latest.yml`). v2.2.0 is also published.
+- Repo `tylercac-cloud/Games` is public; the only branch (and default) is `claude/happy-lovelace-mv77s0`.
+  The app lives in `blackjack-buddy/`; workflows in `.github/workflows/` at the repo root.
+- **The owner has not installed any build yet.** Nothing has run on real Windows: SmartScreen, the installer,
+  tray, click-through, Start with Windows, and an actual auto-update are all unverified on Windows.
+- Auto-update end-to-end test needs an installed older version: install 2.2.1, ship 2.2.2, watch Settings > Updates.
+- The rewritten release workflow (draft first, verify three files, publish) has **not run yet**; the next
+  version bump is its first run. It fails before publishing if anything is missing.
+- Open risk accepted by the owner: typing a bet above your chips makes you all-in (she says so; no confirm step).
+- Suggested but not built: bet as % of bankroll; count-based auto bet spread (owner undecided; it would
+  automate the skill the Card counter milestone rewards).
+
+## Shipping a new version
+
+1. Change code, run the checks below, bump `version` in `package.json` (and `package-lock.json`, the two
+   top-level entries) plus this file.
+2. Commit and push to `claude/happy-lovelace-mv77s0`.
+3. Actions > "Blackjack Buddy release" > Run workflow (or the GitHub API `workflow_dispatch`). About 2.5 min on
+   windows-latest. It tags `v<version>`, creates a draft release, runs `electron-builder --win nsis --publish always`
+   (`releaseType: draft`), checks the exe + blockmap + latest.yml, and publishes. Re-running an existing version fails
+   on purpose.
+4. Installed copies pick it up within 6 h (or on next launch) and install on quit.
+5. If a release ever ends up duplicated, run "Blackjack Buddy fix duplicate release" with the tag.
+Local `npm run dist` builds the installer on Windows only (NSIS needs Wine on Linux).
+
 ## Files
 
 | File | Role |
@@ -30,6 +58,8 @@ Keep replies terse. Ask before adding features; the owner has already trimmed st
 | `README.txt` | Player manual. **CRLF line endings — preserve them.** |
 | `Run Blackjack Buddy.bat` | First-run `npm install` + desktop shortcut, then launches Electron. |
 | `Create Desktop Shortcut.bat` | PowerShell one-liner: desktop `.lnk` to the .bat with `icon.ico`, minimized console. Dry-run tested with PowerShell 7 on Linux (COM stubbed). |
+| `dev-tests/` | Headless Chromium tests (not shipped): `harness.mjs` (fake timers), `fuzz.mjs` logic fuzzer, `domfuzz.mjs` DOM fuzzer, `edge.mjs`, `t1/t3/t4.mjs` (t3 = payout sim, `chipDrift` must be 0), `topup.mjs`, `ux.mjs`, `ach.mjs` (milestones), `bet.mjs` (typed bets, Min, arrows), `eslint.config.mjs`. Serve the folder on :8701 first; `PW=` points at Playwright. |
+| `test-hook.js` | Electron smoke test, loaded only with `BB_TEST=1`; phases below. Not shipped. |
 | `icon.png` / `icon.ico` | Her face; the .ico (16–256 px) is used by the shortcut and `npm run package` (`--icon`). |
 
 `app.js` section banners (`// ------ name`): casino, star shop, VIP ladder, shop catalogue, sound,
@@ -119,22 +149,28 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
 ## Decisions already made by the owner
 
 - Accepted: all bug fixes; side bets ~1%; top-up rule; resume-hand; VIP from total wagered; quick
-  bets + sticky bets; soft totals (7/17); hand history + CSV; keyboard shortcuts; respaced ladder.
+  bets + sticky bets; soft totals (7/17); hand history + CSV; keyboard shortcuts; respaced ladder;
+  always-on-top default with a toggle; installer + auto-update on GitHub; Settings page with backup inside it;
+  15 milestones with cosmetic rewards; a Hide button (auto-hide explicitly not wanted for now); typed bets,
+  arrow-key betting, Min = 1% of chips.
 - **Rejected / removed (do not re-add without asking):** Session/Play/Edge stats pages, basic-strategy
   and Illustrious-18 decision grading, EV engine and mistake cost, luck σ / theo / drawdown, dealer
   up-card / true-count / starting-hand breakdowns, side-bet breakdowns, 30-day log. All of it is in
   commit `5099f26` if ever wanted back.
 - Not requested: an in-game strategy coach.
 
-## Git history (newest first; 2.1.x/2.2 commits omitted, see `git log`) (branch `claude/happy-lovelace-mv77s0`, repo tylercac-cloud/games)
+## Git history (branch `claude/happy-lovelace-mv77s0`, newest first; `git log` for the rest)
 
 ```
-92c7899 Respace the VIP ladder and give each tier family its own badge
+099d70e Release workflow: one draft release per version, verified before publishing
+89c4dc1 Blackjack Buddy 2.2.1: type bets, arrow-key betting, smarter Min
+b8e7dec Release workflow: create the version tag before publishing
+5555482 Blackjack Buddy 2.2.0: installer + auto-update, Settings, milestones, backups
+5b4f6a7 Always-on-top toggle for movies and fullscreen games; v2.1.8
+653dc75 Close remaining exploits: durable saves and top-up cooldown; v2.1.6
 174af38 Trim Stats to Overview, History and Casino
 5099f26 Count-play chart, mistake cost, keyboard shortcuts, 30-day log   (stats later removed)
-1028e0b Track decisions against basic strategy; export hand history as CSV
 f31e2b3 Blackjack Buddy 2.1: fair side bets, VIP by wagered, stats overhaul
-44e0706 Fix action races, sleep income exploit, lost clicks and stuck Deal
 3a4a3fd Add Blackjack Buddy 2.0.0 as uploaded
 ```
 
@@ -163,4 +199,15 @@ The Windows build itself (tray, click-through) still needs a manual check.
 
 ## Known limitations / ideas not built
 
-- Possible next steps the owner may ask for: in-game coach, hand replay, two-deck count indices.
+- Possible next steps the owner may ask for: in-game coach, hand replay, two-deck count indices, bet as % of
+  bankroll, count-based bet spread, auto-hide.
+- Installer is unsigned (SmartScreen "unknown publisher"); a code-signing certificate costs roughly $200-400/yr.
+- Backups allow save-scumming between hands (restore is blocked mid-hand only). Accepted: single-player, offline.
+- Clock changes (forward) still inflate away earnings and skip the top-up cooldown; accepted.
+- Main-game edge at Celestial is ~+0.1% for the player because of 1.25% cashback; owner informed, unchanged.
+
+## Pre-push checklist used so far
+
+eslint (dev-tests config), `fuzz.mjs` seeds 1-6, `domfuzz.mjs` seeds 1-4, `edge`, `t1`, `t3` (chipDrift 0), `t4`,
+`topup`, `ux`, `ach`, `bet`, then Electron phases `1`, `2`, `settings` (plus `killdeal`/`afterkill`, `ontop1`/`ontop2`
+when touching saves or the window). All passed at 2.2.1.

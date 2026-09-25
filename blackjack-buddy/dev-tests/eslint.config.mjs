@@ -1,0 +1,6 @@
+export default [
+  { files: ['**/app.js'], languageOptions: { ecmaVersion: 2022, sourceType: 'script', globals: { window: 'readonly', document: 'readonly', localStorage: 'readonly', setTimeout: 'readonly', setInterval: 'readonly', clearTimeout: 'readonly', performance: 'readonly', requestAnimationFrame: 'readonly', Image: 'readonly', Event: 'readonly', Blob: 'readonly', URL: 'readonly', addEventListener: 'readonly', dispatchEvent: 'readonly', console: 'readonly' } },
+    rules: { 'no-undef': 'error', 'no-unused-vars': ['warn', { args: 'none' }], 'no-redeclare': 'error', 'no-dupe-keys': 'error', 'no-unreachable': 'error', 'no-self-assign': 'error', 'no-constant-condition': 'warn', 'no-shadow': 'off', 'no-use-before-define': 'off', 'eqeqeq': 'warn', 'no-empty': 'off', 'no-cond-assign': 'warn' } },
+  { files: ['**/main.js', '**/preload.js', '**/test-hook.js'], languageOptions: { ecmaVersion: 2022, sourceType: 'commonjs', globals: { require: 'readonly', module: 'writable', process: 'readonly', __dirname: 'readonly', console: 'readonly', setTimeout: 'readonly', setInterval: 'readonly', clearTimeout: 'readonly' } },
+    rules: { 'no-undef': 'error', 'no-unused-vars': ['warn', { args: 'none' }] } },
+];
