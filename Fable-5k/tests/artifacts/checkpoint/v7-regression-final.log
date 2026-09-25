@@ -1,0 +1,166 @@
+core.js extracted
+Exact shipped v7 research code extracted
+PASS SHA256 matches platform implementation across ASCII, Unicode and block boundaries
+PASS frozen protocol checksum and future window
+PASS closed daily candles only; duplicate conflicts, gaps and staleness fail closed
+PASS strict products: USD spot only, duplicates removed, unavailable not zero
+PASS locked rules reproduce causal legacy signals on a fixed synthetic anchor
+PASS dollar risk boundaries including high-water pause
+PASS range overlap ignores label and venue; touching exclusive ends do not overlap
+PASS bounded retries and no credentials
+PASS one scan paginates, preserves fixed BTC anchor and isolates context assets
+PASS partial candle failure cannot masquerade as complete
+PASS repeated product pages stop instead of infinite pagination
+11 v7 market/research assertion groups passed. No live data.
+PASS v7 UI: no auto network, one-click scan, isolated data, durable exposure, reload, legacy import, evidence preservation, checksum rejection, loss pause, stale-result clearing.
+test_allowlist (__main__.ServerTests.test_allowlist) ... ok
+test_loopback_http_and_no_credentials_or_orders (__main__.ServerTests.test_loopback_http_and_no_credentials_or_orders) ... Fable local server: "GET / HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/market/products?limit=100&offset=0&product_type=SPOT HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/orders HTTP/1.1" 400 -
+Fable local server: "POST /coinbase-public/orders HTTP/1.1" 405 -
+Fable local server: "GET / HTTP/1.1" 403 -
+Fable local server: "GET / HTTP/1.1" 403 -
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.017s
+
+OK
+PASS entry follows signal, never captures its close-to-open gap
+PASS fees on actual entry and exit notional; all cash reconciles
+PASS entry fee consumes the allocation; no hidden borrowing
+PASS open position is marked down before sample-end liquidation
+PASS same-bar stop/target ambiguity chooses stop including entry bar
+PASS gap through stop fills at open, not stop price
+PASS max hold exits at the specified future open
+PASS no same-bar reentry following a stop
+PASS cash remains flat without entry signals
+PASS no lookahead: future prices cannot alter earlier fills
+PASS invalid input rejected, never NaN performance
+PASS risk sizing exact formula and caps; stress increases loss
+PASS portfolio limit and cash limit independently bind
+PASS position cap binds with an extremely close stop
+PASS drawdown pause overrides sizing
+PASS invalid risk or impossible state rejected
+PASS strict CSV rejects silent value substitution and missing columns
+PASS strict CSV rejects duplicate, gaps and invalid dates
+PASS millisecond/unix CSV and quoted prices preserve exact OHLC
+19 assertion-based execution/input/risk checks passed. Synthetic data only.
+PASS v6 UI: calculator, synthetic audit, persistence, full-entry import, escaping, invalid data and journal guards
+== core math, data integrity, lookahead
+T1 DSR paper example (expect 0.9004)                 0.9004
+T2 budgetN(5y,SR1) expect 45                         45
+T2 budgetN(3y,SR1) expect 13                         13
+T3 sharpe of zero-variance series                    0
+T3 sample-SD sharpe n=12 check                       0.00e+0
+T4 expMaxSR at N=1 (silently floored to 2)           0.5198 vs N=2 0.5198
+T5 bundled bars                                      3402  2015-01-01 -> 2024-04-24
+T5 validateBars issues                               []
+   close 2017-12-17 (approx 19100)                   19156.71  dev 0.3%
+   close 2018-12-15 (approx 3200)                    3244.87  dev 1.4%
+   close 2020-03-12 (approx 4900)                    4724.39  dev -3.6%
+   close 2021-11-08 (approx 67500)                   67500.02  dev 0.0%
+   close 2022-11-09 (approx 16000)                   15789.34  dev -1.3%
+   close 2022-12-31 (approx 16550)                   16538.35  dev -0.1%
+   close 2024-03-13 (approx 73000)                   73087.95  dev 0.1%
+T6 opens >1% away from prior close                   24 bars, max 4.92%
+T7 lookahead truncation tests                        1200 checks, 0 violations
+== independent Python reference: engine, fixed exits
+ma: PBO js=0.822511 py=0.822511 OK
+ma: decay js=(0.074392,0.006570) py=(0.074392,0.006570)
+rsi: PBO js=0.817100 py=0.817100 OK
+rsi: decay js=(0.026720,-0.024801) py=(0.026720,-0.024801)
+brk: PBO js=0.540043 py=0.540043 OK
+brk: decay js=(0.081324,0.006756) py=(0.081324,0.006756)
+diffs: ["ma signal {'fast': 5, 'slow': 30, 'thr': 0} (1 diffs)"]
+bar 215 js sig 0 py sig 1 exact fast 283.212 exact slow 283.212 diff 0.0
+== independent Python reference: full DSR pipeline, signal exits
+winner idx py=13 js=13 OK
+rho        py=0.7780231485 js=0.7780231485 OK
+effN       py=10.76698146 js=10.76698146 OK
+varSR      py=5.475069956e-05 js=5.475069956e-05 OK
+SR0        py=0.01192477557 js=0.01192477557 OK
+skew       py=0.6947937492 js=0.6947937492 OK
+kurt       py=15.74195829 js=15.74195829 OK
+DSR        py=0.92186324 js=0.9218631892 OK
+== paper formulas, scipy
+=== 1. DSR vs paper example (SR_ann 2.5, T=1250, skew -3, kurt 10, N=100, V_ann 0.5) ===
+SR0 daily=0.11317  DSR=0.9004 (paper 0.9004)
+  if excess kurtosis used by mistake: 0.9018
+  if V=1/T used instead of family dispersion: 0.9933
+
+=== 2. MinBTL (years) for target SR=1 ===
+N=13  MinBTL=2.90 yrs  (upper bound 2lnN=5.13)
+N=45  MinBTL=5.00 yrs  (upper bound 2lnN=7.61)
+3 yrs of data -> max configs = 13
+5 yrs of data -> max configs = 45
+
+=== 3. Sample-vs-population SD inflation ===
+n=12: 4.45%
+n=20: 2.60%
+
+=== 4. N=1 edge case ===
+emax(1) = -inf
+
+=== 5. Paper's second example: same inputs, N=46 trials ===
+DSR(N=46)=0.9505 (paper 0.9505)
+== storage, mock db and two tabs
+banner A: "Cloud register verifiedSaved privately to your account — a write/read/delete check passed on load."
+fresh tab sees configs: 16 (expect 16 = 12 rsi + 4 brk)
+docs in store: edgelab_hyp/0d3013ad088307f2, edgelab_hyp/59749d736e3b1a7a
+after preserve/export, fresh tab configs (expect 16): 16
+== storage fallback when cloud write fails
+db write fails -> banner: "Saved on this browser onlyThe register persists here but not"
+== backup import merge
+import test (expect 225 = 90+135, re-import deduped): MergedAdded 0 register entries and 0 trades. Total now 225 configurations searched across 5 entries.
+== first-recorded single test and input validation
+single run 1 : Indistinguishable from luckFirst recorded single test; no deflation. This app did not verify pre-registration or earlier research history. Deflated Sharpe 0.135, below the 0.95 bar. Annualized excess Sharpe -0.36 against a luck threshold of 0.00. Log the kill.Power: with 9.3 years and 1.0 effective trial, this test detects an annualized excess Sharpe of about 0.82 or more with ~80% probability. The evaluated config s
+single run 2 : Deflated Sharpe not computableThis dataset already has 2.0 effective trials logged, so a single config can't be judged without the spread of the family it was chosen from. Run the sweep — or test it as a pre-registered hypothesis on data you haven't searched yet (e.g. a new asset or a later date range). PBO and retention above are still readable.Power: with 9.3 years and 2.0 effective trials, this test detects an ann
+alert Exit settings must be positive numbers.
+== screener scoring
+all unknown          : 0 Incomplete - cannot clear
+options: mintAuth=unknown/active/renounced  freezeAuth=unknown/active/renounced  lpLock=unknown/unlocked/locked  holderConc=unknown/lt30/30to50/gt50  liq=unknown/gt50k/10to50k/lt10k  devWallet=unknown/lt10/10to20/gt20  verified=unknown/standard/unusual
+all clean            : 100 Low flagged-risk
+clean but LP unknown : 65 Incomplete - cannot clear
+mint active only     : 60 Critical - documented rug mechanism present
+== screener live lookup against mocked documented responses
+renounced, 20% top10       | verdict weak | Live data retrievedMint authority: renouncedFreeze authority: renouncedHolder concentration: 20.0% of supply in the top  | fields: renounced renounced lt30
+mint ACTIVE, 60% top10     | verdict fail | Live data retrievedMint authority: ACTIVE (not renounced)Freeze authority: renouncedHolder concentration: 60.0% of suppl | fields: active renounced gt50
+freeze ACTIVE, 40%         | verdict fail | Live data retrievedMint authority: renouncedFreeze authority: ACTIVE (not renounced)Holder concentration: 40.0% of suppl | fields: renounced active 30to50
+huge supply 1e18 (precision) | verdict weak | Live data retrievedMint authority: renouncedFreeze authority: renouncedHolder concentration: 35.0% of supply in the top  | fields: renounced renounced 30to50
+account missing            | verdict fail | Live check failedNo account found at that address - check it's a mint, not a token account or wallet. | fields: unknown unknown unknown
+not a mint                 | verdict fail | Live check failedThat address exists but is not an SPL token mint. | fields: unknown unknown unknown
+holders call fails         | verdict weak | Live data retrievedMint authority: renouncedFreeze authority: renouncedHolder concentration: could not fetch holder acco | fields: renounced renounced unknown
+network blocked            | verdict fail | Live check failedFailed to fetchHosted and sandboxed pages are not allowed to contact outside servers, so this usually f | fields: unknown unknown unknown
+bad address                | verdict fail | Doesn't look like a Solana addressExpected base58, 32-44 characters. | fields: unknown unknown unknown
+== all HTML files load and all buttons click without script errors
+edge-lab-v7.html                   script errors: none | broken #anchors: none | buttons: 36
+screener-v2.html                   script errors: none | broken #anchors: none | buttons: 3
+landing.html                       script errors: none | broken #anchors: none | buttons: 0
+demo.html                          script errors: none | broken #anchors: none | buttons: 2
+== UI crawl
+storage banner: Saved on this browser onlyThe register persists here but not
+budget: 9.3Years available 495Independent trials affordable 1,648Raw configs at ρ=0.7 0.82Detectable Sharpe, 1 pre-registered test (80% power) 1.75Detectable Sharpe, 45-config sw
+kelly w=33 n=60: 55.0%Observed win rate 42.5%95% CI lower bound 32.5%Kelly on point estimate 13.7%Kelly on lower bound Size on 
+kelly w=0 n=10: 0.0%Observed win rate 0.0%95% CI lower bound 0.0%Kelly on point estimate 0.0%Kelly on lower bound No size is j
+kelly w=10 n=10: 100.0%Observed win rate 72.2%95% CI lower bound 100.0%Kelly on point estimate 44.5%Kelly on lower bound Size o
+kelly w=5 n=0: 100.0%Observed win rate 72.2%95% CI lower bound 100.0%Kelly on point estimate 44.5%Kelly on lower bound Size o
+journal: Indistinguishable from zeroExpectancy 0.56%/trade, 95% CI -0.14% to 1.25% over 35 trades with recorded size. Win rate 65.7% (CI 49.2–79.2%) is shown for reference only. A
+csv newestFirst: Could not parse72 duplicate timestamps; Irregular or unordered timestamps. Repair the source data before testing.
+csv msUnix: 100 bars parsed2023-11-14T22:13:20.000Z to 2024-02-21T22:13:20.000Z — about 0.27 years. Integrity checks passed. At 0.27 years your budget is 2 indepe
+csv quotedJunk: Could not parse99 duplicate timestamps; Irregular or unordered timestamps. Repair the source data before testing.
+csv closeOnly: Could not parseRequire a date/time column and complete open, high, low, close columns. No prices will be substituted.
+csv commaThousands: Could not parse99 duplicate timestamps; Irregular or unordered timestamps. Repair the source data before testing.
+csv highBelowClose: Could not parse100 bars where high/low don't bracket open/close; 72 duplicate timestamps; Irregular or unordered timestamps. Repair the source data be
+synthetic sweep verdict: Deflated Sharpe not computableFewer than 4 configurations produced 5+ trades, so there is 
+header configs: 0
+export: Exported0 configurations across 1 entries, and 35 live trades. Re-import this at
+after clear, configs: 0
+errors: [ 'alert:Check the inputs.' ]
+== bundled BTC end-to-end regression — repeated real-data exposure; see VALIDATION.md
+ma sweep -> verdict: "Indistinguishable from luckDeflated Sharpe 0.908, below the 0.95 bar. Annualized excess Sharpe 0.66 against a luck threshold of 0.23. Log the kill.Warnings: PBO"  | PBO panel:  PBO77.2% Winner loses money OOS21.6% Co
+rsi sweep -> verdict: "Indistinguishable from luckDeflated Sharpe 0.024, below the 0.95 bar. Annualized excess Sharpe -0.10 against a luck threshold of 0.55. Log the kill.Warnings: PB"  | PBO panel:  PBO77.3% Winner loses money OOS95.3% Co
+brk sweep -> verdict: "Indistinguishable from luckDeflated Sharpe 0.820, below the 0.95 bar. Annualized excess Sharpe 0.66 against a luck threshold of 0.36. Log the kill.Warnings: For"  | PBO panel:  PBO40.3% Winner loses money OOS17.5% Co
+ma single -> verdict: "Deflated Sharpe not computableThis dataset already has 22.5 effective trials logged, so a single config can't be judged without the spread of the family it was "  | PBO panel: Need a family sweep (4+ configs) and 60+
+errors: none
+ALL SUITES RAN. Read each block's expected-vs-actual lines.

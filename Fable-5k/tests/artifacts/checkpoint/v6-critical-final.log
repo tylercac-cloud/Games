@@ -1,0 +1,21 @@
+PASS entry follows signal, never captures its close-to-open gap
+PASS fees on actual entry and exit notional; all cash reconciles
+PASS entry fee consumes the allocation; no hidden borrowing
+PASS open position is marked down before sample-end liquidation
+PASS same-bar stop/target ambiguity chooses stop including entry bar
+PASS gap through stop fills at open, not stop price
+PASS max hold exits at the specified future open
+PASS no same-bar reentry following a stop
+PASS cash remains flat without entry signals
+PASS no lookahead: future prices cannot alter earlier fills
+PASS invalid input rejected, never NaN performance
+PASS risk sizing exact formula and caps; stress increases loss
+PASS portfolio limit and cash limit independently bind
+PASS position cap binds with an extremely close stop
+PASS drawdown pause overrides sizing
+PASS invalid risk or impossible state rejected
+PASS strict CSV rejects silent value substitution and missing columns
+PASS strict CSV rejects duplicate, gaps and invalid dates
+PASS millisecond/unix CSV and quoted prices preserve exact OHLC
+19 assertion-based execution/input/risk checks passed. Synthetic data only.
+PASS v6 UI: calculator, synthetic audit, persistence, full-entry import, escaping, invalid data and journal guards

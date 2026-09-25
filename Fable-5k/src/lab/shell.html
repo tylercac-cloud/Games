@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style>
+<title>Fable · Pooled strategy lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#0B0C0E;--card:#161719;--grid:#232529;--ink:#E7E7E9;--muted:#8E9196;--line:#2E3136;
+--kill:#E0736B;--kill-bg:#2E1A19;--live:#8FD9B8;--live-bg:#16241F;--pend:#E0B268;--pend-bg:#2B2416;
+--silver:#C7CACF;--silver-dim:#75787E;
+--sans:'Archivo',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;
+color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+::selection{background:var(--silver);color:#0B0C0E}
+.shell{max-width:1080px;margin:0 auto;padding:0 16px 60px}
+header{background:linear-gradient(180deg,#151618,#0B0C0E);color:var(--silver);margin:0 -16px;
+padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+border-bottom:1px solid var(--line)}
+.title{font-weight:700;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--silver)}
+.title small{display:block;font-size:10.5px;letter-spacing:.1em;color:var(--silver-dim);font-weight:400;margin-top:2px}
+.counter{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#0E0F11}
+.cbox{padding:6px 13px;text-align:center;border-right:1px solid var(--line)}
+.cbox:last-child{border-right:0}
+.cbox .v{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.1;color:var(--silver)}
+.cbox .k{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--silver-dim);margin-top:2px}
+.cbox.warn .v{color:var(--pend)} .cbox.over .v{color:var(--kill)}
+nav{display:flex;background:var(--card);border:1px solid var(--line);border-top:0;margin:0 -16px 20px;overflow-x:auto}
+nav button{flex:1;min-width:104px;font:inherit;font-weight:600;font-size:12px;letter-spacing:.04em;
+text-transform:uppercase;padding:11px 6px;background:none;border:0;border-right:1px solid var(--line);
+border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button:last-child{border-right:0}
+nav button[aria-selected=true]{color:var(--silver);border-bottom-color:var(--silver);background:#1D1F22}
+nav button:focus-visible{outline:2px solid var(--silver);outline-offset:-2px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}
+.card h2{font-size:14px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:3px;color:var(--silver)}
+.card .hint{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);
+border-radius:5px;background:#0E0F11;color:var(--ink)}
+input[type=number]{font-family:var(--mono)}textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--silver);outline-offset:-1px;background:#131417}
+select{color-scheme:dark}
+.row{display:grid;gap:10px;margin-bottom:12px}
+.r2{grid-template-columns:repeat(2,1fr)}.r3{grid-template-columns:repeat(3,1fr)}.r4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:620px){.r3,.r4{grid-template-columns:repeat(2,1fr)}}
+button.act{font:inherit;font-weight:600;font-size:13px;padding:9px 18px;border-radius:5px;cursor:pointer;
+background:var(--silver);color:#0B0C0E;border:1px solid var(--silver)}
+button.act:hover{background:#DEE0E4}button.act.sec{background:transparent;color:var(--silver);border:1px solid var(--line)}
+button.act.sec:hover{background:#1D1F22}button.act:focus-visible{outline:2px solid var(--pend);outline-offset:2px}
+button.act:disabled{opacity:.4;cursor:not-allowed}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;
+text-align:left;padding:7px 8px;border-bottom:2px solid var(--silver)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{font-family:var(--mono);text-align:right}
+tr:hover td{background:#1B1C1F}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px}
+.tag.kill{background:var(--kill-bg);color:var(--kill)}.tag.live{background:var(--live-bg);color:var(--live)}
+.tag.pend{background:var(--pend-bg);color:var(--pend)}
+.verdict{border-left:4px solid var(--line);padding:12px 14px;border-radius:0 6px 6px 0;margin-top:14px;font-size:13px}
+.verdict.fail{border-color:var(--kill);background:var(--kill-bg)}
+.verdict.pass{border-color:var(--live);background:var(--live-bg)}
+.verdict.weak{border-color:var(--pend);background:var(--pend-bg)}
+.verdict b{display:block;font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.stats .st{background:var(--card)}
+@media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--card);padding:11px 12px}
+.st .v{font-family:var(--mono);font-size:17px;font-weight:700}
+.st .k{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.st .v.good{color:var(--live)}.st .v.bad{color:var(--kill)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.split{grid-template-columns:1fr}}
+.half{border:1px solid var(--line);border-radius:6px;padding:12px}
+.half h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);color:var(--silver)}
+.half h3 span{float:right;font-family:var(--mono);color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12.5px;border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}.kv span:last-child{font-family:var(--mono);font-weight:500}
+.gauge{height:9px;background:#0E0F11;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.gauge i{display:block;height:100%;background:var(--live)}
+.gauge.hot i{background:var(--kill)}.gauge.mid i{background:var(--pend)}
+canvas{width:100%;height:180px;border:1px solid var(--line);border-radius:6px;background:#0E0F11;display:block;margin-top:12px}
+.empty{padding:26px;text-align:center;color:var(--muted);font-size:13px}
+code{font-family:var(--mono);font-size:12px;background:#EEF2F6;padding:1px 5px;border-radius:3px}
+.note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px dotted var(--line)}
+.cite{font-size:11.5px;color:var(--muted);font-style:italic}
+#storeWarn:not(:empty){margin:0 -16px;padding:12px 20px;background:var(--pend-bg);
+  border-bottom:1px solid var(--pend);font-size:13px;color:#6B4708}
+#storeWarn b{display:block;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
+</style>
+</head>
+<body><div class="shell">
+
+<header>
+  <div class="title">Fable / Lab <small>Pooled strategy research · release 12</small></div>
+  <div class="counter">
+    <div class="cbox"><div class="v" id="cN">0</div><div class="k">Trials used</div></div>
+    <div class="cbox warn"><div class="v" id="cB">—</div><div class="k">Budget</div></div>
+    <div class="cbox"><div class="v" id="cL">—</div><div class="k">Luck SR</div></div>
+  </div>
+</header>
+
+<div id="storeWarn"></div>
+<div class="workspace-links"><a href="../START-HERE.html">← Workspace</a><a href="edge-lab-v7.html">Daily desk</a><a href="edge-lab-v7.html#control">Capital plan</a></div>
+<div class="workspace-note">Exploratory research. Prior AI audits used the bundled BTC history; an empty register does not make it unseen. A local lock does not prove pre-registration. Statistics here use drift-adjusted returns; use Daily desk → Execution for actual cash accounting and buy-and-hold comparison. Export this lab’s backup separately.</div>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-p="bud">Budget</button>
+  <button role="tab" aria-selected="false" data-p="lab">Test</button>
+  <button role="tab" aria-selected="false" data-p="siz">Sizing</button>
+  <button role="tab" aria-selected="false" data-p="hyp">Register</button>
+  <button role="tab" aria-selected="false" data-p="jrn">Journal</button>
+  <button role="tab" aria-selected="false" data-p="doc">Method</button>
+</nav>
+
+<!-- BUDGET -->
+<section class="panel on" id="p-bud">
+  <div class="card">
+    <h2>Your search budget</h2>
+    <p class="hint">Set this <em>before</em> testing anything. Given how much data you have, there is a hard limit on how many configurations you can try before a fake Sharpe of your target size becomes the <em>expected</em> outcome. Past that point you are not researching, you are sampling noise.</p>
+    <div class="row r3">
+      <div><label for="bY">Years of data</label><input type="number" id="bY" value="3" step="0.5" min="0.25"></div>
+      <div><label for="bSR">Sharpe you'd act on</label><input type="number" id="bSR" value="1.0" step="0.1" min="0.1"></div>
+      <div><label for="bRho">Avg correlation between trials</label><input type="number" id="bRho" value="0.7" step="0.05" min="0" max="0.99"></div>
+    </div>
+    <div class="btns"><button class="act" id="setBud">Set budget</button></div>
+    <div id="budOut"></div>
+    <div class="note">Minimum Backtest Length, Bailey, Borwein, López de Prado &amp; Zhu (2014). Their worked figure — five years of data supports about 45 independent configurations at a target Sharpe of 1 — reproduces exactly here. Because parameter variants of one rule are highly correlated, raw trial count overstates independence; the correlation field converts M raw trials into effective independent trials.</div>
+  </div>
+</section>
+
+<!-- TEST -->
+<section class="panel" id="p-lab">
+  <div class="card">
+    <h2>1 · Data</h2>
+    <p class="hint">Pull daily candles straight from Coinbase's public API. This runs in your browser, so it uses your connection, not mine. Nothing is sent anywhere and no API key is needed — it's a public endpoint.</p>
+    <div class="verdict pass" style="margin:0 0 16px">
+      <b>BTC — no download needed</b>
+      3,402 daily BTC/USD bars are built into this file: <strong>2015-01-01 to 2024-04-24, 9.3 years</strong>.
+      Verified against seven independently known price points and per-era volatility before bundling.
+      <div class="btns" style="margin-top:10px"><button class="act" id="loadBundled">Load bundled BTC data</button></div>
+    </div>
+    <div class="verdict weak" style="margin:0 0 16px">
+      <b>SOL — no bundled data, honestly</b>
+      Solana only listed in mid-2020, so there's less history to work with regardless of source, and no dataset I could verify the way I verified BTC. Paste a CSV below — CryptoDataDownload lists SOL/USD, or export from TradingView/Kraken. Same validation runs either way: OHLC integrity, gaps, duplicates, and your configuration budget calculated from whatever range you give it.
+      <div class="btns" style="margin-top:10px"><button class="act sec" id="jumpSolCsv">Jump to CSV paste</button></div>
+    </div>
+    <div class="verdict pass" style="margin:0 0 16px">
+      <b>Daily market refresh</b>
+      Pull up to 1,800 completed daily candles per asset from Coinbase, validate them, and prepare a research pool. Failed refreshes preserve your previous data. Public market data only; no account connection or API key. This is a three-asset watchlist, not a scan of the whole market.
+      <div class="btns" style="margin-top:10px"><button class="act" id="refreshMarkets">Refresh BTC + ETH + SOL</button></div>
+      <div id="marketOut"></div>
+    </div>
+    <details style="margin-top:12px"><summary>Advanced: pull live data from Coinbase (often blocked here)</summary>
+      <div style="padding:12px 18px 14px">
+        <p class="hint">Live Coinbase candles, completed bars only. Works when the app is opened through START-WINDOWS.bat / START-MAC-LINUX.sh (data routes through the local launcher). Opened as a plain file, browsers usually block it; the Live market strip at the top shows the connection diagnosis.</p>
+    <div class="row r4">
+      <div><label for="dPair">Pair</label><select id="dPair"></select></div>
+      <div><label for="dGran">Candle</label><select id="dGran">
+        <option value="86400">Daily</option><option value="21600">6-hour</option>
+        <option value="3600">Hourly</option></select></div>
+      <div><label for="dDays">Bars to pull</label><input type="number" id="dDays" value="1800" min="300" max="6000" step="300"></div>
+      <div style="display:flex;align-items:flex-end"><button class="act" id="fetchData" style="width:100%">Fetch</button></div>
+    </div>
+    <div id="fetchOut"></div>
+      </div>
+    </details>
+    <details style="margin-top:12px"><summary>Or paste a CSV (TradingView, Kraken, anything)</summary>
+      <p class="hint" style="padding:12px 18px 0">Header row must contain <code>date,open,high,low,close</code>.</p>
+      <div style="padding:0 18px 14px">
+        <textarea id="csv" placeholder="date,open,high,low,close&#10;2024-01-01,42000,42800,41500,42600"></textarea>
+        <div class="btns" style="margin-top:10px">
+          <button class="act sec" id="loadCsv">Load CSV</button>
+          <button class="act sec" id="genData">Generate synthetic (no edge exists)</button>
+          <button class="act sec" id="dlCsv">Download loaded data</button>
+        </div>
+      </div>
+    </details>
+    <div class="note" id="dataInfo">No data loaded.</div>
+    <details id="poolBox" style="margin-top:12px"><summary>Pool several assets (more history, more power)</summary>
+      <div style="padding:12px 18px 14px">
+        <p class="hint">Load a dataset above, name it, add it here, and repeat. Pooled tests run the same rule on every asset (no per-asset tuning) and judge the equal-weight portfolio of the results, each asset measured against holding it. Highly correlated coins add little power; less correlated ones add more. Every trial ever run on any member counts against a pooled test. Pooled data lives in this tab only.</p>
+        <div class="row r2">
+          <div><label for="poolName">Asset name</label><input id="poolName" placeholder="e.g. ETH"></div>
+          <div style="display:flex;align-items:flex-end;gap:8px"><button class="act sec" id="poolAdd">Add loaded data to pool</button><button class="act sec" id="poolClear">Empty pool</button></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)"><input type="checkbox" id="poolOn" style="width:auto"> Run tests on the pool instead of the single loaded dataset</label>
+        <div class="note" id="poolInfo">Pool is empty.</div>
+      </div>
+    </details>
+  </div>
+  <div class="card">
+    <h2>2 · Rule</h2>
+    <div class="row r2">
+      <div><label for="strat">Strategy</label><select id="strat">
+        <option value="ma">MA crossover (trend)</option>
+        <option value="rsi">RSI oversold (mean reversion)</option>
+        <option value="brk">N-day breakout</option></select></div>
+      <div><label for="cost">Cost % round trip</label><input type="number" id="cost" value="1.0" step="0.05" title="Research assumption, not a verified Coinbase fee. Enter your signed-in Advanced Trade fee tier and estimated slippage."></div>
+    </div>
+    <div class="row r4" id="params"></div>
+    <div class="row r4">
+      <div><label for="xmode">Exit rule</label><select id="xmode"><option value="signal" selected>Signal off + stop</option><option value="fixed">Fixed target / stop / time</option></select></div>
+      <div><label for="tgt">Target % (fixed only)</label><input type="number" id="tgt" value="10" step="0.5"></div>
+      <div><label for="stp">Stop %</label><input type="number" id="stp" value="10" step="0.5"></div>
+      <div><label for="hold">Max hold (bars)</label><input type="number" id="hold" value="365"></div>
+    </div>
+    <div><label for="note">Mechanism — who is on the other side, and why do they keep losing?</label>
+      <textarea id="note" placeholder="'It backtested well' is not a mechanism."></textarea></div>
+    <div class="note" id="lockState" style="margin-top:12px"><strong>No active hypothesis lock.</strong> Lock the rule, exits, exact price-data snapshot and mechanism before testing. Locks are local audit records, not tamper-proof proof that data was unseen. Historical locks remain in backups; create a new active lock after reloading.</div>
+    <div class="btns" style="margin-top:12px">
+      <button class="act sec" id="lockHyp">Lock current hypothesis</button>
+      <button class="act sec" id="deactivateLock">Deactivate lock (keep record)</button>
+      <button class="act" id="run">Spend a trial &amp; test</button>
+      <button class="act sec" id="runSweep">Sweep this family (spends the whole family)</button>
+    </div>
+  </div>
+  <div class="card" id="resCard" style="display:none">
+    <h2>3 · Result</h2>
+    <div class="stats" id="resStats"></div>
+    <div class="split">
+      <div class="half"><h3>Selection bias <span id="pboN"></span></h3><div id="pboBody"></div></div>
+      <div class="half"><h3>Regime decay</h3><div id="decBody"></div></div>
+    </div>
+    <canvas id="eq"></canvas>
+    <div id="verdict"></div>
+    <div id="actionPanel"></div>
+  </div>
+</section>
+
+<!-- SIZING -->
+<section class="panel" id="p-siz">
+  <div class="card">
+    <h2>Position sizing under uncertainty</h2>
+    <p class="hint">Kelly assumes you know your win rate exactly. You don't — you have an estimate with a confidence interval. This sizes off the <em>lower bound</em> of that interval, not the point estimate.</p>
+    <div class="row r4">
+      <div><label for="kW">Wins observed</label><input type="number" id="kW" value="33"></div>
+      <div><label for="kN">Trades observed</label><input type="number" id="kN" value="60"></div>
+      <div><label for="kR">Reward : risk (fixed-size wins/losses only)</label><input type="number" id="kR" value="2" step="0.25" min="0.25"></div>
+      <div><label for="kC">Capital $</label><input type="number" id="kC" value="5000"></div>
+    </div>
+    <div class="btns"><button class="act" id="runKelly">Compute</button></div>
+    <div id="kOut"></div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section class="panel" id="p-hyp">
+  <div class="card"><h2>Trial register</h2>
+    <p class="hint">Every configuration you test, permanently. This count is what deflates your Sharpe — the register is the correction.</p>
+    <div id="hypList"></div>
+    <details style="margin-top:14px"><summary>Repair missing research history</summary>
+      <div style="padding:12px 18px 14px">
+        <p class="hint">Append trials that happened but are missing. A repair records no performance result.</p>
+        <div class="row r4">
+          <div><label for="repairDate">Date</label><input type="date" id="repairDate"></div>
+          <div><label for="repairData">Dataset tag</label><input id="repairData" placeholder="BTC-USD daily (bundled)"></div>
+          <div><label for="repairFamily">Strategy/family</label><input id="repairFamily" placeholder="ma / rsi / brk / unknown"></div>
+          <div><label for="repairSpent">Configs spent</label><input type="number" id="repairSpent" value="1" min="1"></div>
+        </div>
+        <div><label for="repairWhy">What was tested / why it is missing</label><textarea id="repairWhy" placeholder="Reconstructed from notes; exact parameters unavailable."></textarea></div>
+        <div class="btns" style="margin-top:8px"><button class="act sec" id="repairAdd">Append history repair</button></div>
+      </div>
+    </details>
+    <div id="lockList"></div>
+    <div class="btns" style="margin-top:12px">
+      <button class="act" id="expState">Download backup file</button>
+      <button class="act sec" id="impState">Import from file</button>
+      <button class="act sec" id="clrHyp">Clear register</button>
+    </div>
+    <input type="file" id="impFile" accept=".json,application/json" style="display:none">
+    <div id="ioOut"></div>
+    <div class="note" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+      <strong>Manual save/restore (works even when downloads don't).</strong>
+      This box always holds your current state as plain text. Before closing the tab: tap it,
+      Select All, Copy, and paste into Notes or a message to yourself. To restore: paste your
+      saved text in here, then tap "Import from text".
+    </div>
+    <textarea id="manualSave" style="min-height:90px;font-family:var(--mono);font-size:11px;margin-top:8px" spellcheck="false" placeholder="Nothing spent yet — this fills in once you set a budget or run a test."></textarea>
+    <div class="btns" style="margin-top:8px"><button class="act sec" id="impText">Import from text</button></div>
+    <div class="note">Import <strong>merges</strong> rather than replaces — entries already present are skipped. That direction is deliberate: losing register entries understates how many configurations you've searched, which inflates every Deflated Sharpe afterwards.</div>
+  </div>
+</section>
+
+<!-- JOURNAL -->
+<section class="panel" id="p-jrn">
+  <div class="card"><h2>Log a live trade</h2>
+    <p class="hint">Record the fill you expected and the fill you got. That gap is what turns a validated backtest into a losing strategy.</p>
+    <div class="row r4">
+      <div><label for="jSym">Symbol</label><input id="jSym" placeholder="BTC/USD"></div>
+      <div><label for="jRule">Trial ID</label><input id="jRule" placeholder="T-003"></div>
+      <div><label for="jSize">Size $</label><input type="number" id="jSize" value="500"></div>
+      <div><label for="jDir">Direction</label><select id="jDir"><option>Long</option><option>Short</option></select></div>
+    </div>
+    <div class="row r4">
+      <div><label for="jExp">Expected entry</label><input type="number" id="jExp" step="any"></div>
+      <div><label for="jAct">Actual entry</label><input type="number" id="jAct" step="any"></div>
+      <div><label for="jExit">Exit price</label><input type="number" id="jExit" step="any"></div>
+      <div><label for="jFee">Fees $</label><input type="number" id="jFee" value="0" step="any"></div>
+    </div>
+    <div class="btns"><button class="act" id="addTrade">Add trade</button></div>
+  </div>
+  <div class="card"><h2>Record</h2>
+    <div class="stats" id="jStats"></div><div id="jTable"></div><div id="jVerdict"></div>
+    <div class="btns" style="margin-top:12px"><button class="act sec" id="clrJrn">Clear journal</button></div>
+  </div>
+</section>
+
+<section class="panel" id="p-doc"><div class="card"><h2>The method</h2><div id="docBody"></div></div></section>
+
+</div>
+<script>/*@@UI@@*/</script>
+</body></html>

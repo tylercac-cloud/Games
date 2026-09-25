@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comal Automation — Back-office automation for Texas accounting firms</title>
+<meta name="description" content="Automated client document collection for small accounting and bookkeeping firms. No new portal, no sales calls. Live in a week.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF7; --card:#fff; --ink:#17211C; --muted:#5E6A62;
+    --green:#1F4A38; --green-soft:#E7EFE9; --red:#B3382C;
+    --line:#DDD9CE; --rule:#CFDAD2;
+    --sans:'Libre Franklin',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;font-size:16px}
+  a{color:var(--green)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+  header{border-bottom:2px solid var(--ink);background:var(--card)}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;max-width:960px;margin:0 auto}
+  .brand{font-weight:900;letter-spacing:.14em;font-size:14px;text-transform:uppercase}
+  .brand span{color:var(--green)}
+  .btn{display:inline-block;font-weight:600;font-size:14.5px;text-decoration:none;border-radius:99px;padding:10px 20px}
+  .btn.solid{background:var(--green);color:#fff;border:1.5px solid var(--green)}
+  .btn.solid:hover{background:#173A2C}
+  .btn.ghost{color:var(--ink);border:1.5px solid var(--ink)}
+  .btn.ghost:hover{background:var(--green-soft)}
+  .btn:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+
+  .hero{padding:64px 0 56px}
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:600}
+  h1{font-size:clamp(30px,5.2vw,50px);font-weight:900;line-height:1.06;letter-spacing:-.01em;margin:14px 0 18px;max-width:17ch}
+  .lede{font-size:18px;color:var(--muted);max-width:56ch;margin-bottom:26px}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+
+  .ledger{background:repeating-linear-gradient(to bottom,var(--card),var(--card) 35px,var(--rule) 35px,var(--rule) 36px);
+    border:1.5px solid var(--ink);border-radius:10px;padding:26px 26px 20px;max-width:620px;
+    font-family:var(--mono);font-size:14px}
+  .ledger .title{font-family:var(--sans);font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+  .row{display:flex;justify-content:space-between;gap:12px;line-height:36px;white-space:nowrap}
+  .row .fill{flex:1;overflow:hidden;color:var(--line)}
+  .row.redline{color:var(--red);font-weight:600}
+  .ledger .note{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.4}
+
+  section{padding:56px 0;border-top:1px solid var(--line)}
+  h2{font-size:26px;font-weight:900;letter-spacing:-.01em;margin-bottom:10px}
+  .sub{color:var(--muted);max-width:60ch;margin-bottom:30px}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:760px){.grid3{grid-template-columns:1fr}}
+  .painsBox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px}
+  .painsBox .big{font-family:var(--mono);font-weight:600;font-size:26px;color:var(--green)}
+  .painsBox p{font-size:14px;color:var(--muted);margin-top:6px}
+
+  .pkg{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column}
+  .pkg.hot{border-color:var(--ink);box-shadow:4px 4px 0 var(--green)}
+  .pkg h3{font-size:17px;font-weight:800}
+  .price{font-family:var(--mono);font-size:26px;font-weight:600;margin:6px 0 2px}
+  .price small{font-size:13px;color:var(--muted);font-family:var(--sans);font-weight:400}
+  .pkg ul{list-style:none;margin:14px 0 18px;flex:1}
+  .pkg li{font-size:14px;padding:6px 0 6px 22px;position:relative;border-bottom:1px dashed var(--line)}
+  .pkg li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}
+  .tagline{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+  .founding{margin-top:22px;background:var(--green-soft);border:1.5px solid var(--green);border-radius:10px;padding:16px 20px;font-size:14.5px}
+  .founding b{font-weight:800}
+
+  .steps{counter-reset:s;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .step::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--mono);font-weight:600;color:var(--green);font-size:13px}
+  .step h4{font-size:15px;font-weight:800;margin:6px 0 4px}
+  .step p{font-size:13.5px;color:var(--muted)}
+
+  .who{display:flex;gap:20px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;max-width:720px}
+  .who p{font-size:15px}
+  .who .name{font-weight:800}
+
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  summary{cursor:pointer;font-weight:600;font-size:15px;padding:14px 18px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+  summary::after{content:"+";font-family:var(--mono);color:var(--green);font-weight:600}
+  details[open] summary::after{content:"–"}
+  summary:focus-visible{outline:3px solid var(--green);outline-offset:-3px}
+  details p{padding:0 18px 16px;font-size:14.5px;color:var(--muted)}
+
+  .final{background:var(--ink);color:#fff;border-top:0}
+  .final h2{color:#fff}
+  .final .sub{color:#B9C4BD}
+  .final .btn.solid{background:#fff;color:var(--ink);border-color:#fff}
+  .final .btn.solid:hover{background:var(--green-soft)}
+
+  footer{padding:26px 0;font-size:12.5px;color:var(--muted)}
+  footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">COMAL <span>AUTOMATION</span></div>
+    <a class="btn ghost" href="mailto:hello@YOURDOMAIN.com?subject=Document%20Chaser">Email us</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="kicker">For accounting & bookkeeping firms · 2–15 staff · Texas</div>
+    <h1>Your team shouldn't spend billable hours chasing bank statements.</h1>
+    <p class="lede">Comal Automation sets up polite, persistent, automated document collection that runs inside the email and file storage your firm already uses. Clients respond, documents arrive, and your staff touches it only when a human is truly needed.</p>
+    <div class="cta-row">
+      <a class="btn solid" href="DEMO_VIDEO_LINK">Watch the 4-minute demo</a>
+      <a class="btn ghost" href="mailto:hello@YOURDOMAIN.com?subject=Document%20Chaser">Reply-to-start — no calls, ever</a>
+    </div>
+
+    <div class="ledger" role="img" aria-label="A ledger showing where firm capacity goes each month">
+      <div class="title">Where the month actually goes</div>
+      <div class="row"><span>Reminder emails, written by hand</span><span class="fill">.....................................</span><span>~30 hrs</span></div>
+      <div class="row"><span>"Did we ever get their payroll report?"</span><span class="fill">.....................................</span><span>daily</span></div>
+      <div class="row redline"><span>Clients turned away for lack of capacity</span><span class="fill">.....................................</span><span>( growth )</span></div>
+      <div class="note">Red is the line that matters. Firms don't have a demand problem right now — they have a capacity problem.</div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>The industry math is not on your side</h2>
+    <p class="sub">Fewer accounting graduates, a wave of retirements, and steady demand mean hiring your way out keeps getting harder. The firms winning right now are the ones deleting busywork instead.</p>
+    <div class="grid3">
+      <div class="painsBox"><div class="big">↓ pipeline</div><p>New accounting graduates keep declining while open roles keep growing — small firms feel it first.</p></div>
+      <div class="painsBox"><div class="big">turned-away work</div><p>Capacity-constrained firms are declining clients they'd love to serve. That's revenue walking out the door.</p></div>
+      <div class="painsBox"><div class="big">30+ hrs/mo</div><p>What a two-person chase routine typically costs a small firm in staff time — every single month.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="packages">
+  <div class="wrap">
+    <h2>Flat-fee setups. No contracts. No new portal for your clients.</h2>
+    <p class="sub">Everything runs on Gmail/Outlook and Drive/SharePoint/Dropbox — the tools your firm and your clients already answer to.</p>
+    <div class="grid3">
+      <div class="pkg hot">
+        <div class="tagline">Start here</div>
+        <h3>Document Chaser</h3>
+        <div class="price">$950 <small>one-time</small></div>
+        <ul>
+          <li>Per-client monthly document checklist</li>
+          <li>Automated request → nudge → reminder → escalation cadence</li>
+          <li>Reminders name the exact missing items, in your firm's voice</li>
+          <li>Live tracking view of every outstanding document</li>
+          <li>30 days of support and tweaks included</li>
+        </ul>
+        <a class="btn solid" href="mailto:hello@YOURDOMAIN.com?subject=Document%20Chaser">Start over email</a>
+      </div>
+      <div class="pkg">
+        <div class="tagline">The full front office</div>
+        <h3>Front Office</h3>
+        <div class="price">$1,450 <small>one-time</small></div>
+        <ul>
+          <li>Everything in Document Chaser</li>
+          <li>New-client onboarding & intake flow</li>
+          <li>Monday morning status digest — every client, one email</li>
+          <li>Recurring deadline tracker with lead-time reminders</li>
+        </ul>
+        <a class="btn ghost" href="mailto:hello@YOURDOMAIN.com?subject=Front%20Office">Ask a question</a>
+      </div>
+      <div class="pkg">
+        <div class="tagline">Keep it running</div>
+        <h3>Care Plan</h3>
+        <div class="price">$295<small>/mo · optional</small></div>
+        <ul>
+          <li>Monitoring & fixes</li>
+          <li>Cadence and template adjustments</li>
+          <li>One new automation improvement each month</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <a class="btn ghost" href="mailto:hello@YOURDOMAIN.com?subject=Care%20Plan">Ask a question</a>
+      </div>
+    </div>
+    <div class="founding"><b>Founding-firm offer:</b> the first two Texas firms get 50% off setup in exchange for an honest testimonial. When they're gone, they're gone.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>How it works — entirely over email</h2>
+    <p class="sub">No discovery calls, no demos-on-Zoom, no meetings. You run a firm; your inbox is enough.</p>
+    <div class="steps">
+      <div class="step"><h4>Reply to us</h4><p>Tell us roughly how many clients you close monthly and what you use for email & file storage.</p></div>
+      <div class="step"><h4>20-minute email Q&A</h4><p>We map your document checklist, your reminder tone, and your escalation rules — in writing, on your schedule.</p></div>
+      <div class="step"><h4>We build it in a week</h4><p>You review the templates and cadence. Nothing goes to a client until you approve it.</p></div>
+      <div class="step"><h4>Go live</h4><p>Documents start arriving without anyone on your team chasing them. Month one of support included.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Who's behind this</h2>
+    <div class="who">
+      <p><span class="name">YOUR NAME</span> — former COO of a Texas company, finance degree, and the person who answers every email here. I've run month-end from the operator's chair; I build automation for firms because I know exactly which hours hurt. <span class="name">Built with modern AI, delivered with operator judgment.</span></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Fair questions</h2>
+    <details><summary>Is our client data safe?</summary><p>The automation runs inside your accounts — your email, your file storage. We don't warehouse client documents on our systems, you keep admin access to everything we build, and we'll sign your confidentiality agreement before we touch anything.</p></details>
+    <details><summary>We already use practice-management software.</summary><p>Keep it. Most firms on Karbon, Canopy, or TaxDome still chase documents by hand because clients ignore portal notifications. We add persistent, personalized follow-up from your real email address on top of what you have — and if your current setup already gets documents in on time, you honestly don't need us.</p></details>
+    <details><summary>Will clients be annoyed by automated emails?</summary><p>They won't know the difference — that's the point. Reminders are drafted fresh for each client, name the specific missing items, and read like your firm wrote them. Clients who are current never hear from the system at all.</p></details>
+    <details><summary>Do you do bookkeeping or tax work?</summary><p>No. We move paper, you do accounting. We deliberately stay out of anything requiring a license — your engagement with your clients is untouched.</p></details>
+    <details><summary>What does setup require from us?</summary><p>About 20 minutes of answering questions over email, your document checklist, and approving the templates. That's it — we handle the build.</p></details>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>Two founding spots. One email to claim one.</h2>
+    <p class="sub">Reply with your client count and your email/file tools — you'll get a scoped plan back within one business day.</p>
+    <a class="btn solid" href="mailto:hello@YOURDOMAIN.com?subject=Founding%20firm">hello@YOURDOMAIN.com</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Comal Automation · YOUR CITY, Texas</span>
+    <span>YOUR PHYSICAL ADDRESS (required in email footers)</span>
+  </div>
+</footer>
+
+</body>
+</html>

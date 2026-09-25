@@ -1,0 +1,64 @@
+// Synthetic data only. Exercise shipped UI and network failure paths, not strategy performance.
+const assert=require('node:assert/strict'),fs=require('fs'),{JSDOM}=require('jsdom');
+const file=process.env.EDGE_APP||__dirname+'/../edge-lab/strategy-lab.html';
+const alerts=[],errors=[];
+const w=new JSDOM(fs.readFileSync(file,'utf8'),{url:'https://example.org/',runScripts:'dangerously',pretendToBeVisual:true,beforeParse(w){
+  w.HTMLCanvasElement.prototype.getContext=()=>new Proxy({},{get:()=>()=>{}});
+  w.Element.prototype.scrollIntoView=()=>{};w.alert=m=>alerts.push(m);w.confirm=()=>true;
+  w.addEventListener('error',e=>errors.push(e.message));
+  const timer=w.setTimeout.bind(w);w.setTimeout=(fn,ms,...args)=>timer(fn,Math.min(ms,5),...args);
+}}).window;
+const $=id=>w.document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const state=()=>JSON.parse(w.eval('JSON.stringify({HYP,LOCKS,TRADES,BARS,DATA_TAG,POOL,ACTIVE_COMPS})'));
+const check=(n,b)=>{assert.ok(b,n);console.log('SAFE '+n)};
+async function settle(){for(let i=0;i<200;i++){if(!w.eval('RUNNING||LOCKING||DATA_BUSY')){await sleep(15);return}await sleep(10)}throw Error('Operation did not finish')}
+const now=Date.UTC(2026,8,22,12),cutoff=Math.floor(now/86400000)*86400;
+function rows(url){const u=new URL(url),start=Date.parse(u.searchParams.get('start'))/1000,end=Date.parse(u.searchParams.get('end'))/1000;
+  const out=[];for(let t=start;t<=end;t+=86400)out.push([t,90,110,100,101,10]);
+  // Return boundary duplicates, unfinished candle and out-of-window data deliberately.
+  out.push([cutoff,90,110,100,101,10],[cutoff+86400,90,110,100,101,10]);return out.reverse()}
+const success=async url=>({ok:true,status:200,json:async()=>rows(url)});
+(async()=>{await sleep(50);
+  $('genData').click();$('note').value='Synthetic lock regression';$('lockHyp').click();await settle();
+  const locked=state().LOCKS[0];
+  check('lock includes exact data snapshot',!!locked.snapshots?.[0].fingerprint);
+  w.eval('BARS[10].c *= 1.0001');$('run').click();await settle();
+  check('same-tag changed prices rejected',state().HYP.length===0&&alerts.pop().includes('does not match'));
+  $('lockHyp').click();await settle();$('run').click();$('run').click();await settle();
+  check('double click spends one trial',state().HYP.length===1&&!!state().HYP[0].lockId);
+  check('lock consumed before another run',w.eval('CURRENT_LOCK===null'));
+  $('stp').value='-5';$('lockHyp').click();await settle();
+  check('invalid lock settings rejected',state().LOCKS.length===2&&alerts.pop().includes('valid exits'));
+  $('stp').value='10';
+  check('manual backup works with local storage',JSON.parse($('manualSave').value).hyp.length===1);
+  const exported=JSON.parse($('manualSave').value);await w.importState(JSON.stringify(exported));await settle();
+  check('lock snapshots survive idempotent import',state().LOCKS.length===2&&!!state().LOCKS[0].snapshots[0].fingerprint);
+  await w.importState('null');check('null import rejected safely',$('ioOut').textContent.includes('Wrong file'));
+  for(const [id,v] of Object.entries({jExp:100,jAct:0,jExit:110,jSize:500,jFee:1}))$(id).value=v;
+  $('addTrade').click();await settle();check('zero fill rejected',state().TRADES.length===0&&alerts.pop().includes('positive'));
+  w.eval('saveFile=async()=>false');await w.exportState();
+  check('failed download is not called exported',$('ioOut').textContent.includes('Download unavailable'));
+  $('repairData').value='BTC-USD daily (bundled)';$('repairWhy').value='regression';$('repairSpent').value='1.5';$('repairAdd').click();await settle();
+  check('fractional repair count rejected',state().HYP.length===1&&alerts.pop().includes('whole config'));
+  w.Date.now=()=>now;w.fetch=success;
+  const bars=await w.fetchCandles('BTC-USD',86400,301,()=>{});
+  check('completed candles and exact count',bars.length===301&&bars[300].t===cutoff-86400&&bars[0].t===cutoff-301*86400);
+  w.fetch=async()=>({ok:true,status:200,json:async()=>[[cutoff-86400,90,110,100,null]]});
+  await assert.rejects(()=>w.fetchCandles('BTC-USD',86400,1),/Malformed/);console.log('SAFE malformed candles rejected');
+  let calls=0;w.fetch=async()=>{calls++;return{ok:false,status:429}};
+  await assert.rejects(()=>w.fetchCandles('BTC-USD',86400,1),/three attempts/);
+  check('rate limit stops after three attempts',calls===3);
+  w.fetch=()=>new Promise(()=>{});
+  await assert.rejects(()=>w.fetchCandles('BTC-USD',86400,1),/timed out/);console.log('SAFE stalled request times out');
+  w.fetch=success;$('refreshMarkets').click();await settle();
+  check('daily refresh commits all three assets',state().POOL.length===3&&state().BARS.length===1800);
+  const before=JSON.stringify(state());
+  w.fetch=async url=>url.includes('ETH-USD')?{ok:false,status:503}:success(url);
+  $('refreshMarkets').click();await settle();
+  check('partial failure retains all prior data',JSON.stringify(state())===before&&$('marketOut').textContent.includes('Previous data and pool retained'));
+  const snapBefore=state().HYP.length;
+  $('poolInfo').querySelector('[data-remove-asset="0"]').click();
+  check('BTC removable without losing ETH SOL',state().POOL.map(p=>p.name).join(',')==='ETH,SOL'&&$('poolOn').checked&&state().HYP.length===snapBefore);
+  check('no page errors or unexpected alerts',errors.length===0&&alerts.length===0);
+  w.close();
+})().catch(e=>{console.error(e);w.close();process.exitCode=1});

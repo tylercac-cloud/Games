@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Screener — rug-risk checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#0B0C0E;--card:#161719;--grid:#232529;--ink:#E7E7E9;--muted:#8E9196;--line:#2E3136;
+--kill:#E0736B;--kill-bg:#2E1A19;--live:#8FD9B8;--live-bg:#16241F;--pend:#E0B268;--pend-bg:#2B2416;
+--silver:#C7CACF;--silver-dim:#75787E;
+--sans:'Archivo',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;
+color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+::selection{background:var(--silver);color:#0B0C0E}
+.shell{max-width:900px;margin:0 auto;padding:0 16px 60px}
+header{background:linear-gradient(180deg,#151618,#0B0C0E);color:var(--silver);margin:0 -16px;
+padding:16px 20px;border-bottom:1px solid var(--line)}
+.title{font-weight:700;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--silver)}
+.title small{display:block;font-size:10.5px;letter-spacing:.1em;color:var(--silver-dim);font-weight:400;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}
+.card h2{font-size:14px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:3px;color:var(--silver)}
+.card .hint{font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+color:var(--muted);margin-bottom:4px}
+input,select{width:100%;font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);
+border-radius:5px;background:#0E0F11;color:var(--ink)}
+select{color-scheme:dark}
+input:focus,select:focus{outline:2px solid var(--silver);outline-offset:-1px;background:#131417}
+.row{display:grid;gap:10px;margin-bottom:12px}
+.r2{grid-template-columns:repeat(2,1fr)} .r3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:620px){.r3{grid-template-columns:1fr 1fr}}
+button.act{font:inherit;font-weight:600;font-size:13px;padding:9px 18px;border-radius:5px;cursor:pointer;
+background:var(--silver);color:#0B0C0E;border:1px solid var(--silver)}
+button.act:hover{background:#DEE0E4}
+button.act.sec{background:transparent;color:var(--silver);border:1px solid var(--line)}
+button.act.sec:hover{background:#1D1F22}
+button.act:disabled{opacity:.4;cursor:not-allowed}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.verdict{border-left:4px solid var(--line);padding:12px 14px;border-radius:0 6px 6px 0;margin-top:14px;font-size:13px}
+.verdict.fail{border-color:var(--kill);background:var(--kill-bg)}
+.verdict.pass{border-color:var(--live);background:var(--live-bg)}
+.verdict.weak{border-color:var(--pend);background:var(--pend-bg)}
+.verdict b{display:block;font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.flags{margin-top:10px}
+.flag{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.flag:last-child{border-bottom:0}
+.flag .pts{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.flag .pts.neg{color:var(--kill)} .flag .basis{font-size:10.5px;color:var(--muted);display:block;margin-top:1px}
+.scoreBig{display:flex;align-items:baseline;gap:12px;margin:4px 0 12px}
+.scoreBig .num{font-family:var(--mono);font-weight:700;font-size:40px}
+.scoreBig .tier{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.gauge{height:10px;background:#0E0F11;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.gauge i{display:block;height:100%}
+.note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line);line-height:1.55}
+.cite{font-size:11px;color:var(--silver-dim);font-style:italic}
+details{background:#0E0F11;border:1px solid var(--line);border-radius:6px;margin-top:10px}
+summary{cursor:pointer;font-weight:600;font-size:12.5px;padding:10px 14px;color:var(--silver)}
+details .inner{padding:0 14px 12px;font-size:12.5px;color:var(--muted);line-height:1.6}
+code{font-family:var(--mono);font-size:11.5px;background:#0E0F11;padding:1px 5px;border-radius:3px}
+</style>
+</head>
+<body><div class="shell">
+
+<header>
+  <div class="title">Token Screener<small>rug-risk checklist for new Solana tokens — not a buy signal, not a pump predictor</small></div>
+</header>
+
+<div class="verdict weak">
+  <b>What this is, plainly</b>
+  This screens for the three documented rug-pull mechanisms and a handful of practitioner-sourced red flags. It cannot tell you whether a token will pump, gain attention, or be worth anything — no tool can, and anything claiming otherwise is not backed by the published research. What it can do: flag the structural setups that precede most on-chain fraud, which is a real and different question.
+</div>
+
+<div class="card">
+  <h2>1 · Live on-chain check (optional)</h2>
+  <p class="hint">Paste a mint address and this tries a direct, no-key call to Solana's public RPC, from your browser — not mine. It can only ever read three things this way: mint authority, freeze authority, and holder concentration. Everything else on this page has to be entered by hand, because it needs an indexer this RPC doesn't provide. This may be blocked by the sandbox you're running the page in; if so, the manual form below works exactly the same either way.</p>
+  <div class="row r2">
+    <div><label for="mintAddr">Token mint address</label><input id="mintAddr" placeholder="e.g. EKpQGSJt...base58 address"></div>
+    <div style="display:flex;align-items:flex-end"><button class="act" id="liveCheck" style="width:100%">Check on-chain</button></div>
+  </div>
+  <div id="liveOut"></div>
+</div>
+
+<div class="card">
+  <h2>2 · Manual checklist</h2>
+  <p class="hint">Look these up on DexScreener, Birdeye, RugCheck, or Solscan for the specific token. Leave anything you don't know as "Unknown" — the score only penalizes what's actually confirmed risky, never a blank.</p>
+
+  <div class="row r2">
+    <div><label for="mintAuth">Mint authority</label>
+      <select id="mintAuth"><option value="unknown">Unknown</option><option value="active">Active (not renounced)</option><option value="renounced">Renounced</option></select></div>
+    <div><label for="freezeAuth">Freeze authority</label>
+      <select id="freezeAuth"><option value="unknown">Unknown</option><option value="active">Active (not renounced)</option><option value="renounced">Renounced</option></select></div>
+  </div>
+
+  <div class="row r2">
+    <div><label for="lpLock">Liquidity pool</label>
+      <select id="lpLock"><option value="unknown">Unknown</option><option value="unlocked">Unlocked / withdrawable</option><option value="locked">Locked or burned</option></select></div>
+    <div><label for="holderConc">Top-10 holder concentration</label>
+      <select id="holderConc"><option value="unknown">Unknown</option><option value="lt30">Under 30%</option><option value="30to50">30-50%</option><option value="gt50">Over 50%</option></select></div>
+  </div>
+
+  <div class="row r2">
+    <div><label for="liq">Liquidity depth (USD)</label>
+      <select id="liq"><option value="unknown">Unknown</option><option value="gt50k">Over $50,000</option><option value="10to50k">$10,000-$50,000</option><option value="lt10k">Under $10,000</option></select></div>
+    <div><label for="devWallet">Deployer wallet holding (outside LP)</label>
+      <select id="devWallet"><option value="unknown">Unknown</option><option value="lt10">Under 10%</option><option value="10to20">10-20%</option><option value="gt20">Over 20%</option></select></div>
+  </div>
+
+  <div class="row r2">
+    <div><label for="verified">Standard SPL token, no unusual extensions</label>
+      <select id="verified"><option value="unknown">Unknown</option><option value="standard">Yes, standard</option><option value="unusual">Has transfer hooks / unusual extensions</option></select></div>
+    <div><label for="age">Token age</label>
+      <select id="age"><option value="unknown">Unknown</option><option value="lt1h">Under 1 hour</option><option value="1to24h">1-24 hours</option><option value="gt24h">Over 24 hours</option></select></div>
+  </div>
+
+  <div class="btns"><button class="act" id="scoreBtn">Score it</button><button class="act sec" id="resetBtn">Reset</button></div>
+</div>
+
+<div class="card" id="resultCard" style="display:none">
+  <h2>3 · Result</h2>
+  <div class="scoreBig"><span class="num" id="scoreNum">-</span><span class="tier" id="scoreTier"></span></div>
+  <div class="gauge"><i id="scoreBar" style="width:0%"></i></div>
+  <div class="flags" id="flagList"></div>
+  <div id="verdictBox"></div>
+</div>
+
+<div class="card">
+  <h2>Method &amp; sources</h2>
+  <p class="hint">Where every point value comes from, and what's a citation versus a heuristic.</p>
+  <details>
+    <summary>Documented rug-pull mechanisms (large, fixed penalties)</summary>
+    <div class="inner">
+      A manually-verified benchmark of 117 confirmed Solana rug pulls classified every case into exactly three mechanisms: Pump-and-Dump (89 cases), Liquidity Withdrawal (26 cases), and Freeze Authority Abuse (2 cases). <span class="cite">Source: "From Hype to Collapse: Investigating Rug Pull Scams on Solana," arXiv 2603.24625.</span> Active mint authority, active freeze authority, and an unlocked liquidity pool map directly onto these three mechanisms - they aren't guesses, they're the literal preconditions for each documented category. A separate large-scale study (6.4M tokens) found the majority of Solana memecoins show rug-pull characteristics within the first hour, and that gradient-boosted models using only the first 5 minutes of trading data reach AUCPRC around 0.76-0.80 detecting them. <span class="cite">Source: "Catching the Rug," arXiv 2608.20271.</span>
+    </div>
+  </details>
+  <details>
+    <summary>Heuristic factors (smaller penalties, practitioner-sourced)</summary>
+    <div class="inner">
+      Holder concentration, liquidity depth, and deployer wallet share are cited across multiple practitioner red-flag guides (DeFade, BarryGuard) as commonly-checked signals, but I don't have a peer-reviewed, calibrated weight for any of them - the academic papers use trained ML models on many more features than a person can hand-collect, not a simple points table. These are included because they're genuinely part of the public conversation on this, labeled at the weight I judged reasonable, not derived from a study. Take them as somewhat less reliable than the three items above.
+    </div>
+  </details>
+  <details>
+    <summary>Token age - deliberately not scored</summary>
+    <div class="inner">
+      The two papers point in different directions here. One finds most rugs happen within the first hour (implying "new" is dangerous); another finds rug-pull risk in its dataset rises gradually the longer a token has been trading past its early phase (implying "new" is comparatively safer, for the subset that's still around to measure). I don't have a way to reconcile these into one honest number, so age is shown for context only and never subtracts or adds points.
+    </div>
+  </details>
+  <details>
+    <summary>What this explicitly cannot do</summary>
+    <div class="inner">
+      No published research - academic or industry - supports predicting which token gains attention or price. Multiple sources, including teams actively building AI trading products for this space, state directly that pump prediction doesn't work reliably; that's the field's own conclusion, not caution added here. A high score here means "not obviously structured to rug" - it says nothing about whether anyone will ever buy this token.
+    </div>
+  </details>
+</div>
+
+</div>
+<script>
+function $(id){return document.getElementById(id);}
+
+async function rpcCall(method,params){
+  var r=await fetch('https://api.mainnet-beta.solana.com',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})
+  });
+  if(!r.ok) throw new Error('RPC HTTP '+r.status);
+  var j=await r.json();
+  if(j.error) throw new Error(j.error.message||'RPC error');
+  return j.result;
+}
+function b58ok(s){ return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s.trim()); }
+
+$('liveCheck').addEventListener('click', async function(){
+  var addr=$('mintAddr').value.trim();
+  var out=$('liveOut'), btn=$('liveCheck');
+  if(!addr){out.innerHTML='<div class="verdict fail"><b>Nothing entered</b>Paste a mint address first.</div>';return;}
+  if(!b58ok(addr)){out.innerHTML="<div class=\"verdict fail\"><b>Doesn't look like a Solana address</b>Expected base58, 32-44 characters.</div>";return;}
+  btn.disabled=true; out.innerHTML='<div class="note">Contacting Solana public RPC...</div>';
+  try{
+    var info=await rpcCall('getAccountInfo',[addr,{encoding:'jsonParsed'}]);
+    if(!info || !info.value) throw new Error("No account found at that address - check it's a mint, not a token account or wallet.");
+    var parsed=info.value.data && info.value.data.parsed;
+    if(!parsed || parsed.type!=='mint') throw new Error('That address exists but is not an SPL token mint.');
+    var pinfo=parsed.info;
+    var mintAuthActive = pinfo.mintAuthority!=null;
+    var freezeAuthActive = pinfo.freezeAuthority!=null;
+
+    var holderLine='<em>holder lookup failed or unsupported here</em>', holderBucket=null;
+    try{
+      var largest=await rpcCall('getTokenLargestAccounts',[addr]);
+      var accs=(largest&&largest.value)||[];
+      if(accs.length && pinfo.supply && Number(pinfo.supply)>0){
+        var top10=0;
+        for(var i=0;i<Math.min(10,accs.length);i++) top10+=Number(accs[i].amount||0);
+        var pct=top10/Number(pinfo.supply)*100;
+        holderBucket = pct>50?'gt50':(pct>30?'30to50':'lt30');
+        holderLine=pct.toFixed(1)+'% of supply in the top '+Math.min(10,accs.length)+' accounts - <strong>this total includes any liquidity pool address</strong>, which will show as concentrated without being malicious. Cross-check against DexScreener before trusting this number.';
+      }
+    }catch(e){ holderLine='<em>could not fetch holder accounts: '+e.message+'</em>'; }
+
+    out.innerHTML='<div class="verdict pass"><b>Live data retrieved</b>'+
+      'Mint authority: <strong>'+(mintAuthActive?'ACTIVE (not renounced)':'renounced')+'</strong><br>'+
+      'Freeze authority: <strong>'+(freezeAuthActive?'ACTIVE (not renounced)':'renounced')+'</strong><br>'+
+      'Holder concentration: '+holderLine+'<br>'+
+      'Supply: '+pinfo.supply+' ('+pinfo.decimals+' decimals)'+
+      '<div class="note">Auto-filling the matching fields below - liquidity, LP lock status, deployer wallet, and age still need to be looked up by hand; this RPC has no way to see them.</div>'+
+      '</div>';
+    $('mintAuth').value = mintAuthActive?'active':'renounced';
+    $('freezeAuth').value = freezeAuthActive?'active':'renounced';
+    if(holderBucket) $('holderConc').value = holderBucket;
+  }catch(e){
+    out.innerHTML='<div class="verdict fail"><b>Live check failed</b>'+e.message+
+      '<div class="note">This is very likely the sandbox blocking outbound requests, the same way it blocked storage and file downloads earlier - not necessarily a problem with the address. The manual checklist below works regardless; look the same data up on Solscan, DexScreener, or RugCheck instead.</div></div>';
+  }finally{ btn.disabled=false; }
+});
+
+var RULES=[
+  {id:'mintAuth',val:'active',pts:-40,label:'Mint authority active',basis:'Documented mechanism (Pump-and-Dump precondition)'},
+  {id:'freezeAuth',val:'active',pts:-35,label:'Freeze authority active',basis:'Documented mechanism (2/117 confirmed cases)'},
+  {id:'lpLock',val:'unlocked',pts:-35,label:'Liquidity pool unlocked',basis:'Documented mechanism (26/117 confirmed cases, 22%)'},
+  {id:'holderConc',val:'gt50',pts:-20,label:'Top-10 holders over 50% of supply',basis:'Heuristic - practitioner-sourced, no calibrated weight'},
+  {id:'holderConc',val:'30to50',pts:-10,label:'Top-10 holders 30-50% of supply',basis:'Heuristic - practitioner-sourced, no calibrated weight'},
+  {id:'liq',val:'lt10k',pts:-15,label:'Liquidity under $10,000',basis:'Heuristic - thin liquidity, easy to manipulate'},
+  {id:'liq',val:'10to50k',pts:-7,label:'Liquidity $10,000-$50,000',basis:'Heuristic - thin liquidity, easy to manipulate'},
+  {id:'devWallet',val:'gt20',pts:-15,label:'Deployer holds over 20% outside LP',basis:'Heuristic - common industry check'},
+  {id:'devWallet',val:'10to20',pts:-7,label:'Deployer holds 10-20% outside LP',basis:'Heuristic - common industry check'},
+  {id:'verified',val:'unusual',pts:-10,label:'Unusual token extensions (transfer hooks etc.)',basis:'Heuristic - non-standard tokens can hide logic'}
+];
+var FIELD_IDS=['mintAuth','freezeAuth','lpLock','holderConc','liq','devWallet','verified','age'];
+function computeScore(){
+  var vals={};
+  for(var i=0;i<FIELD_IDS.length;i++) vals[FIELD_IDS[i]]=$(FIELD_IDS[i]).value;
+  var unknownCount=0;
+  for(var k in vals) if(vals[k]==='unknown') unknownCount++;
+  var hit=RULES.filter(function(r){ return vals[r.id]===r.val; });
+  var sum=0; hit.forEach(function(r){ sum+=r.pts; });
+  var total=Math.max(0,100+sum);
+  return {total:total,hit:hit,unknownCount:unknownCount,vals:vals};
+}
+function render(){
+  var s=computeScore();
+  $('resultCard').style.display='block';
+  $('scoreNum').textContent=s.total;
+  var tier,color,cls;
+  if(s.total>=80){tier='Low flagged-risk';color='var(--live)';cls='pass';}
+  else if(s.total>=50){tier='Moderate risk';color='var(--pend)';cls='weak';}
+  else if(s.total>=25){tier='Elevated risk';color='var(--pend)';cls='weak';}
+  else {tier='Critical risk';color='var(--kill)';cls='fail';}
+  $('scoreTier').textContent=tier; $('scoreTier').style.color=color;
+  $('scoreBar').style.width=s.total+'%'; $('scoreBar').style.background=color;
+  $('flagList').innerHTML = s.hit.length? s.hit.map(function(r){
+    return '<div class="flag"><span>'+r.label+'<span class="basis">'+r.basis+'</span></span><span class="pts neg">'+r.pts+'</span></div>';
+  }).join('') : '<div class="flag"><span>No flags triggered by what\'s entered so far</span><span class="pts">-</span></div>';
+  var ageLabels={lt1h:'under 1 hour','1to24h':'1-24 hours',gt24h:'over 24 hours'};
+  var ageNote = s.vals.age!=='unknown' ? ('<br><br><em>Age noted ('+ageLabels[s.vals.age]+') but not scored - see the Method section for why.</em>') : '';
+  $('verdictBox').innerHTML = '<div class="verdict '+cls+'"><b>'+tier+'</b>'+
+    (s.unknownCount>0? (s.unknownCount+' of 8 fields are still Unknown - this score only reflects what\'s confirmed, so it will move as you fill in more. ') : '')+
+    'This measures structural rug-pull setup only. It is not a signal that this token is a good buy, and a perfect score does not mean anyone will ever trade it.'+ageNote+
+    '</div>';
+}
+$('scoreBtn').addEventListener('click',render);
+$('resetBtn').addEventListener('click', function(){
+  FIELD_IDS.forEach(function(id){ $(id).value='unknown'; });
+  $('mintAddr').value=''; $('liveOut').innerHTML=''; $('resultCard').style.display='none';
+});
+</script>
+</body></html>

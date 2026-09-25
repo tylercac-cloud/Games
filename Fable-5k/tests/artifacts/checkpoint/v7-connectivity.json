@@ -1,0 +1,5 @@
+{
+  "purpose": "Connectivity and schema check after protocol lock; no strategy backtest",
+  "url": "https://api.coinbase.com/api/v3/brokerage/market/products?limit=1&product_type=SPOT&product_ids=BTC-USD",
+  "error": "TimeoutError: The read operation timed out"
+}

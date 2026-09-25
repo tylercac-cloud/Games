@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "repairStatus": "PARTIAL_RECONSTRUCTION_EARLIER_TOTAL_UNKNOWN",
+  "verifiedEvaluationCount": 736,
+  "independentTrialCount": null,
+  "olderResearch": {
+    "source": "HANDOFF.md sections 6\u20137 and CHANGELOG.md passes 1\u20137",
+    "known": "MA/RSI/breakout sweeps, both exit rules, prior v1\u2013v5 attempts",
+    "missing": "Exact attempts, dates, order and complete configurations of earlier Claude/user work",
+    "asset": "BTC",
+    "start": "2015-01-01",
+    "end": "2024-04-24"
+  },
+  "verifiedRuns": [
+    {
+      "id": "v5-baseline.log",
+      "source": "tests/artifacts/v5-baseline.log",
+      "sha256": "a8fb7861ce6d5f63875ef9f7ce9bd0fbb409188b23854d6312e42c0965e49220",
+      "configurationEvaluations": 184,
+      "independence": "Repeated implementation evaluations, not independent discoveries",
+      "blocks": {
+        "fixedReferenceAllFamilies": 61,
+        "signalReferenceMA": 45,
+        "storageRSIAndBreakout": 16,
+        "endToEndSweepsAndSingle": 62
+      },
+      "additionalSignalPrefixChecks": 1200,
+      "verdicts": {
+        "ma": "DSR 0.908",
+        "rsi": "DSR 0.024",
+        "brk": "DSR 0.820",
+        "maLaterSingle": "not computable after accumulated trials"
+      }
+    },
+    {
+      "id": "v6-regression.log",
+      "source": "tests/artifacts/v6-regression.log",
+      "sha256": "b8fa14b9b89ed482cd57d91ff3629c0f77000a0c75d9fa15c2aa724436edb4bd",
+      "configurationEvaluations": 184,
+      "independence": "Repeated implementation evaluations, not independent discoveries",
+      "blocks": {
+        "fixedReferenceAllFamilies": 61,
+        "signalReferenceMA": 45,
+        "storageRSIAndBreakout": 16,
+        "endToEndSweepsAndSingle": 62
+      },
+      "additionalSignalPrefixChecks": 1200,
+      "verdicts": {
+        "ma": "DSR 0.908",
+        "rsi": "DSR 0.024",
+        "brk": "DSR 0.820",
+        "maLaterSingle": "not computable after accumulated trials"
+      }
+    },
+    {
+      "id": "v7-baseline.log",
+      "source": "tests/artifacts/v7-baseline.log",
+      "sha256": "f4c4ab3feda5a5877dc933a35efc513b5562af2ec7290d65a4cbab1623c9f69e",
+      "configurationEvaluations": 184,
+      "independence": "Repeated implementation evaluations, not independent discoveries",
+      "blocks": {
+        "fixedReferenceAllFamilies": 61,
+        "signalReferenceMA": 45,
+        "storageRSIAndBreakout": 16,
+        "endToEndSweepsAndSingle": 62
+      },
+      "additionalSignalPrefixChecks": 1200,
+      "verdicts": {
+        "ma": "DSR 0.908",
+        "rsi": "DSR 0.024",
+        "brk": "DSR 0.820",
+        "maLaterSingle": "not computable after accumulated trials"
+      }
+    },
+    {
+      "id": "v7-regression-final.log",
+      "source": "tests/artifacts/v7-regression-final.log",
+      "sha256": "18d87ff4d3496d3ae748d42c07c88d92d7e534093242c3cb0bdc2b5a666a35ff",
+      "configurationEvaluations": 184,
+      "independence": "Repeated implementation evaluations, not independent discoveries",
+      "blocks": {
+        "fixedReferenceAllFamilies": 61,
+        "signalReferenceMA": 45,
+        "storageRSIAndBreakout": 16,
+        "endToEndSweepsAndSingle": 62
+      },
+      "additionalSignalPrefixChecks": 1200,
+      "verdicts": {
+        "ma": "DSR 0.908",
+        "rsi": "DSR 0.024",
+        "brk": "DSR 0.820",
+        "maLaterSingle": "not computable after accumulated trials"
+      }
+    }
+  ]
+}

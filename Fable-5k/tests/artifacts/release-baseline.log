@@ -1,0 +1,226 @@
+installing jsdom…
+
+== shipped app == fresh build from src/
+  PASS build check passes
+  PASS no uncaught errors
+
+== extract shipped core
+  PASS core.js extracted
+  PASS no uncaught errors
+
+== core math, data, lookahead
+  PASS DSR matches paper example 0.9004
+  PASS MinBTL 5y -> 45 configs
+  PASS MinBTL 3y -> 13 configs
+  PASS zero-variance Sharpe is 0
+  PASS 3,402 bundled bars 2015-01-01 -> 2024-04-24
+  PASS bundled data passes integrity checks
+  PASS no lookahead in 1,200 truncation checks
+  PASS judge: 12 trades is judged
+  PASS judge: 9 trades is few-trades
+  PASS judge: lone first trial undeflated
+  PASS judge: sweep floor of 2 effective trials
+  PASS judge: over budget cannot pass
+  PASS judge: MDS 0.815
+  PASS judge: MIN_TRADES is 10
+  PASS no uncaught errors
+
+== independent Python engine (fixed exits)
+  PASS MA PBO identical
+  PASS RSI PBO identical
+  PASS breakout PBO identical
+  PASS only difference is the known exact float tie
+  PASS that tie is exact (fast == slow)
+  PASS no uncaught errors
+  PASS no PBO mismatch
+
+== independent Python DSR pipeline (signal exits)
+  PASS 8 quantities match
+  PASS no uncaught errors
+  PASS no DIFF
+
+== paper formulas (scipy)
+  PASS DSR 0.9004
+  PASS DSR N=46 0.9505
+  PASS MinBTL(45)=5.00y
+  PASS sample SD +4.45% at n=12
+  PASS no uncaught errors
+
+== pooling: structure
+  PASS pool of one asset == that asset
+  PASS pool of identical copies == the asset
+  PASS pooled length = union of dates
+  PASS single-member pool refused
+  PASS mixed candle sizes refused
+  PASS no uncaught errors
+
+== pooling: independent Python rebuild
+  PASS 8 quantities match
+  PASS no uncaught errors
+  PASS no DIFF
+
+== pooling: simulation smoke test (null + planted edge)
+  PASS null: pooled false passes <= 2 of 60
+  PASS no uncaught errors
+
+== pooling: UI flow
+  PASS toggle refused while pool empty
+  PASS same dataset twice refused
+  PASS pool lists both assets
+  PASS pooled verdict rendered
+  PASS winner labelled as pooled
+  PASS register records the pool
+  PASS pooled trials count against BTC single tests
+  PASS synthetic + dated pool refused
+  PASS synthetic pool is practice
+  PASS no stray alerts
+  PASS no uncaught errors
+
+== hostile backup import
+  PASS no injected elements, no handlers fired
+  PASS well-typed hostile entry still imported (as inert text)
+  PASS no uncaught errors
+
+== position sizing: single vs pooled
+  PASS single-asset position is full 2%
+  PASS single-asset line does not mention a split
+  PASS 3-asset pool splits risk per asset
+  PASS pool line explains the split
+  PASS total risk stays 2% of account
+  PASS no uncaught errors
+
+== coin registry drives the app
+  PASS registry non-empty
+  PASS ids are PAIR-USD
+  PASS coinName resolves known
+  PASS coinName falls back for unknown
+  PASS isKnownCoin
+  PASS assetKey groups a coin's sources
+  PASS no uncaught errors
+
+== data persistence across a reload
+  PASS coin dropdown filled from COINS
+  PASS pool built in first session
+  PASS datasets written to storage
+  PASS fresh session shows restored message
+  PASS pool restored and active
+  PASS single dataset written to storage
+  PASS single dataset restored in fresh session
+  PASS no uncaught errors
+
+== trial accounting follows the coin, not the tag
+  PASS bundled BTC counts its sweeps
+  PASS Coinbase-refreshed BTC inherits them
+  PASS other candle sizes of BTC inherit them
+  PASS a pool containing BTC inherits them (+ ETH/SOL trials)
+  PASS pooled ETH+SOL trials count against ETH
+  PASS unrelated CSV untouched
+  PASS asset keys
+  PASS no uncaught errors
+
+== next-action instructions
+  PASS state matches the ENGINE on every bar (0 mismatches)
+  PASS MA trigger close produces a clean cross
+  PASS MA trigger close is the price, not the MA level
+  PASS already-satisfied flat rule is not armed (no false entry)
+  PASS bracket states stop-first + gap risk
+  PASS signal mode has no fixed target
+  PASS fixed mode shows the target
+  PASS expiry date shown when in a position
+  PASS no uncaught errors
+
+== action panel: fail shows rejection banner, pass shows order + sizing
+  PASS empty before any run
+  PASS failed rule shows did-not-survive banner
+  PASS failed rule still shows the levels
+  PASS passed rule shows the order
+  PASS passed rule shows 2% of $5,000 sizing
+  PASS no uncaught errors
+
+== cloud storage (mock, two tabs)
+  PASS self-test banner shown
+  PASS both tabs' trials kept (16)
+  PASS clear empties register
+  PASS no uncaught errors
+
+== storage fallback
+  PASS falls back to browser storage
+  PASS no uncaught errors
+
+== backup import merge
+  PASS no trials lost (225)
+  PASS re-import adds nothing
+  PASS no uncaught errors
+
+== pre-registered test + validation
+  PASS first lone trial judged undeflated
+  PASS second lone trial refused
+  PASS power line printed
+  PASS negative stop rejected
+  PASS no uncaught errors
+
+== research controls
+  PASS hypothesis lock persists
+  PASS trial links to prior lock
+  PASS history repair spends seven configs
+  PASS one-click daily pool loads
+  PASS no unexpected alerts
+  PASS no uncaught errors
+
+== release safety regressions
+  PASS lock includes exact data snapshot
+  PASS same-tag changed prices rejected
+  PASS double click spends one trial
+  PASS lock consumed before another run
+  PASS invalid lock settings rejected
+  PASS manual backup works with local storage
+  PASS lock snapshots survive idempotent import
+  PASS null import rejected safely
+  PASS zero fill rejected
+  PASS failed download is not called exported
+  PASS fractional repair count rejected
+  PASS completed candles and exact count
+  PASS malformed candles rejected
+  PASS rate limit stops after three attempts
+  PASS stalled request times out
+  PASS daily refresh commits all three assets
+  PASS partial failure retains all prior data
+  PASS BTC removable without losing ETH SOL
+  PASS no page errors or unexpected alerts
+  PASS no uncaught errors
+
+== screener scoring
+  PASS all-Unknown cannot clear
+  PASS clean token scores 100
+  PASS unknown LP lock blocks clear
+  PASS active mint is Critical
+  PASS no uncaught errors
+
+== screener live lookup (documented RPC shapes)
+  PASS renounced + 20% parsed
+  PASS active mint flagged
+  PASS active freeze flagged
+  PASS 1e18 supply precision
+  PASS missing account handled
+  PASS non-mint handled
+  PASS holder-call failure degrades gracefully
+  PASS network note on network errors
+  PASS bad address rejected
+  PASS no uncaught errors
+  PASS no network note on non-network errors
+
+== every HTML loads, every button clicks
+  PASS Edge Lab clean
+  PASS screener clean
+  PASS landing clean
+  PASS demo clean
+  PASS no uncaught errors
+
+== UI crawl
+  PASS only the deliberate bad-input alert
+  PASS quoted thousands parsed
+  PASS practice runs not counted
+  PASS no uncaught errors
+
+============================================================
+ALL CHECKS PASSED (168) — quick mode, end-to-end BTC sweeps skipped

@@ -1,0 +1,14 @@
+FINAL different datasets and costs survive import
+FINAL different trade returns survive import
+FINAL full-content import remains idempotent
+FINAL backup contains all recovered records
+FINAL signature ignores metadata and key order
+FINAL valid OHLC accepted
+FINAL rejects missing OHLC
+FINAL rejects invalid price
+FINAL rejects duplicate date
+FINAL rejects uneven interval
+FINAL saving a budget preserves saved datasets
+FINAL deep links select the requested tab
+FINAL passing result cannot be read as a live order
+FINAL no script errors

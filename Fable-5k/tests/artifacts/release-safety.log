@@ -1,0 +1,25 @@
+
+== release safety regressions
+  PASS lock includes exact data snapshot
+  PASS same-tag changed prices rejected
+  PASS double click spends one trial
+  PASS lock consumed before another run
+  PASS invalid lock settings rejected
+  PASS manual backup works with local storage
+  PASS lock snapshots survive idempotent import
+  PASS null import rejected safely
+  PASS zero fill rejected
+  PASS failed download is not called exported
+  PASS fractional repair count rejected
+  PASS completed candles and exact count
+  PASS malformed candles rejected
+  PASS rate limit stops after three attempts
+  PASS stalled request times out
+  PASS daily refresh commits all three assets
+  PASS partial failure retains all prior data
+  PASS BTC removable without losing ETH SOL
+  PASS no page errors or unexpected alerts
+  PASS no uncaught errors
+
+============================================================
+ALL CHECKS PASSED (20) — synthetic release-safety checks only

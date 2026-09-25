@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-09-22T23:16:09.609827+00:00",
+  "endpoint": "https://api.coinbase.com/api/v3/brokerage/market/products?limit=1&product_type=SPOT",
+  "purpose": "public connection smoke check only; no backtest",
+  "success": false,
+  "error": "HTTP 403 from build-environment egress proxy (x-deny-reason: host_not_allowed); Coinbase not reached",
+  "note": "Release 10's JSONDecodeError had the same cause. End-to-end path verified against a local fake Coinbase (tests/desk/test_live_proxy.py). Verify on the user machine via the launcher startup check."
+}

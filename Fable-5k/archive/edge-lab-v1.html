@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edge Lab — hypothesis testing for traders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EBEFF3; --card:#FFFFFF; --grid:#D4DCE5;
+  --ink:#16233A; --muted:#5B6B80; --line:#C3CEDA;
+  --kill:#A3282A; --kill-bg:#F7E7E7;
+  --live:#2F5D50; --live-bg:#E4EEEA;
+  --pend:#B07415; --pend-bg:#F8EEDC;
+  --sans:'Archivo',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+}
+.shell{max-width:1080px;margin:0 auto;padding:0 16px 60px}
+
+/* ---- masthead + signature counter ---- */
+header{background:var(--ink);color:#fff;margin:0 -16px 0;padding:16px 20px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.title{font-weight:700;font-size:15px;letter-spacing:.18em;text-transform:uppercase}
+.title small{display:block;font-size:10.5px;letter-spacing:.1em;color:#93A4BC;font-weight:400;margin-top:2px}
+.counter{display:flex;gap:0;border:1px solid #37496A;border-radius:6px;overflow:hidden}
+.cbox{padding:6px 14px;text-align:center;border-right:1px solid #37496A}
+.cbox:last-child{border-right:0}
+.cbox .v{font-family:var(--mono);font-size:19px;font-weight:700;line-height:1.1}
+.cbox .k{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#93A4BC;margin-top:2px}
+.cbox.warn .v{color:#F0A63C}
+
+nav{display:flex;gap:0;background:var(--card);border:1px solid var(--line);border-top:0;
+  margin:0 -16px 20px;overflow-x:auto}
+nav button{flex:1;min-width:110px;font:inherit;font-weight:600;font-size:12.5px;letter-spacing:.04em;
+  text-transform:uppercase;padding:11px 8px;background:none;border:0;border-right:1px solid var(--line);
+  border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button:last-child{border-right:0}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);background:#F7F9FB}
+nav button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+
+.panel{display:none} .panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}
+.card h2{font-size:14px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:3px}
+.card .hint{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+
+label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--line);
+  border-radius:5px;background:#FBFCFD;color:var(--ink)}
+input[type=number]{font-family:var(--mono)}
+textarea{min-height:64px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;background:#fff}
+.row{display:grid;gap:10px;margin-bottom:12px}
+.r2{grid-template-columns:repeat(2,1fr)} .r3{grid-template-columns:repeat(3,1fr)}
+.r4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:620px){.r3,.r4{grid-template-columns:repeat(2,1fr)}}
+
+button.act{font:inherit;font-weight:600;font-size:13px;padding:9px 18px;border-radius:5px;cursor:pointer;
+  background:var(--ink);color:#fff;border:1px solid var(--ink)}
+button.act:hover{background:#0E1830}
+button.act.sec{background:#fff;color:var(--ink)}
+button.act.sec:hover{background:#EEF2F6}
+button.act:focus-visible{outline:2px solid var(--pend);outline-offset:2px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  text-align:left;padding:7px 8px;border-bottom:2px solid var(--ink)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{font-family:var(--mono);text-align:right}
+tr:hover td{background:#F5F8FA}
+
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:99px}
+.tag.kill{background:var(--kill-bg);color:var(--kill)}
+.tag.live{background:var(--live-bg);color:var(--live)}
+.tag.pend{background:var(--pend-bg);color:var(--pend)}
+
+.verdict{border-left:4px solid var(--line);padding:12px 14px;border-radius:0 6px 6px 0;margin-top:14px;font-size:13px}
+.verdict.fail{border-color:var(--kill);background:var(--kill-bg)}
+.verdict.pass{border-color:var(--live);background:var(--live-bg)}
+.verdict.weak{border-color:var(--pend);background:var(--pend-bg)}
+.verdict b{display:block;font-size:12px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px}
+@media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--card);padding:11px 12px}
+.st .v{font-family:var(--mono);font-size:17px;font-weight:700}
+.st .k{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.st .v.good{color:var(--live)} .st .v.bad{color:var(--kill)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.split{grid-template-columns:1fr}}
+.half{border:1px solid var(--line);border-radius:6px;padding:12px}
+.half h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;
+  padding-bottom:6px;border-bottom:1px solid var(--line)}
+.half h3 span{float:right;font-family:var(--mono);color:var(--muted)}
+.kv{display:flex;justify-content:space-between;padding:4px 0;font-size:12.5px;border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv span:last-child{font-family:var(--mono);font-weight:500}
+
+canvas{width:100%;height:190px;border:1px solid var(--line);border-radius:6px;background:#fff;display:block}
+.empty{padding:26px;text-align:center;color:var(--muted);font-size:13px}
+code{font-family:var(--mono);font-size:12px;background:#EEF2F6;padding:1px 5px;border-radius:3px}
+.note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px dotted var(--line)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header>
+  <div class="title">Edge Lab<small>measure it before you fund it</small></div>
+  <div class="counter">
+    <div class="cbox"><div class="v" id="cN">0</div><div class="k">Hypotheses tested</div></div>
+    <div class="cbox warn"><div class="v" id="cA">0.050</div><div class="k">Corrected &alpha;</div></div>
+    <div class="cbox"><div class="v" id="cF">0.00</div><div class="k">Expected false +</div></div>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-p="lab">Backtest</button>
+  <button role="tab" aria-selected="false" data-p="hyp">Hypotheses</button>
+  <button role="tab" aria-selected="false" data-p="jrn">Trade journal</button>
+  <button role="tab" aria-selected="false" data-p="box">Overfit sandbox</button>
+  <button role="tab" aria-selected="false" data-p="doc">Method</button>
+</nav>
+
+<!-- ================= BACKTEST ================= -->
+<section class="panel on" id="p-lab">
+  <div class="card">
+    <h2>1 · Data</h2>
+    <p class="hint">Paste CSV with a header row: <code>date,open,high,low,close</code>. Export from TradingView or Kraken. Or generate synthetic data to practise the workflow.</p>
+    <textarea id="csv" placeholder="date,open,high,low,close&#10;2024-01-01,42000,42800,41500,42600&#10;..."></textarea>
+    <div class="btns" style="margin-top:10px">
+      <button class="act" id="loadCsv">Load CSV</button>
+      <button class="act sec" id="genData">Generate synthetic (no edge exists)</button>
+    </div>
+    <div class="note" id="dataInfo">No data loaded.</div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Rule</h2>
+    <p class="hint">Log the hypothesis <em>before</em> you run it. That's what makes the result mean anything.</p>
+    <div class="row r2">
+      <div><label for="strat">Strategy</label>
+        <select id="strat">
+          <option value="ma">MA crossover (trend)</option>
+          <option value="rsi">RSI oversold (mean reversion)</option>
+          <option value="brk">N-day breakout</option>
+        </select></div>
+      <div><label for="split">In-sample share</label>
+        <select id="split"><option value="0.7">70% build / 30% held out</option>
+          <option value="0.6">60% build / 40% held out</option>
+          <option value="0.5">50% build / 50% held out</option></select></div>
+    </div>
+    <div class="row r4" id="params"></div>
+    <div class="row r4">
+      <div><label for="tgt">Target %</label><input type="number" id="tgt" value="10" step="0.5"></div>
+      <div><label for="stp">Stop %</label><input type="number" id="stp" value="5" step="0.5"></div>
+      <div><label for="hold">Max hold (bars)</label><input type="number" id="hold" value="30" step="1"></div>
+      <div><label for="cost">Cost % round trip</label><input type="number" id="cost" value="0.5" step="0.05"></div>
+    </div>
+    <div><label for="note">Why should this work? (required)</label>
+      <textarea id="note" placeholder="State the mechanism. 'It backtested well' is not a mechanism."></textarea></div>
+    <div class="btns" style="margin-top:12px">
+      <button class="act" id="run">Log hypothesis &amp; run</button>
+      <button class="act sec" id="runQuiet">Run without logging (exploration)</button>
+    </div>
+  </div>
+
+  <div class="card" id="resCard" style="display:none">
+    <h2>3 · Result</h2>
+    <p class="hint">The held-out column is the only one that counts. If the two disagree, believe the right one.</p>
+    <div class="split">
+      <div class="half"><h3>In-sample <span id="isN"></span></h3><div id="isBody"></div></div>
+      <div class="half"><h3>Held out <span id="osN"></span></h3><div id="osBody"></div></div>
+    </div>
+    <canvas id="eq"></canvas>
+    <div id="verdict"></div>
+  </div>
+</section>
+
+<!-- ================= HYPOTHESES ================= -->
+<section class="panel" id="p-hyp">
+  <div class="card">
+    <h2>Hypothesis register</h2>
+    <p class="hint">Every rule you test, permanently. The count is what corrects your significance threshold — you cannot un-test a hypothesis.</p>
+    <div id="hypList"></div>
+    <div class="btns" style="margin-top:12px"><button class="act sec" id="clrHyp">Clear register</button></div>
+  </div>
+</section>
+
+<!-- ================= JOURNAL ================= -->
+<section class="panel" id="p-jrn">
+  <div class="card">
+    <h2>Log a live trade</h2>
+    <p class="hint">Record the fill you expected and the fill you got. That gap is what turns a working backtest into a losing strategy.</p>
+    <div class="row r4">
+      <div><label for="jSym">Symbol</label><input id="jSym" placeholder="BTC/USD"></div>
+      <div><label for="jRule">Rule ID</label><input id="jRule" placeholder="H-003"></div>
+      <div><label for="jSize">Size $</label><input type="number" id="jSize" value="500"></div>
+      <div><label for="jDir">Direction</label><select id="jDir"><option>Long</option><option>Short</option></select></div>
+    </div>
+    <div class="row r4">
+      <div><label for="jExp">Expected entry</label><input type="number" id="jExp" step="any"></div>
+      <div><label for="jAct">Actual entry</label><input type="number" id="jAct" step="any"></div>
+      <div><label for="jExit">Exit price</label><input type="number" id="jExit" step="any"></div>
+      <div><label for="jFee">Fees $</label><input type="number" id="jFee" value="0" step="any"></div>
+    </div>
+    <div class="btns"><button class="act" id="addTrade">Add trade</button></div>
+  </div>
+  <div class="card">
+    <h2>Record</h2>
+    <div class="stats" id="jStats"></div>
+    <div id="jTable"></div>
+    <div id="jVerdict"></div>
+    <div class="btns" style="margin-top:12px"><button class="act sec" id="clrJrn">Clear journal</button></div>
+  </div>
+</section>
+
+<!-- ================= SANDBOX ================= -->
+<section class="panel" id="p-box">
+  <div class="card">
+    <h2>Overfitting sandbox</h2>
+    <p class="hint">Searches random rules on data where <strong>no edge can exist</strong> — a pure random walk. Whatever the winner scores in-sample is the amount of self-deception available to you at that search count.</p>
+    <div class="row r3">
+      <div><label for="sN">Rules to search</label><input type="number" id="sN" value="200" min="10" max="2000" step="10"></div>
+      <div><label for="sBars">Bars per series</label><input type="number" id="sBars" value="800" min="200" max="3000" step="100"></div>
+      <div><label for="sOOS">Fresh series to validate on</label><input type="number" id="sOOS" value="40" min="5" max="200" step="5"></div>
+    </div>
+    <div class="btns"><button class="act" id="runBox">Run search</button></div>
+    <div id="boxOut"></div>
+  </div>
+</section>
+
+<!-- ================= METHOD ================= -->
+<section class="panel" id="p-doc">
+  <div class="card">
+    <h2>The method</h2>
+    <div id="docBody"></div>
+  </div>
+</section>
+
+</div>
+<script>
+/* ---------- storage ---------- */
+const S={
+  async get(k,d){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):d;}catch(e){return d;}},
+  async set(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch(e){console.error('save failed',e);}}
+};
+let HYP=[], TRADES=[];
+
+/* ---------- stats helpers ---------- */
+const Z=1.96;
+function wilson(w,n){
+  if(!n) return [0,0];
+  const p=w/n, d=1+Z*Z/n;
+  const c=(p+Z*Z/(2*n))/d;
+  const h=(Z/d)*Math.sqrt(p*(1-p)/n + Z*Z/(4*n*n));
+  return [Math.max(0,c-h),Math.min(1,c+h)];
+}
+function breakeven(tgt,stp,cost){
+  const w=tgt-cost, l=stp+cost;
+  return (w+l)<=0?1:l/(w+l);
+}
+function sampleNeeded(p1,p0){
+  if(p1<=p0) return Infinity;
+  return Math.ceil(Math.pow(1.645+0.8416,2)*p1*(1-p1)/Math.pow(p1-p0,2));
+}
+const pct=x=>(x*100).toFixed(1)+'%';
+const usd=x=>'$'+x.toLocaleString(undefined,{maximumFractionDigits:0});
+
+/* ---------- indicators ---------- */
+function sma(a,n){const o=Array(a.length).fill(null);let s=0;
+  for(let i=0;i<a.length;i++){s+=a[i];if(i>=n)s-=a[i-n];if(i>=n-1)o[i]=s/n;}return o;}
+function rsi(c,n){const o=Array(c.length).fill(null);let g=0,l=0;
+  for(let i=1;i<c.length;i++){const d=c[i]-c[i-1];
+    const up=d>0?d:0, dn=d<0?-d:0;
+    if(i<=n){g+=up;l+=dn;if(i===n){g/=n;l/=n;o[i]=l===0?100:100-100/(1+g/l);}}
+    else{g=(g*(n-1)+up)/n;l=(l*(n-1)+dn)/n;o[i]=l===0?100:100-100/(1+g/l);}}
+  return o;}
+
+/* ---------- signals ---------- */
+function signal(bars,strat,p){
+  const c=bars.map(b=>b.c), n=bars.length, sig=Array(n).fill(0);
+  if(strat==='ma'){
+    const f=sma(c,p.fast), s=sma(c,p.slow);
+    for(let i=0;i<n;i++) if(f[i]!=null&&s[i]!=null&&f[i]>s[i]*(1+p.thr/100)) sig[i]=1;
+  } else if(strat==='rsi'){
+    const r=rsi(c,p.per);
+    for(let i=0;i<n;i++) if(r[i]!=null&&r[i]<p.os) sig[i]=1;
+  } else {
+    for(let i=p.look;i<n;i++){
+      let mx=-Infinity; for(let j=i-p.look;j<i;j++) mx=Math.max(mx,bars[j].h);
+      if(c[i]>mx) sig[i]=1;
+    }
+  }
+  return sig;
+}
+
+/* ---------- backtest engine ---------- */
+function backtest(bars,strat,p,cfg){
+  const sig=signal(bars,strat,p), tr=[]; let pos=null;
+  for(let i=1;i<bars.length;i++){
+    if(!pos){
+      if(sig[i]===1&&sig[i-1]===0) pos={e:bars[i].c,i:i};
+    } else {
+      const tgt=pos.e*(1+cfg.tgt), stp=pos.e*(1-cfg.stp);
+      let x=null,w=null;
+      if(bars[i].l<=stp){x=stp;w='stop';}          // conservative: stop wins ties
+      else if(bars[i].h>=tgt){x=tgt;w='target';}
+      else if(i-pos.i>=cfg.hold){x=bars[i].c;w='time';}
+      if(x!==null){tr.push({r:(x-pos.e)/pos.e-cfg.cost,w:w});pos=null;}
+    }
+  }
+  return tr;
+}
+function summarize(tr,cfg){
+  const n=tr.length;
+  if(!n) return {n:0};
+  const wins=tr.filter(t=>t.r>0).length;
+  let eq=1,peak=1,dd=0; const curve=[1];
+  tr.forEach(t=>{eq*=(1+t.r);peak=Math.max(peak,eq);dd=Math.max(dd,(peak-eq)/peak);curve.push(eq);});
+  const ci=wilson(wins,n);
+  return {n,wins,wr:wins/n,ci,exp:tr.reduce((a,t)=>a+t.r,0)/n,total:eq-1,dd,curve,
+          be:breakeven(cfg.tgt,cfg.stp,cfg.cost)};
+}
+
+/* ---------- data ---------- */
+let BARS=null;
+function synth(n,seed){
+  let s=seed||Math.floor(Math.random()*1e9);
+  const rnd=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
+  const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const bars=[];let px=100;
+  for(let i=0;i<n;i++){
+    const o=px, r=gauss()*0.03; px=px*Math.exp(r);
+    const hi=Math.max(o,px)*(1+Math.abs(gauss())*0.006);
+    const lo=Math.min(o,px)*(1-Math.abs(gauss())*0.006);
+    bars.push({d:'syn'+i,o:o,h:hi,l:lo,c:px});
+  }
+  return bars;
+}
+function parseCsv(txt){
+  const lines=txt.trim().split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<20) throw new Error('need at least 20 rows');
+  const head=lines[0].toLowerCase().split(',').map(s=>s.trim());
+  const ix={d:head.indexOf('date'),o:head.indexOf('open'),h:head.indexOf('high'),
+            l:head.indexOf('low'),c:head.indexOf('close')};
+  if(ix.c<0) throw new Error('missing a "close" column');
+  const out=[];
+  for(let i=1;i<lines.length;i++){
+    const p=lines[i].split(',');
+    const c=parseFloat(p[ix.c]); if(!isFinite(c)) continue;
+    out.push({d:ix.d>=0?p[ix.d]:String(i),
+      o:ix.o>=0?parseFloat(p[ix.o])||c:c,
+      h:ix.h>=0?parseFloat(p[ix.h])||c:c,
+      l:ix.l>=0?parseFloat(p[ix.l])||c:c, c:c});
+  }
+  if(out.length<20) throw new Error('parsed fewer than 20 valid rows');
+  return out;
+}
+
+/* ---------- param forms ---------- */
+const PARAMS={
+  ma:[['fast','Fast MA',10],['slow','Slow MA',50],['thr','Threshold %',0.5]],
+  rsi:[['per','RSI period',14],['os','Oversold below',30]],
+  brk:[['look','Lookback bars',20]]
+};
+function drawParams(){
+  const s=document.getElementById('strat').value;
+  document.getElementById('params').innerHTML=PARAMS[s].map(([k,lab,v])=>
+    `<div><label for="pp_${k}">${lab}</label><input type="number" id="pp_${k}" value="${v}" step="any"></div>`).join('');
+}
+function readParams(){
+  const s=document.getElementById('strat').value, o={};
+  PARAMS[s].forEach(([k])=>o[k]=parseFloat(document.getElementById('pp_'+k).value));
+  return o;
+}
+
+/* ---------- counter ---------- */
+function refreshCounter(){
+  const n=HYP.length;
+  document.getElementById('cN').textContent=n;
+  const a=n?0.05/n:0.05;
+  document.getElementById('cA').textContent=a.toFixed(4);
+  document.getElementById('cF').textContent=(n*0.05).toFixed(2);
+}
+
+/* ---------- render backtest ---------- */
+function half(sm,cfg){
+  if(!sm.n) return '<div class="empty">No trades generated.</div>';
+  const beat=sm.ci[0]>sm.be;
+  return `
+  <div class="kv"><span>Trades</span><span>${sm.n}</span></div>
+  <div class="kv"><span>Win rate</span><span>${pct(sm.wr)}</span></div>
+  <div class="kv"><span>95% CI</span><span>${pct(sm.ci[0])} – ${pct(sm.ci[1])}</span></div>
+  <div class="kv"><span>Breakeven needed</span><span>${pct(sm.be)}</span></div>
+  <div class="kv"><span>Expectancy / trade</span><span style="color:${sm.exp>0?'var(--live)':'var(--kill)'}">${(sm.exp*100).toFixed(2)}%</span></div>
+  <div class="kv"><span>Compounded</span><span style="color:${sm.total>0?'var(--live)':'var(--kill)'}">${(sm.total*100).toFixed(1)}%</span></div>
+  <div class="kv"><span>Max drawdown</span><span>${pct(sm.dd)}</span></div>
+  <div class="kv"><span>CI clears breakeven</span><span>${beat?'yes':'no'}</span></div>`;
+}
+function drawEq(a,b){
+  const cv=document.getElementById('eq'), dpr=devicePixelRatio||1;
+  const w=cv.clientWidth, h=190; cv.width=w*dpr; cv.height=h*dpr;
+  const x=cv.getContext('2d'); x.scale(dpr,dpr); x.clearRect(0,0,w,h);
+  const all=[...(a.curve||[1]),...(b.curve||[1])];
+  const mn=Math.min(...all,0.9), mx=Math.max(...all,1.1);
+  const Y=v=>h-12-((v-mn)/(mx-mn))*(h-28);
+  x.strokeStyle='#C3CEDA';x.lineWidth=1;x.beginPath();x.moveTo(0,Y(1));x.lineTo(w,Y(1));x.stroke();
+  [[a.curve,'#16233A'],[b.curve,'#A3282A']].forEach(([c,col])=>{
+    if(!c||c.length<2)return;
+    x.strokeStyle=col;x.lineWidth=1.8;x.beginPath();
+    c.forEach((v,i)=>{const px=(i/(c.length-1))*(w-6)+3;i?x.lineTo(px,Y(v)):x.moveTo(px,Y(v));});
+    x.stroke();});
+  x.font='10px JetBrains Mono';x.fillStyle='#16233A';x.fillText('in-sample',8,14);
+  x.fillStyle='#A3282A';x.fillText('held out',72,14);
+}
+function verdict(is,os){
+  const el=document.getElementById('verdict');
+  if(!os.n||os.n<10){
+    el.className='verdict weak';
+    el.innerHTML=`<b>Inconclusive</b>Only ${os.n||0} held-out trades. You cannot evaluate a rule on this. Get more data or widen the rule — do not proceed on the in-sample number.`;
+    return;
+  }
+  const need=sampleNeeded(Math.max(os.wr,os.be+0.001),os.be);
+  const clears=os.ci[0]>os.be;
+  const alpha=HYP.length?0.05/HYP.length:0.05;
+  if(clears){
+    el.className='verdict pass';
+    el.innerHTML=`<b>Survives — provisionally</b>Held-out lower CI bound (${pct(os.ci[0])}) clears breakeven (${pct(os.be)}) on ${os.n} trades. With ${HYP.length} hypotheses registered your corrected threshold is α=${alpha.toFixed(4)}, so treat this as a candidate, not a conclusion. Next step is small live size and a slippage log — not funding it.`;
+  } else {
+    el.className='verdict fail';
+    el.innerHTML=`<b>No evidence of edge</b>Held-out CI (${pct(os.ci[0])}–${pct(os.ci[1])}) includes the breakeven rate of ${pct(os.be)}. At this win rate you would need roughly ${isFinite(need)?need.toLocaleString():'∞'} trades to distinguish it from noise. In-sample scored ${pct(is.wr)} — that gap is the cost of searching. Kill it and log the kill.`;
+  }
+}
+
+async function run(log){
+  if(!BARS){alert('Load or generate data first.');return;}
+  const strat=document.getElementById('strat').value, p=readParams();
+  const cfg={tgt:parseFloat(tgt.value)/100,stp:parseFloat(stp.value)/100,
+             hold:parseInt(hold.value),cost:parseFloat(cost.value)/100};
+  const sp=parseFloat(document.getElementById('split').value);
+  const cut=Math.floor(BARS.length*sp);
+  const A=summarize(backtest(BARS.slice(0,cut),strat,p,cfg),cfg);
+  const B=summarize(backtest(BARS.slice(cut),strat,p,cfg),cfg);
+  if(log){
+    const why=document.getElementById('note').value.trim();
+    if(!why){alert('State the mechanism first. That field is the whole point.');return;}
+    HYP.push({id:'H-'+String(HYP.length+1).padStart(3,'0'),t:new Date().toISOString().slice(0,10),
+      strat:strat,p:p,cfg:{tgt:tgt.value,stp:stp.value,cost:cost.value},why:why,
+      is:A.n?A.wr:null,os:B.n?B.wr:null,n:B.n,
+      status:(B.n>=10&&B.ci[0]>B.be)?'live':'kill'});
+    await S.set('hyp',HYP); refreshCounter(); renderHyp();
+  }
+  document.getElementById('resCard').style.display='block';
+  document.getElementById('isN').textContent=A.n+' trades';
+  document.getElementById('osN').textContent=B.n+' trades';
+  document.getElementById('isBody').innerHTML=half(A,cfg);
+  document.getElementById('osBody').innerHTML=half(B,cfg);
+  drawEq(A,B); verdict(A,B);
+  document.getElementById('resCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- hypotheses ---------- */
+function renderHyp(){
+  const el=document.getElementById('hypList');
+  if(!HYP.length){el.innerHTML='<div class="empty">Nothing registered yet. The counter stays honest only if you log every test.</div>';return;}
+  el.innerHTML=`<table><thead><tr><th>ID</th><th>Date</th><th>Rule</th><th class="n">In-sample</th>
+    <th class="n">Held out</th><th class="n">n</th><th>Status</th></tr></thead><tbody>`+
+    HYP.slice().reverse().map(h=>`<tr>
+      <td class="n">${h.id}</td><td class="n">${h.t}</td>
+      <td>${h.strat.toUpperCase()} ${Object.entries(h.p).map(([k,v])=>k+'='+v).join(' ')}<br>
+        <span style="color:var(--muted);font-size:11.5px">${h.why.slice(0,90)}${h.why.length>90?'…':''}</span></td>
+      <td class="n">${h.is==null?'—':pct(h.is)}</td>
+      <td class="n">${h.os==null?'—':pct(h.os)}</td>
+      <td class="n">${h.n}</td>
+      <td><span class="tag ${h.status==='live'?'live':'kill'}">${h.status==='live'?'candidate':'killed'}</span></td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+/* ---------- journal ---------- */
+function renderJrn(){
+  const st=document.getElementById('jStats'), tb=document.getElementById('jTable'),
+        vd=document.getElementById('jVerdict');
+  if(!TRADES.length){
+    st.innerHTML=''; tb.innerHTML='<div class="empty">No live trades logged.</div>'; vd.innerHTML=''; return;}
+  const n=TRADES.length, wins=TRADES.filter(t=>t.pnl>0).length;
+  const pnl=TRADES.reduce((a,t)=>a+t.pnl,0);
+  const slip=TRADES.reduce((a,t)=>a+t.slip,0)/n;
+  const ci=wilson(wins,n);
+  st.innerHTML=`
+    <div class="st"><div class="v">${n}</div><div class="k">Trades</div></div>
+    <div class="st"><div class="v">${pct(wins/n)}</div><div class="k">Win rate</div></div>
+    <div class="st"><div class="v ${pnl>=0?'good':'bad'}">${usd(pnl)}</div><div class="k">Net P&amp;L</div></div>
+    <div class="st"><div class="v ${slip<=0.1?'good':'bad'}">${slip.toFixed(2)}%</div><div class="k">Avg slippage</div></div>`;
+  tb.innerHTML=`<table><thead><tr><th>Date</th><th>Symbol</th><th>Rule</th><th class="n">Slip %</th>
+    <th class="n">P&amp;L</th></tr></thead><tbody>`+
+    TRADES.slice().reverse().map(t=>`<tr><td class="n">${t.d}</td><td>${t.sym}</td><td class="n">${t.rule||'—'}</td>
+      <td class="n" style="color:${t.slip>0.2?'var(--kill)':'inherit'}">${t.slip.toFixed(2)}</td>
+      <td class="n" style="color:${t.pnl>=0?'var(--live)':'var(--kill)'}">${usd(t.pnl)}</td></tr>`).join('')+'</tbody></table>';
+  const need=sampleNeeded(Math.max(wins/n,0.501),0.50);
+  vd.className='verdict '+(n<30?'weak':(ci[0]>0.5?'pass':'fail'));
+  vd.innerHTML=n<30
+    ? `<b>Too early to read</b>${n} trades. Your 95% CI is ${pct(ci[0])}–${pct(ci[1])} — wide enough to contain almost anything. Keep logging; don't conclude.`
+    : (ci[0]>0.5
+      ? `<b>Signal, not proof</b>CI ${pct(ci[0])}–${pct(ci[1])} sits above a coin flip over ${n} trades. To confirm at this rate you'd want about ${isFinite(need)?need.toLocaleString():'∞'} trades total.`
+      : `<b>Indistinguishable from chance</b>CI ${pct(ci[0])}–${pct(ci[1])} includes 50%. After ${n} trades there is still no evidence of edge. Average slippage of ${slip.toFixed(2)}% is the first thing to attack.`);
+}
+
+/* ---------- sandbox ---------- */
+function runSandbox(){
+  const N=parseInt(sN.value), bars=parseInt(sBars.value), oosN=parseInt(sOOS.value);
+  const out=document.getElementById('boxOut');
+  out.innerHTML='<div class="empty">Searching…</div>';
+  setTimeout(()=>{
+    const IS=synth(bars,12345);
+    const cfg={tgt:0.10,stp:0.05,hold:30,cost:0.005};
+    const res=[];
+    for(let i=0;i<N;i++){
+      const p={fast:3+Math.floor(Math.random()*25),slow:31+Math.floor(Math.random()*110),
+               thr:Math.random()*2};
+      const s=summarize(backtest(IS,'ma',p,cfg),cfg);
+      if(s.n>=8) res.push({s:s,p:p});
+    }
+    if(!res.length){out.innerHTML='<div class="empty">No rule produced enough trades. Raise bars per series.</div>';return;}
+    res.sort((a,b)=>b.s.total-a.s.total);
+    const oosSeries=Array.from({length:oosN},(_,k)=>synth(bars,900000+k*7919));
+    const top=res.slice(0,Math.min(5,res.length)).map(r=>{
+      const vals=oosSeries.map(S2=>summarize(backtest(S2,'ma',r.p,cfg),cfg)).filter(x=>x.n);
+      const avg=vals.length?vals.reduce((a,x)=>a+x.total,0)/vals.length:0;
+      return {p:r.p,is:r.s.total,os:avg,wr:r.s.wr};
+    });
+    const avgOS=top.reduce((a,t)=>a+t.os,0)/top.length;
+    out.innerHTML=`
+      <div class="stats" style="margin-top:14px">
+        <div class="st"><div class="v">${res.length}</div><div class="k">Rules with enough trades</div></div>
+        <div class="st"><div class="v good">${(top[0].is*100).toFixed(1)}%</div><div class="k">Best in-sample</div></div>
+        <div class="st"><div class="v">${pct(top[0].wr)}</div><div class="k">Its win rate</div></div>
+        <div class="st"><div class="v ${avgOS<0?'bad':''}">${(avgOS*100).toFixed(1)}%</div><div class="k">Top-5 avg out-of-sample</div></div>
+      </div>
+      <table><thead><tr><th>Rank</th><th>Parameters</th><th class="n">In-sample</th><th class="n">Out-of-sample</th></tr></thead><tbody>`+
+      top.map((t,i)=>`<tr><td class="n">${i+1}</td>
+        <td class="n">fast=${t.p.fast} slow=${t.p.slow} thr=${t.p.thr.toFixed(2)}</td>
+        <td class="n" style="color:var(--live)">${(t.is*100).toFixed(1)}%</td>
+        <td class="n" style="color:${t.os<0?'var(--kill)':'inherit'}">${(t.os*100).toFixed(1)}%</td></tr>`).join('')+
+      `</tbody></table>
+      <div class="verdict fail"><b>What you just watched</b>The underlying data is a driftless random walk — there is no pattern to find, by construction. Searching ${N} rules still produced a winner scoring ${(top[0].is*100).toFixed(1)}%. Out-of-sample it averages ${(avgOS*100).toFixed(1)}%. Raise the search count and the in-sample number gets better while the out-of-sample number does not. That difference is exactly what you'd be funding.</div>`;
+  },30);
+}
+
+/* ---------- method doc ---------- */
+document.getElementById('docBody').innerHTML=`
+<div class="kv"><span><strong>Phase 1 — Register before you test</strong></span><span>weeks 1–4</span></div>
+<p class="hint" style="margin:6px 0 14px">Write the rule and the mechanism down first. Every test increments the counter in the header, which divides your significance threshold. Twenty hypotheses means α=0.0025, not 0.05. You cannot un-test something, so logging honestly is the only version that works.</p>
+<div class="kv"><span><strong>Phase 2 — Hold data back</strong></span><span>months 1–6</span></div>
+<p class="hint" style="margin:6px 0 14px">Build on the first 70%, validate on the last 30%, and treat the held-out slice as spent once you've looked. If you tune parameters after seeing it, it is now in-sample and you have no validation left. Kill rules fast; a killed rule is information, a kept-but-unvalidated rule is a liability.</p>
+<div class="kv"><span><strong>Phase 3 — Live small, log slippage</strong></span><span>months 6–18</span></div>
+<p class="hint" style="margin:6px 0 14px">Backtests fill at prices you may never get. Trade minimum size and record expected vs actual fill on every entry. Slippage above roughly 0.2% per side will quietly delete most retail edges. This phase also builds the thing no backtest can: evidence you follow your own rules during a drawdown.</p>
+<div class="kv"><span><strong>Phase 4 — Scale decision</strong></span><span>at exit</span></div>
+<p class="hint" style="margin:6px 0 14px">Deploy real capital only on rules with held-out <em>and</em> live evidence. Two cautions: strategies that depend on small size break exactly when you finally have capital, and a 10% drawdown that costs $500 today costs $25,000 on $250K — same percentage, different sleep.</p>
+<div class="note">This tool measures. It does not predict, and it isn't financial advice. Its main job is telling you when you don't know something yet — which will be most of the time, and is the correct answer.</div>`;
+
+/* ---------- wiring ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected','false'));
+  b.setAttribute('aria-selected','true');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+b.dataset.p).classList.add('on');
+}));
+document.getElementById('strat').addEventListener('change',drawParams);
+document.getElementById('run').addEventListener('click',()=>run(true));
+document.getElementById('runQuiet').addEventListener('click',()=>run(false));
+document.getElementById('runBox').addEventListener('click',runSandbox);
+document.getElementById('genData').addEventListener('click',()=>{
+  BARS=synth(900); document.getElementById('dataInfo').innerHTML=
+   `<strong>900 synthetic bars loaded.</strong> Driftless random walk — no edge exists in this data. Anything you find here is noise, which makes it the safest place to learn the workflow.`;});
+document.getElementById('loadCsv').addEventListener('click',()=>{
+  try{BARS=parseCsv(document.getElementById('csv').value);
+    document.getElementById('dataInfo').innerHTML=
+      `<strong>${BARS.length} bars loaded</strong> — ${BARS[0].d} to ${BARS[BARS.length-1].d}.`;
+  }catch(e){document.getElementById('dataInfo').innerHTML=
+    `<span style="color:var(--kill)"><strong>Could not parse:</strong> ${e.message}</span>`;}});
+document.getElementById('addTrade').addEventListener('click',async()=>{
+  const exp=parseFloat(jExp.value), act=parseFloat(jAct.value), ex=parseFloat(jExit.value),
+        sz=parseFloat(jSize.value), fee=parseFloat(jFee.value)||0;
+  if(![exp,act,ex,sz].every(isFinite)){alert('Fill in size, expected entry, actual entry and exit.');return;}
+  const dir=jDir.value==='Long'?1:-1;
+  const units=sz/act;
+  TRADES.push({d:new Date().toISOString().slice(0,10),sym:jSym.value||'—',rule:jRule.value,
+    slip:Math.abs(act-exp)/exp*100, pnl:dir*(ex-act)*units-fee});
+  await S.set('trades',TRADES); renderJrn();
+  [jExp,jAct,jExit].forEach(i=>i.value='');
+});
+document.getElementById('clrHyp').addEventListener('click',async()=>{
+  if(confirm('Clearing the register resets your correction factor and destroys the record. Sure?')){
+    HYP=[];await S.set('hyp',HYP);refreshCounter();renderHyp();}});
+document.getElementById('clrJrn').addEventListener('click',async()=>{
+  if(confirm('Delete all logged trades?')){TRADES=[];await S.set('trades',TRADES);renderJrn();}});
+
+(async()=>{
+  drawParams();
+  HYP=await S.get('hyp',[]); TRADES=await S.get('trades',[]);
+  refreshCounter(); renderHyp(); renderJrn();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+const {JSDOM}=require('jsdom');const fs=require('fs');
+const dom=new JSDOM(fs.readFileSync(__dirname+'/../edge-lab/strategy-lab.html','utf8'),{runScripts:'dangerously',pretendToBeVisual:true,beforeParse(w){w.HTMLCanvasElement.prototype.getContext=()=>new Proxy({},{get:()=>()=>{}});w.alert=()=>{};w.Element.prototype.scrollIntoView=()=>{}}});
+const d=dom.window.document;
+const mk=(n,tag)=>[...Array(n)].map((_,i)=>({id:'T-'+String(i+1).padStart(3,'0'),t:'2026-09-0'+tag,st:'ma',p:{fast:i},spent:45,why:'s'+tag,n:30}));
+(async()=>{await new Promise(r=>setTimeout(r,300));
+ const box=d.getElementById('manualSave'),btn=d.getElementById('impText');
+ box.value=JSON.stringify({format:'edge-lab',hyp:mk(2,'2'),trades:[]});btn.click();await new Promise(r=>setTimeout(r,100));
+ box.value=JSON.stringify({format:'edge-lab',hyp:mk(3,'1'),trades:[]});btn.click();await new Promise(r=>setTimeout(r,100));
+ box.value=JSON.stringify({format:'edge-lab',hyp:mk(3,'1'),trades:[]});btn.click();await new Promise(r=>setTimeout(r,100));
+ console.log('import test (expect 225 = 90+135, re-import deduped):',d.getElementById('ioOut').textContent.replace(/\s+/g,' '));process.exit(0)})();

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comal Automation — Document Chaser (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF7; --card:#FFFFFF; --ink:#17211C; --muted:#5E6A62;
+    --green:#1F4A38; --green-soft:#E7EFE9;
+    --red:#B3382C; --red-soft:#F7E9E6;
+    --amber:#8F6417; --amber-soft:#F5EDDA;
+    --line:#DDD9CE;
+    --sans:'Libre Franklin',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+
+  .topbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+    padding:14px 28px;border-bottom:2px solid var(--ink);background:var(--card)}
+  .brand{font-weight:800;letter-spacing:.14em;font-size:13px;text-transform:uppercase}
+  .brand span{color:var(--green)}
+  .demotag{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .demotag b{color:var(--ink);font-weight:600}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);background:var(--card)}
+  .stat{padding:18px 28px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  .stat .num{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.1}
+  .stat .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:4px}
+  .num.ok{color:var(--green)} .num.bad{color:var(--red)}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);gap:0;align-items:start}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.stat{border-bottom:1px solid var(--line)}}
+
+  .tablewrap{padding:22px 28px}
+  .tablehead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .tablehead h2{font-size:15px;font-weight:800;letter-spacing:.02em}
+  .toggle{font:inherit;font-size:12.5px;font-weight:600;color:var(--green);background:none;border:1px solid var(--green);
+    border-radius:99px;padding:5px 12px;cursor:pointer}
+  .toggle:hover,.toggle:focus-visible{background:var(--green-soft)}
+  .replaces{display:none;background:var(--green-soft);border:1px solid var(--green);border-radius:8px;
+    padding:12px 16px;margin:0 0 14px;font-size:13.5px}
+  .replaces.show{display:block}
+  .replaces b{font-weight:800}
+
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;
+    text-align:left;padding:8px 10px;border-bottom:2px solid var(--ink)}
+  td{padding:10px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+  tr.client{cursor:pointer}
+  tr.client:hover td{background:#F3F2EC}
+  tr.client.sel td{background:var(--green-soft)}
+  tr.client.sel td:first-child{box-shadow:inset 3px 0 0 var(--green)}
+  .cname{font-weight:600}
+  .mono{font-family:var(--mono);font-size:13px}
+  .days-hot{color:var(--red);font-weight:600}
+  .chip{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 9px;border-radius:99px;white-space:nowrap}
+  .chip.done{background:var(--green-soft);color:var(--green)}
+  .chip.rem{background:var(--amber-soft);color:var(--amber)}
+  .chip.esc{background:var(--red-soft);color:var(--red)}
+
+  .panel{border-left:1px solid var(--line);padding:22px 28px;background:var(--card);min-height:70vh}
+  @media(max-width:900px){.panel{border-left:0;border-top:2px solid var(--ink)}}
+  .panel h2{font-size:18px;font-weight:800}
+  .panel .sub{font-size:13px;color:var(--muted);margin:2px 0 16px}
+  .missing{margin:0 0 18px}
+  .missing .mlbl{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .doc{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .doc .st{font-family:var(--mono);font-size:12px}
+  .doc.in .st{color:var(--green)} .doc.out .st{color:var(--red)}
+
+  .tl .mlbl{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:8px}
+  .step{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:7px 0;font-size:13px;align-items:baseline}
+  .step .d{font-family:var(--mono);font-weight:600;font-size:12px}
+  .step.past .d{color:var(--green)}
+  .step.now .d{color:var(--amber)}
+  .step.future{color:var(--muted)}
+  .step.now .t{font-weight:600}
+
+  .draft{margin-top:20px;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden}
+  .drafthead{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;padding:8px 14px}
+  .drafthead span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .regen{font:inherit;font-size:11.5px;font-weight:600;color:var(--ink);background:#fff;border:0;border-radius:99px;
+    padding:4px 12px;cursor:pointer}
+  .regen:hover{background:var(--green-soft)}
+  .draftbody{padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.65;white-space:pre-wrap;min-height:210px}
+  .caret{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .draftfoot{padding:8px 16px 12px;font-size:11.5px;color:var(--muted);border-top:1px dashed var(--line)}
+
+  footer{padding:16px 28px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+  @media (prefers-reduced-motion:reduce){.caret{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">COMAL <span>AUTOMATION</span> · Document Chaser</div>
+  <div class="demotag">DEMO FIRM: <b>Hill Country Bookkeeping</b> · August 2026 close · day 25 · fictional data</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">14</div><div class="lbl">Clients in close</div></div>
+  <div class="stat"><div class="num ok">9</div><div class="lbl">Fully documented</div></div>
+  <div class="stat"><div class="num bad">23</div><div class="lbl">Documents outstanding</div></div>
+  <div class="stat"><div class="num">0<span style="font-size:16px"> hrs</span></div><div class="lbl">Staff time spent chasing</div></div>
+</div>
+
+<div class="layout">
+  <div class="tablewrap">
+    <div class="tablehead">
+      <h2>Monthly close — document status</h2>
+      <button class="toggle" id="repBtn" aria-expanded="false">What this replaces</button>
+    </div>
+    <div class="replaces" id="repBox">
+      <b>Replaces:</b> ~45 min/day of manual reminder emails · the "did we ever get their payroll report?" hunt ·
+      spreadsheet checklists nobody updates · the day-28 shoebox scramble. Escalations reach a human only after
+      three automated attempts fail.
+    </div>
+    <table id="tbl">
+      <thead><tr><th>Client</th><th>Missing</th><th>Waiting</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <aside class="panel">
+    <h2 id="pName"></h2>
+    <div class="sub" id="pSub"></div>
+
+    <div class="missing">
+      <div class="mlbl">Document checklist — August</div>
+      <div id="pDocs"></div>
+    </div>
+
+    <div class="tl">
+      <div class="mlbl">Automated follow-up timeline</div>
+      <div id="pTl"></div>
+    </div>
+
+    <div class="draft">
+      <div class="drafthead">
+        <span>Next reminder — drafted for approval</span>
+        <button class="regen" id="regen">Regenerate</button>
+      </div>
+      <div class="draftbody" id="draft"></div>
+      <div class="draftfoot">Sent from the firm's own email address · template approved by the firm · never sends without the cadence rules you set</div>
+    </div>
+  </aside>
+</div>
+
+<footer>Comal Automation — demo environment. All firm names, clients, and data on this page are fictional.</footer>
+
+<script>
+const CLIENTS=[
+ {n:"Lone Star Landscaping",c:"Danny",days:6,st:"rem",docs:[["July bank statement",0],["Fuel & equipment receipts",0],["Credit card statement",1],["Payroll report",1]]},
+ {n:"Bluebonnet Dental",c:"Priya",days:0,st:"done",docs:[["July bank statement",1],["Merchant deposits report",1],["Payroll report",1]]},
+ {n:"Guadalupe Outfitters",c:"Marcus",days:9,st:"rem",docs:[["July bank statement",0],["Square sales export",0],["Sales tax detail",1]]},
+ {n:"Mesquite BBQ Supply",c:"Rae",days:12,st:"esc",docs:[["July bank statement",0],["Vendor invoices (3)",0],["Credit card statement",0],["Inventory count sheet",0]]},
+ {n:"Cedar Park Physical Therapy",c:"Tom",days:0,st:"done",docs:[["July bank statement",1],["Insurance remittances",1],["Payroll report",1]]},
+ {n:"Alamo City Electric",c:"Luis",days:4,st:"rem",docs:[["Job costing sheet",0],["July bank statement",1],["Fuel receipts",0]]},
+ {n:"Pecan Street Coffee",c:"Amara",days:0,st:"done",docs:[["Toast POS export",1],["July bank statement",1]]},
+ {n:"Hondo Freight Services",c:"Bill",days:3,st:"rem",docs:[["Fuel card statement",0],["July bank statement",1],["Driver settlements",1]]},
+ {n:"Wimberley Wellness Spa",c:"Dana",days:0,st:"done",docs:[["July bank statement",1],["Gift card liability report",1]]},
+ {n:"Brazos Valley Pools",c:"Kent",days:0,st:"done",docs:[["July bank statement",1],["Chemical supplier invoices",1],["Payroll report",1]]},
+ {n:"Kyle Auto Body",c:"Sofia",days:0,st:"done",docs:[["July bank statement",1],["Parts invoices",1]]},
+ {n:"Marfa Print Co.",c:"Jesse",days:0,st:"done",docs:[["July bank statement",1],["Stripe payout report",1]]},
+ {n:"Boerne Pet Clinic",c:"Nadia",days:0,st:"done",docs:[["July bank statement",1],["Payroll report",1]]},
+ {n:"Salado Interiors",c:"Grace",days:0,st:"done",docs:[["July bank statement",1],["Client deposits ledger",1]]}
+];
+const CHIP={done:['done','Complete'],rem:['rem','Reminding'],esc:['esc','Escalated']};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let sel=0, variant=0, typer=null;
+
+function outstanding(cl){return cl.docs.filter(d=>!d[1]).map(d=>d[0]);}
+
+function drafts(cl){
+ const miss=outstanding(cl); const list=miss.map(m=>"  • "+m).join("\n");
+ return [
+`Subject: ${cl.n} — ${miss.length} item${miss.length>1?'s':''} left for your July books
+
+Hi ${cl.c},
+
+Quick nudge from Hill Country Bookkeeping — we're closing out
+July and just need the following from you:
+
+${list}
+
+Reply to this email with the files attached, or drop them in
+your usual shared folder and we'll take it from there.
+
+Once these are in, your July financials go out on schedule.
+
+Thanks!
+Hill Country Bookkeeping`,
+`Subject: Almost done with July — just need ${miss.length} thing${miss.length>1?'s':''}
+
+Hi ${cl.c},
+
+Good news: your July close is nearly wrapped. The only items
+still outstanding on our end:
+
+${list}
+
+Whenever you have two minutes today or tomorrow, send them
+over and we'll finish up. If anything is hard to pull, just
+reply and tell us — we can usually work around it.
+
+Hill Country Bookkeeping`,
+`Subject: July books — holding on ${miss.length} item${miss.length>1?'s':''} (day ${cl.days})
+
+Hi ${cl.c},
+
+Third time's the charm — we still can't finalize July without:
+
+${list}
+
+If these don't come through in the next few days, ${"Hill Country's"}
+owner will reach out personally to sort out what's stuck. We'd
+love to save you both that email.
+
+Hill Country Bookkeeping`];
+}
+
+function typeInto(el,text){
+ if(typer)clearInterval(typer);
+ if(reduced){el.textContent=text;return;}
+ el.innerHTML=''; const caret=document.createElement('span'); caret.className='caret';
+ el.appendChild(caret); let i=0;
+ typer=setInterval(()=>{
+   caret.insertAdjacentText('beforebegin',text.slice(i,i+3)); i+=3;
+   if(i>=text.length){clearInterval(typer);typer=null;}
+ },14);
+}
+
+function renderPanel(){
+ const cl=CLIENTS[sel]; const miss=outstanding(cl);
+ document.getElementById('pName').textContent=cl.n;
+ document.getElementById('pSub').textContent = cl.st==='done'
+   ? `Contact: ${cl.c} · all documents received — no action needed`
+   : `Contact: ${cl.c} · ${miss.length} item${miss.length>1?'s':''} outstanding · waiting ${cl.days} day${cl.days>1?'s':''}`;
+ document.getElementById('pDocs').innerHTML = cl.docs.map(d=>
+   `<div class="doc ${d[1]?'in':'out'}"><span>${d[0]}</span><span class="st">${d[1]?'RECEIVED':'MISSING'}</span></div>`).join('');
+ const steps=[[0,'Document request sent automatically'],[3,'Friendly nudge — lists exactly what\u2019s missing'],[7,'Firmer reminder — flags the close deadline'],[10,'Escalates to firm owner with full history']];
+ document.getElementById('pTl').innerHTML = steps.map(s=>{
+   let cls='future';
+   if(cl.st==='done'){cls = s[0]===0?'past':'future';}
+   else if(cl.days>s[0])cls='past'; else if(cl.days===s[0]||(cl.days>=s[0]-1&&cl.days<s[0]))cls= cl.days>=s[0]?'past':'future';
+   if(cl.st!=='done' && s[0]<=cl.days) cls='past';
+   if(cl.st!=='done'){const next=steps.find(x=>x[0]>cl.days); if(next&&s[0]===next[0])cls='now';}
+   return `<div class="step ${cls}"><span class="d">DAY ${s[0]}</span><span class="t">${s[1]}</span></div>`;}).join('');
+ const box=document.getElementById('draft');
+ if(cl.st==='done'){ if(typer)clearInterval(typer);
+   box.textContent="Nothing to send — "+cl.n+" is fully documented.\n\nThe system stays quiet when clients are on top of things.\nNo reminder fatigue, no noise.";
+ } else {
+   const set=drafts(cl); typeInto(box,set[Math.min(variant, cl.st==='esc'?2:1)]);
+ }
+}
+
+function renderTable(){
+ const tb=document.querySelector('#tbl tbody');
+ tb.innerHTML=CLIENTS.map((cl,i)=>{
+  const miss=outstanding(cl).length; const chip=CHIP[cl.st];
+  return `<tr class="client ${i===sel?'sel':''}" data-i="${i}" tabindex="0">
+   <td class="cname">${cl.n}</td>
+   <td class="mono">${miss?miss+' docs':'\u2713 all in'}</td>
+   <td class="mono ${cl.days>=7?'days-hot':''}">${cl.days?cl.days+' d':'\u2014'}</td>
+   <td><span class="chip ${chip[0]}">${chip[1]}</span></td></tr>`;}).join('');
+ tb.querySelectorAll('tr').forEach(r=>{
+   const go=()=>{sel=+r.dataset.i;variant=0;renderTable();renderPanel();};
+   r.addEventListener('click',go);
+   r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+ });
+}
+
+document.getElementById('regen').addEventListener('click',()=>{variant=(variant+1)%3;renderPanel();});
+const repBtn=document.getElementById('repBtn'),repBox=document.getElementById('repBox');
+repBtn.addEventListener('click',()=>{const on=repBox.classList.toggle('show');repBtn.setAttribute('aria-expanded',on);});
+
+renderTable();renderPanel();
+</script>
+</body>
+</html>

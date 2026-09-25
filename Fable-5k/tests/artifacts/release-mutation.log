@@ -1,0 +1,10 @@
+AssertionError [ERR_ASSERTION]: different datasets and costs survive import
+    at check (/workspace/scratch/b302271ff725/fable-final-app/tests/test_final_release.js:8:32)
+    at /workspace/scratch/b302271ff725/fable-final-app/tests/test_final_release.js:15:2 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

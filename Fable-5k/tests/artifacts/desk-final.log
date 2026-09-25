@@ -1,0 +1,55 @@
+core.js extracted
+Exact shipped v7 research code extracted
+PASS SHA256 matches platform implementation across ASCII, Unicode and block boundaries
+PASS frozen protocol checksum and future window
+PASS closed daily candles only; duplicate conflicts, gaps and staleness fail closed
+PASS strict products: USD spot only, duplicates removed, unavailable not zero
+PASS locked rules reproduce causal legacy signals on a fixed synthetic anchor
+PASS dollar risk boundaries including high-water pause
+PASS range overlap ignores label and venue; touching exclusive ends do not overlap
+PASS bounded retries and no credentials
+PASS one scan paginates, preserves fixed BTC anchor and isolates context assets
+PASS partial candle failure cannot masquerade as complete
+PASS repeated product pages stop instead of infinite pagination
+11 v7 market/research assertion groups passed. No live data.
+PASS v7 UI: no auto network, one-click scan, isolated data, durable exposure, reload, legacy import, evidence preservation, checksum rejection, loss pause, stale-result clearing.
+PASS entry follows signal, never captures its close-to-open gap
+PASS fees on actual entry and exit notional; all cash reconciles
+PASS entry fee consumes the allocation; no hidden borrowing
+PASS open position is marked down before sample-end liquidation
+PASS same-bar stop/target ambiguity chooses stop including entry bar
+PASS gap through stop fills at open, not stop price
+PASS max hold exits at the specified future open
+PASS no same-bar reentry following a stop
+PASS cash remains flat without entry signals
+PASS no lookahead: future prices cannot alter earlier fills
+PASS invalid input rejected, never NaN performance
+PASS risk sizing exact formula and caps; stress increases loss
+PASS portfolio limit and cash limit independently bind
+PASS position cap binds with an extremely close stop
+PASS drawdown pause overrides sizing
+PASS invalid risk or impossible state rejected
+PASS strict CSV rejects silent value substitution and missing columns
+PASS strict CSV rejects duplicate, gaps and invalid dates
+PASS millisecond/unix CSV and quoted prices preserve exact OHLC
+19 assertion-based execution/input/risk checks passed. Synthetic data only.
+PASS v6 UI: calculator, synthetic audit, persistence, full-entry import, escaping, invalid data and journal guards
+test_allowlist (__main__.ServerTests.test_allowlist) ... ok
+test_loopback_http_and_no_credentials_or_orders (__main__.ServerTests.test_loopback_http_and_no_credentials_or_orders) ... Fable local server: "GET / HTTP/1.1" 200 -
+Fable local server: "GET /START-HERE.html HTTP/1.1" 200 -
+Fable local server: "GET /edge-lab/edge-lab-v7.html HTTP/1.1" 200 -
+Fable local server: "GET /edge-lab/strategy-lab.html HTTP/1.1" 200 -
+Fable local server: "GET /src/core.js HTTP/1.1" 400 -
+Fable local server: "GET /../src/core.js HTTP/1.1" 400 -
+Fable local server: "GET /market-scan/server.py HTTP/1.1" 400 -
+Fable local server: "GET /coinbase-public/market/products?limit=100&offset=0&product_type=SPOT HTTP/1.1" 200 -
+Fable local server: "GET /coinbase-public/orders HTTP/1.1" 400 -
+Fable local server: "POST /coinbase-public/orders HTTP/1.1" 405 -
+Fable local server: "GET / HTTP/1.1" 403 -
+Fable local server: "GET / HTTP/1.1" 403 -
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.513s
+
+OK

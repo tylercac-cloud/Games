@@ -1,0 +1,131 @@
+{
+  "protocol": {
+    "schema": 1,
+    "studyId": "FABLE-2026-09-P01",
+    "status": "LOCKED_PAPER_DESIGN",
+    "lockedAt": "2026-09-21T20:34:01Z",
+    "lockAuthority": "User authorized hypothesis locking in this conversation; assistant selected the explicit designs before fetching current prices.",
+    "venue": "Coinbase Advanced",
+    "instrument": "BTC-USD",
+    "marketDataSource": "Coinbase Advanced public REST market endpoints",
+    "barConvention": "ONE_DAY UTC; timestamp is bucket open; only fully closed candles; no invented missing bars",
+    "startInclusive": "2026-09-22T00:00:00Z",
+    "endExclusive": "2027-09-22T00:00:00Z",
+    "priorExposure": "BTC daily 2015-01-01 through 2024-04-24 repeatedly searched; earlier total unknown. All data before study start is development/warm-up, not holdout. No use of 2024-2026 history as fresh validation.",
+    "warmup": "At least 121 contiguous daily bars before decision date; historical fetch is for signal context only, never scored as forward performance.",
+    "hypotheses": [
+      {
+        "id": "H1",
+        "title": "Slow trend continuation",
+        "mechanism": "Slow adjustment of positioning may allow persistent trends; turnover must be low enough to survive transaction costs. This is a testable proposal, not an established edge.",
+        "strategy": "ma",
+        "params": {
+          "fast": 20,
+          "slow": 120,
+          "thr": 0
+        },
+        "signal": "ON when the 20-day simple moving average of closing prices is strictly above the 120-day average; OFF otherwise."
+      },
+      {
+        "id": "H2",
+        "title": "Sustained breakout continuation",
+        "mechanism": "New multi-month highs may accompany sustained demand; a shorter exit channel may leave weakening trends. It may fail in choppy markets and is correlated with H1.",
+        "strategy": "brk",
+        "params": {
+          "look": 60
+        },
+        "signal": "ON at a close strictly above the previous 60 daily highs, OFF at a close strictly below the previous 30 daily lows. State persists between thresholds; seed OFF at the first valid warm-up bar."
+      }
+    ],
+    "execution": {
+      "engine": "next-open-v1",
+      "mode": "signal",
+      "stopFraction": 0.1,
+      "targetFraction": 0.1,
+      "targetActive": false,
+      "maxHoldBars": 365,
+      "entry": "Fresh OFF-to-ON close transition only; next open. On the first forward day, treat existing ON as a fresh signal from flat. Each hypothesis starts in cash.",
+      "exit": "Signal OFF exits at next open; 10% stop from actual entry fill; gap stops use worse open; sample-end liquidation at final close. No leverage or shorting.",
+      "sameBarRule": "Protective stop checked on entry bar; stop before target; no reentry on an exit bar.",
+      "paperAllocationFraction": 0.04,
+      "paperAllocationRationale": "Each entry spends 4% of its own paper account, including entry fee. At $5,000 this is $200 cash; a 10% stop with the frozen base costs models about $23.74 loss. This is not a live size authorization.",
+      "independentPaperAccounts": true,
+      "capitalPerHypothesis": 5000,
+      "combineHypothesisAccounts": false
+    },
+    "costs": {
+      "basis": "Explicit hypothetical research assumptions, NOT a verified Coinbase account fee. Actual user tier remains unknown.",
+      "base": {
+        "entryFee": 0.01,
+        "exitFee": 0.01,
+        "entrySlip": 0.001,
+        "exitSlip": 0.001
+      },
+      "stress": {
+        "entryFee": 0.015,
+        "exitFee": 0.015,
+        "entrySlip": 0.003,
+        "exitSlip": 0.003
+      },
+      "noAfterResultsTuning": true
+    },
+    "benchmark": {
+      "primary": "4%-allocated buy-and-hold from first forward open, 96% non-interest cash; same costs and final liquidation",
+      "secondary": "100% buy-and-hold over identical dates, same costs",
+      "metrics": [
+        "terminal pre-tax net return",
+        "return difference versus each benchmark",
+        "maximum close-to-close drawdown",
+        "turnover",
+        "fee and slippage dollars",
+        "number of fills",
+        "missing/late observation count"
+      ],
+      "tax": "No tax liability assumed; report pre-tax and any separately supplied reserve explicitly."
+    },
+    "evaluation": {
+      "forwardCollection": "Save each daily scan and its observed signal/time. Daily results are monitoring only. Never label a late reconstruction a contemporaneous observation.",
+      "decisionDate": "2027-09-22T00:00:00Z",
+      "primaryDescriptiveQuestion": "At the fixed endpoint, does each fixed rule have positive net return and a positive return difference versus the allocation-matched benchmark under both cost scenarios? Report either way.",
+      "minimumObservations": "Report elapsed years and trade count. Few trades or missing data remain inconclusive, never an automatic pass.",
+      "inferentialVerdict": "DISABLED: no calibrated next-open significance test is implemented. Do not use these descriptive conditions as statistical proof or authority to scale.",
+      "multipleTesting": "Two correlated hypotheses and two fixed cost scenarios. No picking the most favorable asset/rule/scenario after viewing results. Any future inferential family must account for all hypotheses/looks.",
+      "earlyReview": "Safety, missing data and execution errors only; no early profit-based declaration of success.",
+      "amendments": "New dated study/version only; old protocol and outcomes retained. Changes cannot inherit the original unexposed start."
+    },
+    "riskPolicy": {
+      "initialCapital": 5000,
+      "userDiscomfortLoss": 1000,
+      "reviewLoss": 500,
+      "noNewRiskLoss": 750,
+      "hardPauseLoss": 1000,
+      "liveTradingEnabled": false,
+      "venue": "Coinbase Advanced",
+      "perTradeRiskFraction": 0.005,
+      "portfolioOpenRiskFraction": 0.01,
+      "maxPositionCashFraction": 0.25,
+      "trailingPauseDollars": 1000,
+      "cashFlowTreatment": "Equity and high-water mark must be cash-flow-adjusted; do not reset losses by adding money.",
+      "implementation": "Manual inputs and planning gates only. No access to account balances, orders or credentials; cannot enforce broker-side liquidation.",
+      "gapCaveat": "Stop fills, adverse gaps, outages and simultaneous losses can exceed modeled risk."
+    },
+    "scanPolicy": {
+      "universe": "Public Coinbase SPOT products quoted in USD, excluding disabled/cancel-only/auction modes. Availability in a particular account is not verified.",
+      "overviewOrder": "24h reported or estimated quote volume, not strategy returns; maximum 20 pages of 100 products with explicit truncation warning",
+      "fixedSignalWatchlist": [
+        "BTC-USD"
+      ],
+      "contextOnlyWatchlist": [
+        "ETH-USD",
+        "SOL-USD"
+      ],
+      "candlesPerAsset": 200,
+      "excludeIncompleteCandles": true,
+      "noAutomaticBacktests": true,
+      "observationLogging": "Every scan attempt and returned data range is recorded; warm-up prices viewed are no longer untouched. Market scanning does not validate a hypothesis.",
+      "dailySchedule": "Manual button after 00:05 UTC; one record per day plus any explicit repeated observations, no background schedule."
+    }
+  },
+  "sha256": "54898ef67ac41612539893bbb1f3e15574c35d4f994e2361a2ef8e4becb22858",
+  "digestEncoding": "SHA-256 of UTF-8 recursively key-sorted compact JSON protocol"
+}

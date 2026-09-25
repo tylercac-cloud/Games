@@ -1,0 +1,85 @@
+core.js extracted
+PASS entry follows signal, never captures its close-to-open gap
+PASS fees on actual entry and exit notional; all cash reconciles
+PASS entry fee consumes the allocation; no hidden borrowing
+PASS open position is marked down before sample-end liquidation
+PASS same-bar stop/target ambiguity chooses stop including entry bar
+PASS gap through stop fills at open, not stop price
+PASS max hold exits at the specified future open
+PASS no same-bar reentry following a stop
+PASS cash remains flat without entry signals
+PASS no lookahead: future prices cannot alter earlier fills
+PASS invalid input rejected, never NaN performance
+PASS risk sizing exact formula and caps; stress increases loss
+PASS portfolio limit and cash limit independently bind
+PASS position cap binds with an extremely close stop
+PASS drawdown pause overrides sizing
+PASS invalid risk or impossible state rejected
+PASS strict CSV rejects silent value substitution and missing columns
+PASS strict CSV rejects duplicate, gaps and invalid dates
+PASS millisecond/unix CSV and quoted prices preserve exact OHLC
+19 assertion-based execution/input/risk checks passed. Synthetic data only.
+PASS v6 UI: calculator, synthetic audit, persistence, full-entry import, escaping, invalid data and journal guards
+== core math, data integrity, lookahead
+T1 DSR paper example (expect 0.9004)                 0.9004
+T2 budgetN(5y,SR1) expect 45                         45
+T2 budgetN(3y,SR1) expect 13                         13
+T3 sharpe of zero-variance series                    0
+T3 sample-SD sharpe n=12 check                       0.00e+0
+T4 expMaxSR at N=1 (silently floored to 2)           0.5198 vs N=2 0.5198
+T5 bundled bars                                      3402  2015-01-01 -> 2024-04-24
+T5 validateBars issues                               []
+   close 2017-12-17 (approx 19100)                   19156.71  dev 0.3%
+   close 2018-12-15 (approx 3200)                    3244.87  dev 1.4%
+   close 2020-03-12 (approx 4900)                    4724.39  dev -3.6%
+   close 2021-11-08 (approx 67500)                   67500.02  dev 0.0%
+   close 2022-11-09 (approx 16000)                   15789.34  dev -1.3%
+   close 2022-12-31 (approx 16550)                   16538.35  dev -0.1%
+   close 2024-03-13 (approx 73000)                   73087.95  dev 0.1%
+T6 opens >1% away from prior close                   24 bars, max 4.92%
+T7 lookahead truncation tests                        1200 checks, 0 violations
+== independent Python reference: engine (fixed exits)
+ma: PBO js=0.822511 py=0.822511 OK
+ma: decay js=(0.074392,0.006570) py=(0.074392,0.006570)
+rsi: PBO js=0.817100 py=0.817100 OK
+rsi: decay js=(0.026720,-0.024801) py=(0.026720,-0.024801)
+brk: PBO js=0.540043 py=0.540043 OK
+brk: decay js=(0.081324,0.006756) py=(0.081324,0.006756)
+diffs: ["ma signal {'fast': 5, 'slow': 30, 'thr': 0} (1 diffs)"]
+bar 215 js sig 0 py sig 1 exact fast 283.212 exact slow 283.212 diff 0.0
+== independent Python reference: full DSR pipeline (signal exits)
+winner idx py=13 js=13 OK
+rho        py=0.7780231485 js=0.7780231485 OK
+effN       py=10.76698146 js=10.76698146 OK
+varSR      py=5.475069956e-05 js=5.475069956e-05 OK
+SR0        py=0.01192477557 js=0.01192477557 OK
+skew       py=0.6947937492 js=0.6947937492 OK
+kurt       py=15.74195829 js=15.74195829 OK
+DSR        py=0.92186324 js=0.9218631892 OK
+== paper formulas (scipy)
+=== 1. DSR vs paper example (SR_ann 2.5, T=1250, skew -3, kurt 10, N=100, V_ann 0.5) ===
+SR0 daily=0.11317  DSR=0.9004 (paper 0.9004)
+  if excess kurtosis used by mistake: 0.9018
+  if V=1/T used instead of family dispersion: 0.9933
+
+=== 2. MinBTL (years) for target SR=1 ===
+N=13  MinBTL=2.90 yrs  (upper bound 2lnN=5.13)
+N=45  MinBTL=5.00 yrs  (upper bound 2lnN=7.61)
+3 yrs of data -> max configs = 13
+5 yrs of data -> max configs = 45
+
+=== 3. Sample-vs-population SD inflation ===
+n=12: 4.45%
+n=20: 2.60%
+
+=== 4. N=1 edge case ===
+emax(1) = -inf
+
+=== 5. Paper's second example: same inputs, N=46 trials ===
+DSR(N=46)=0.9505 (paper 0.9505)
+== storage (mock db, two tabs)
+banner A: "Cloud register verifiedSaved privately to your account — a write/read/delete check passed on load."
+fresh tab sees configs: 16 (expect 16 = 12 rsi + 4 brk)
+docs in store: edgelab_hyp/03163edad9e849a3, edgelab_hyp/84c8e6cee2f3453b
+after preserve/export, fresh tab configs (expect 16): 16
+run_all.sh: line 14: syntax error near unexpected token `)'
