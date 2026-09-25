@@ -248,7 +248,8 @@ the "Blackjack Buddy" desktop shortcut into that folder.
 BUILDING THE INSTALLER (developers)
 npm run dist builds dist\Blackjack-Buddy-Setup-x.y.z.exe (needs Windows). Releases are built by the GitHub
 Actions workflow "Blackjack Buddy release" (Actions tab -> Run workflow), which publishes the installer and
-the update feed (latest.yml) to GitHub Releases. Bump "version" in package.json first; updates only reach
+the update feed (latest.yml) to GitHub Releases. It creates a draft release first, uploads
+the installer, blockmap and latest.yml, checks all three are there, then publishes it. Bump "version" in package.json first; updates only reach
 players when the version number goes up.
 
 TROUBLESHOOTING

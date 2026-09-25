@@ -1,0 +1,42 @@
+# One-off repair: when a version ended up as several releases with the same tag (the upload race fixed in the
+# release workflow), move every file into the release that has latest.yml and delete the others.
+name: Blackjack Buddy fix duplicate release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to repair, e.g. v2.2.1
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Merge the duplicates
+        run: |
+          R="$GITHUB_REPOSITORY"
+          ids=$(gh api "repos/$R/releases" --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id")
+          echo "releases for $TAG: $ids"
+          keep=""
+          for id in $ids; do gh api "repos/$R/releases/$id/assets" --jq '.[].name' | grep -qxF latest.yml && keep=$id; done
+          [ -n "$keep" ] || { echo "::error::No release for $TAG has latest.yml"; exit 1; }
+          have=$(gh api "repos/$R/releases/$keep/assets" --jq '.[].name')
+          for id in $ids; do
+            [ "$id" = "$keep" ] && continue
+            gh api "repos/$R/releases/$id/assets" --jq '.[] | "\(.id) \(.name)"' | while read -r aid name; do
+              if echo "$have" | grep -qxF "$name"; then echo "skip $name (already there)"; continue; fi
+              curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" "https://api.github.com/repos/$R/releases/assets/$aid" -o "$name"
+              curl -fsS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$name" \
+                "https://uploads.github.com/repos/$R/releases/$keep/assets?name=$name" >/dev/null
+              echo "moved $name"
+            done
+            gh api -X DELETE "repos/$R/releases/$id"; echo "deleted duplicate release $id"
+          done
+          gh api "repos/$R/releases/$keep/assets" --jq '.[].name'

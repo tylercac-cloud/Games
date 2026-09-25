@@ -96,6 +96,9 @@ Hi-Lo running/true count shown in a pill (true count = RC / (shoe cards / 52)).
   can't orphan saves. electron-updater (GitHub provider) checks 8 s after launch then every 6 h, auto-downloads,
   installs on quit or via "Restart to update". Not packaged → updater off (`state: 'dev'`). Installer is unsigned
   (SmartScreen warning). To ship an update: bump `version`, push, run the release workflow.
+  The workflow opens a draft release before electron-builder runs (`releaseType: draft`): with no release, its
+  parallel uploads each created one and v2.2.1 came out split in two. It then checks exe + blockmap + latest.yml
+  and publishes. `blackjack-buddy-fix-release.yml` (input: tag) merges such duplicates.
 - **Betting input** (2.2.1): click any amount to type it (`parseAmount`: 2500, 2.5k, 1.2M, 3Qa, 1e21; capped to chips
   with a line from her); Min = 1% of chips, again = 10; ↑/↓ ×2/½, Shift+↑/↓ ±10 (±100 while held).
 - **Keyboard**: H/S/D/P/R, I/Y/N insurance, Space/Enter deal, arrows for the bet (table open, Table tab, window focused).

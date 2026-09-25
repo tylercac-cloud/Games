@@ -68,7 +68,7 @@
         "provider": "github",
         "owner": "tylercac-cloud",
         "repo": "Games",
-        "releaseType": "release"
+        "releaseType": "draft"
       }
     ]
   }

@@ -15,6 +15,9 @@ jobs:
     defaults:
       run:
         working-directory: blackjack-buddy
+        shell: bash
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,13 +26,27 @@ jobs:
           cache: npm
           cache-dependency-path: blackjack-buddy/package-lock.json
       - run: npm ci
-      - name: Tag this version (GitHub releases need an existing tag)
-        shell: bash
+      - name: Tag this version and open one draft release for it
+        # electron-builder uploads the installer and its blockmap in parallel; with no release yet, each upload
+        # creates its own and the files end up split across two releases. So the release exists before it runs.
         run: |
           tag="v$(node -p "require('./package.json').version")"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then echo "$tag exists"; else
             git tag "$tag" && git push origin "refs/tags/$tag"; fi
-      - name: Build installer and publish the release
+          n=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq "[.[] | select(.tag_name == \"$tag\")] | length")
+          if [ "$n" -gt 0 ]; then echo "::error::A release for $tag already exists. Bump the version in package.json first."; exit 1; fi
+          gh release create "$tag" --draft --title "${tag#v}" --notes "Blackjack Buddy ${tag#v}"
+      - name: Build installer and upload it to the draft
         run: npx electron-builder --win nsis --publish always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check all three files are there, then publish
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id")
+          [ "$(echo "$id" | wc -w)" -eq 1 ] || { echo "::error::Expected one release for $TAG, found: $id"; exit 1; }
+          names=$(gh api "repos/$GITHUB_REPOSITORY/releases/$id/assets" --jq '.[].name')
+          echo "$names"
+          for f in "Blackjack-Buddy-Setup-${TAG#v}.exe" "Blackjack-Buddy-Setup-${TAG#v}.exe.blockmap" latest.yml; do
+            echo "$names" | grep -qxF "$f" || { echo "::error::$f missing from the release"; exit 1; }
+          done
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$id" -F draft=false -f make_latest=true >/dev/null
+          echo "Published $TAG"
