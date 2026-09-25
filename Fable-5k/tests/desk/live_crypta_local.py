@@ -2,13 +2,13 @@
 As the owner would: open the desk, Fill the Capital plan from live data, open Crypta (Alt+C), download a model from her
 settings, then ask about the plan and the Journal. Checks the download, the switch to the local brain, that answers
 stream, that her read-only tools fire, and that no Claude usage is recorded. Answer quality is printed for a human to judge.
-Needs Ollama running and internet. Usage: python tests/desk/live_crypta_local.py [qwen3:4b|qwen3:8b|llama3.1:8b]
+Needs Ollama running and internet. Usage: python tests/desk/live_crypta_local.py [qwen3:4b-instruct|qwen3:8b|llama3.1:8b]
 Writes tests/artifacts/live-crypta-local.json."""
 import json,os,subprocess,sys,tempfile,threading,time
 from datetime import datetime,timezone
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-ROOT=Path(__file__).parents[2];MODEL=sys.argv[1] if len(sys.argv)>1 else 'qwen3:4b'
+ROOT=Path(__file__).parents[2];MODEL=sys.argv[1] if len(sys.argv)>1 else 'qwen3:4b-instruct'
 env={**os.environ,'FABLE_KEY_DIR':tempfile.mkdtemp()}
 for k in ('FABLE_BROKERAGE_BASE','FABLE_EXCHANGE_BASE','FABLE_ACCOUNT_BASE','FABLE_OLLAMA_BASE','ANTHROPIC_API_KEY'):env.pop(k,None)
 proc=subprocess.Popen([sys.executable,'-u',str(ROOT/'market-scan/server.py'),'--no-browser','--port','0'],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)

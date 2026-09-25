@@ -18,7 +18,7 @@
   const PAGE_ID=Math.random().toString(36).slice(2);
   const settings=()=>Object.assign({model:null,share:true,brain:'auto',localModel:null},LS.get('crypta:settings',{}));
   // Which brain answers: Claude (API key, paid), a local model through Ollama (free, on this PC), or the built-in guide.
-  const LOCAL_PREF=['qwen3:8b','qwen3:4b','llama3.1:8b'];
+  const LOCAL_PREF=['qwen3:8b','qwen3:4b-instruct','qwen3:4b','llama3.1:8b'];
   function localModel(){const inst=((STATUS||{}).local||{}).installed||[],s=settings();return inst.includes(s.localModel)?s.localModel:(LOCAL_PREF.find(m=>inst.includes(m))||inst[0]||null)}
   function brain(){const st=STATUS||{},s=settings(),localOk=!!(st.local&&st.local.running&&localModel());
     if(s.brain==='claude')return st.configured?'claude':'guide';if(s.brain==='local')return localOk?'local':'guide';if(s.brain==='guide')return 'guide';

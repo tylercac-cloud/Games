@@ -20,19 +20,19 @@ try:
         pg.goto(B+'/edge-lab/edge-lab-v7.html');pg.wait_for_timeout(1000);pg.click('nav button[data-p="control"]');pg.wait_for_timeout(1500);pg.keyboard.press('Alt+c');pg.wait_for_timeout(600)
         ok('Guide mode' in pg.inner_text('#cryptaMode'),'no key and no local model yet: guide mode')
         pg.click('#cryptaSettingsBtn');pg.wait_for_timeout(300);ok('Ollama running, no model yet' in pg.inner_text('#cryptaSettings'),'settings see Ollama and offer downloads')
-        pg.click('button[data-pull="qwen3:4b"]');seen=set()
+        pg.click('button[data-pull="qwen3:4b-instruct"]');seen=set()
         for _ in range(60):
             t=pg.evaluate("(document.getElementById('cryptaPull')||{}).textContent||document.getElementById('cryptaSettings').textContent");seen.add(t[:60])
             if 'is ready' in t:break
             pg.wait_for_timeout(100)
         ok(any('GB (' in x for x in seen),'download shows progress in GB and % ('+next((x for x in seen if 'GB (' in x),'none')+')')
         ok(not any('NaN' in x or ' 0.00 GB' in x for x in seen),'progress never shows NaN or a 0.00 GB layer (real Ollama omits "completed" at first)')
-        ok('qwen3:4b is ready' in pg.inner_text('#cryptaSettings') and 'Local AI · qwen3:4b · free' in pg.inner_text('#cryptaMode'),'after download she switches to the local model automatically')
+        ok('qwen3:4b-instruct is ready' in pg.inner_text('#cryptaSettings') and 'Local AI · qwen3:4b-instruct · free' in pg.inner_text('#cryptaMode'),'after download she switches to the local model automatically')
         def ask(q):
             pg.fill('#cryptaInput',q);pg.press('#cryptaInput','Enter');pg.wait_for_function("!document.querySelector('#cryptaLog .crypta-msg.streaming')",timeout=30000);pg.wait_for_timeout(250)
             return pg.evaluate("[...document.querySelectorAll('#cryptaLog .crypta-msg.assistant .crypta-text')].pop().innerText")
         a=ask('How is my plan?');ok(a=='Your plan is within limits (local).','answer streamed from the local model')
-        body=FO.STATE['reqs'][-1][1];ok(body['model']=='qwen3:4b' and 'rEquity' in body['messages'][0]['content'],'local request used the chosen model and carried the screen numbers')
+        body=FO.STATE['reqs'][-1][1];ok(body['model']=='qwen3:4b-instruct' and 'rEquity' in body['messages'][0]['content'],'local request used the chosen model and carried the screen numbers')
         a=ask('go to journal');ok(pg.evaluate("document.querySelector('nav button[aria-selected=\"true\"]').dataset.p")=='jrn' and 'Done locally' in a,'local model used a tool (switched to the Journal) and continued')
         ok(not Path(env['FABLE_KEY_DIR'],'crypta-usage.json').exists(),'no Claude usage recorded: the local model is free')
         ok(not errs,'no page errors '+'; '.join(errs[:2]));br.close()

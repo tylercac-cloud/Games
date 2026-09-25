@@ -42,9 +42,19 @@ class Local(unittest.TestCase):
         server.crypta.OLLAMA_BASE='http://127.0.0.1:9';s,b=self.post('/crypta/chat',{'provider':'local','model':'qwen3:8b','messages':[{'role':'user','content':'x'}]});self.assertEqual(s,503);self.assertIn('Ollama is not running',b)
         server.crypta.OLLAMA_BASE=FOU;s,b=self.post('/crypta/chat',{'provider':'local','model':'qwen3:8b','messages':[{'role':'assistant','content':'x'}]});self.assertEqual(s,400)
     def test_download_recommended_model_only(self):
-        s,b=self.post('/crypta/local/pull',{'model':'qwen3:4b'});self.assertEqual(s,200);lines=[json.loads(l) for l in b.splitlines() if l.strip()]
-        self.assertEqual(lines[-1]['status'],'success');self.assertEqual(lines[3]['completed'],1_300_000_000);self.assertIn('qwen3:4b',FO.STATE['installed'])
+        s,b=self.post('/crypta/local/pull',{'model':'qwen3:4b-instruct'});self.assertEqual(s,200);lines=[json.loads(l) for l in b.splitlines() if l.strip()]
+        self.assertEqual(lines[-1]['status'],'success');self.assertEqual(lines[3]['completed'],1_300_000_000);self.assertIn('qwen3:4b-instruct',FO.STATE['installed'])
+        self.assertEqual(self.post('/crypta/local/pull',{'model':'qwen3:4b'})[0],400)   # the always-thinking build is no longer offered
         self.assertEqual(self.post('/crypta/local/pull',{'model':'some/random-model'})[0],400)
+    def test_reasoning_never_reaches_the_answer(self):
+        # Real Ollama: plain qwen3:4b always reasons; with think:false the reasoning lands in the answer text.
+        server.crypta._THINK.clear();FO.STATE['installed']=['qwen3:8b','qwen3:4b','qwen3:4b-instruct','llama3.1:8b']
+        s,b=self.post('/crypta/chat',{'provider':'local','model':'qwen3:4b','messages':[{'role':'user','content':'how is my plan'}]})
+        txt=''.join(e['delta']['text'] for e in self.events(b) if e['type']=='content_block_delta' and e['delta']['type']=='text_delta')
+        self.assertEqual(txt,'Plan checked (thinking model).');self.assertIs(FO.STATE['reqs'][-1][1]['think'],True)
+        want={'qwen3:8b':False,'qwen3:4b-instruct':False,'llama3.1:8b':None}
+        for m,t in want.items():
+            self.post('/crypta/chat',{'provider':'local','model':m,'messages':[{'role':'user','content':'hi'}]});self.assertEqual(FO.STATE['reqs'][-1][1].get('think'),t,m)
     def test_local_is_free_no_usage_recorded(self):
         u=Path(KEYDIR,'crypta-usage.json');before=u.read_text() if u.exists() else None
         self.post('/crypta/chat',{'provider':'local','model':'qwen3:8b','messages':[{'role':'user','content':'hi'}]})

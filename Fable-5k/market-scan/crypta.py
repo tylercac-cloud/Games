@@ -25,8 +25,9 @@ DEFAULT_CAP=5.0
 MAX_BODY=256*1024
 # Free option: a local model through Ollama (ollama.com) on this PC. No key, no bill, nothing leaves the machine.
 OLLAMA_BASE=os.environ.get('FABLE_OLLAMA_BASE','http://127.0.0.1:11434')
-LOCAL_RECOMMENDED=[('qwen3:8b','Qwen3 8B · best local choice · ~5 GB download · needs 16 GB RAM'),('qwen3:4b','Qwen3 4B · lighter · ~2.5 GB download · 8 GB RAM'),('llama3.1:8b','Llama 3.1 8B · alternative · ~5 GB download')]
-THINKING_FAMILIES=('qwen3','deepseek-r1','gpt-oss')   # models that accept "think": false (faster answers)
+LOCAL_RECOMMENDED=[('qwen3:8b','Qwen3 8B · best local choice · ~5 GB download · needs 16 GB RAM'),('qwen3:4b-instruct','Qwen3 4B Instruct · lighter · ~2.5 GB download · 8 GB RAM'),('llama3.1:8b','Llama 3.1 8B · alternative · ~5 GB download')]
+THINKING_FAMILIES=('qwen3','deepseek-r1','gpt-oss')   # fallback when Ollama's /api/show can't be read: send "think": false
+_THINK={}
 LOCAL_CTX=16384
 _LOCK=threading.Lock()
 
@@ -201,6 +202,20 @@ def to_ollama_messages(msgs):
                 if b.get('type')=='tool_result':out.append({'role':'tool','tool_name':names.get(b.get('tool_use_id'),''),'content':str(b.get('content',''))})
                 elif b.get('type')=='text':out.append({'role':'user','content':b.get('text','')})
     return out
+def think_setting(model,opener=urlopen):
+    """The "think" value for this model, from Ollama's own metadata. Reasoning must never reach the answer text:
+    models that can switch it off get false (faster); models that always reason (plain qwen3:4b is the 2507 Thinking
+    build) get true, so Ollama returns the reasoning in a separate field that is never shown. None: don't send it."""
+    if model in _THINK:return _THINK[model]
+    val=False if model.split(':')[0].startswith(THINKING_FAMILIES) else None
+    try:
+        with opener(Request(OLLAMA_BASE+'/api/show',data=json.dumps({'model':model}).encode(),method='POST',headers={'content-type':'application/json'}),timeout=10) as r:info=json.loads(r.read())
+        values=(info.get('thinking') or {}).get('values')
+        if isinstance(values,list) and values:val=False if False in values else True
+        elif 'thinking' not in (info.get('capabilities') or []):val=None
+        _THINK[model]=val
+    except Exception:pass
+    return val
 def local_request(body):
     model=body.get('model')
     running,installed=ollama_models()
@@ -211,7 +226,8 @@ def local_request(body):
     req={'model':model,'stream':True,'messages':[{'role':'system','content':system}]+to_ollama_messages(payload['messages']),
          'tools':[{'type':'function','function':{'name':t['name'],'description':t['description'],'parameters':t['input_schema']}} for t in payload['tools']],
          'options':{'num_ctx':LOCAL_CTX,'temperature':0.3}}
-    if model.split(':')[0].startswith(THINKING_FAMILIES):req['think']=False
+    think=think_setting(model)
+    if think is not None:req['think']=think
     return model,req
 def stream_local(body,write,opener=urlopen):
     model,req=local_request(body)
